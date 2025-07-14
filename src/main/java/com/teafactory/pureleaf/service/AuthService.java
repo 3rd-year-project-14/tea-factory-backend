@@ -116,7 +116,9 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found with email: " + email));
-
-        return new AuthResponse(user.getRole().name());
+//        System.out.println(user.getRole().name());
+//        return new AuthResponse(user.getRole().name());
+//        System.out.println("User found: " + user.getName() + ", Role: " + user.getRole().name());
+        return new AuthResponse(user.getRole().name(), user.getName());
     }
 }
