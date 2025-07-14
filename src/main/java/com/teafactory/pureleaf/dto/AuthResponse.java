@@ -9,4 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthResponse {
     private String role;
+    private String username;
 }
