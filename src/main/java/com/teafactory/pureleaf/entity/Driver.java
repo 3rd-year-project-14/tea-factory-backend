@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "driver")
 public class Driver {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long driverId;
 
     private String driverType; // inhouse or privet
