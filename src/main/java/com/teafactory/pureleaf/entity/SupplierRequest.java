@@ -13,11 +13,11 @@ import java.time.LocalDateTime;
 public class SupplierRequest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -47,4 +47,8 @@ public class SupplierRequest {
 
     @Column(name = "land_location")
     private String landLocation;
+
+    @ManyToOne
+    @JoinColumn(name = "factory_id")
+    private Factory factory;
 }
