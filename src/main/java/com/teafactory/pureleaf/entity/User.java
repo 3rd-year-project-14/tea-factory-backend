@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "firebase_uid", nullable = false)
@@ -38,6 +38,12 @@ public class User {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
+    @Column(name = "address")
+    private String address;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
