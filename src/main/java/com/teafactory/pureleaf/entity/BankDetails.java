@@ -10,7 +10,7 @@ import lombok.Setter;
 @Table(name = "bank_details")
 public class BankDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bankDetailsId;
 
     private String accountNumber;

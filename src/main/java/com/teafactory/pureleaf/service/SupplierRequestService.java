@@ -2,8 +2,10 @@ package com.teafactory.pureleaf.service;
 
 
 import com.teafactory.pureleaf.dto.SupplierRequestDTO;
+import com.teafactory.pureleaf.entity.Factory;
 import com.teafactory.pureleaf.entity.SupplierRequest;
 import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.repository.SupplierRequestRepo;
 import com.teafactory.pureleaf.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class SupplierRequestService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private FactoryRepository factoryRepository;
+
     // Fetch the User entity from DB
 
 
@@ -27,8 +32,6 @@ public class SupplierRequestService {
 
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-
 
         SupplierRequest supplierRequest = new SupplierRequest();
 
@@ -41,8 +44,30 @@ public class SupplierRequestService {
         supplierRequest.setRejectReason(requestDTO.getRejectReason());
         supplierRequest.setPickupLocation(requestDTO.getPickupLocation());
         supplierRequest.setLandLocation(requestDTO.getLandLocation());
+        if (requestDTO.getFactoryId() != null) {
+            Factory factory = factoryRepository.findById(requestDTO.getFactoryId())
+                .orElseThrow(() -> new RuntimeException("Factory not found"));
+            supplierRequest.setFactory(factory);
+        }
         supplierRequestRepo.save(supplierRequest);
-        return requestDTO;
+        return convertToDTO(supplierRequest);
+    }
+
+    private SupplierRequestDTO convertToDTO(SupplierRequest supplierRequest) {
+        Long factoryId = supplierRequest.getFactory() != null ? supplierRequest.getFactory().getFactoryId() : null;
+        return new SupplierRequestDTO(
+            supplierRequest.getUser().getId(),
+            supplierRequest.getStatus(),
+            supplierRequest.getLandSize(),
+            supplierRequest.getMonthlySupply(),
+            supplierRequest.getRequestedRoute(),
+            supplierRequest.getNicImage(),
+            supplierRequest.getRejectReason(),
+            supplierRequest.getPickupLocation(),
+            supplierRequest.getLandLocation(),
+            supplierRequest.getRejectedDate(),
+            factoryId
+        );
     }
     public SupplierRequestDTO updateSupplierRequest(Long id, SupplierRequestDTO requestDTO) {
         SupplierRequest supplierRequest = supplierRequestRepo.findById(id)

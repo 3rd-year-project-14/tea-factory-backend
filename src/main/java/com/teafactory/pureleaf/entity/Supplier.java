@@ -12,15 +12,21 @@ import lombok.Setter;
 @Setter
 public class Supplier {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long supplierId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    private Long factoryId;
-    private Long routeId;
+    @ManyToOne
+    @JoinColumn(name = "factory_id")
+    private Factory factory;
+
+    @ManyToOne
+    @JoinColumn(name = "route_id")
+    private Route route;
+
     private Double landSize;
     private String landLocation;
     private String pickupLocation;
