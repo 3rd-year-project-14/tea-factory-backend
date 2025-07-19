@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/routes")
 public class RouteController {
@@ -16,22 +15,17 @@ public class RouteController {
     private RouteService routeService;
 
     @GetMapping
-    public ResponseEntity<List<RouteDTO>> getAllRoutes() {
-        List<RouteDTO> routeDTOs = routeService.getAllRoutes();
-        return ResponseEntity.ok(routeDTOs);
+    public List<RouteDTO> getAllRoutes() {
+        return routeService.getAllRoutes();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RouteDTO> getRouteById(@PathVariable Long id) {
-        return routeService.getRouteById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<RouteDTO> createRoute(@RequestBody RouteDTO routeDTO) {
-        RouteDTO responseDTO = routeService.createRoute(routeDTO);
-        return ResponseEntity.ok(responseDTO);
+        RouteDTO dto = routeService.getRouteById(id);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
     }
 }
 
