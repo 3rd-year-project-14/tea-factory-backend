@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "route")
 public class Route {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long routeId;
 
     private String name;
