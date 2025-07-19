@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class SupplierRequestDTO {
     private Long userId;
     private String status;
@@ -20,4 +20,5 @@ public class SupplierRequestDTO {
     private String pickupLocation;
     private String landLocation;
     private LocalDateTime rejectedDate;
+    private Long factoryId;
 }

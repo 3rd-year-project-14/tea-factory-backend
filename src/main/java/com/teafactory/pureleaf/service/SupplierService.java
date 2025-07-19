@@ -6,8 +6,13 @@ import com.teafactory.pureleaf.repository.SupplierRequestRepo;
 import com.teafactory.pureleaf.repository.SupplierRepository;
 import com.teafactory.pureleaf.entity.SupplierRequest;
 import com.teafactory.pureleaf.entity.Supplier;
+import com.teafactory.pureleaf.entity.Route;
+import com.teafactory.pureleaf.repository.RouteRepository;
+import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.repository.UserRepository;
+import com.teafactory.pureleaf.entity.Factory;
+import com.teafactory.pureleaf.repository.FactoryRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 public class SupplierService {
@@ -15,21 +20,40 @@ public class SupplierService {
     private SupplierRequestRepo supplierRequestRepo;
     @Autowired
     private SupplierRepository supplierRepository;
+    @Autowired
+    private RouteRepository routeRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private FactoryRepository factoryRepository;
 
     public Supplier approveSupplierRequest(Long requestId, Long routeId) {
         SupplierRequest request = supplierRequestRepo.findById(requestId).orElse(null);
         if (request == null) return null;
 
+        Route route = routeRepository.findById(routeId).orElse(null);
+        if (route == null) return null;
+
+        User user = request.getUser();
+        User managedUser = userRepository.findById(user.getId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
         Supplier supplier = new Supplier();
-        supplier.setUser(request.getUser());
-        supplier.setRouteId(routeId);
+        supplier.setUser(managedUser);
+        supplier.setRoute(route);
         supplier.setLandSize(request.getLandSize());
         supplier.setLandLocation(request.getLandLocation());
         supplier.setPickupLocation(request.getPickupLocation());
         supplier.setNicImage(request.getNicImage());
-        supplier.setApprovedDate(LocalDate.now()); // Use LocalDate for approvedDate
+        supplier.setApprovedDate(LocalDate.now());
         supplier.setIsActive(true);
         supplier.setSupplierRequestId(requestId);
+
+        Factory factory = request.getFactory();
+        if (factory != null && factory.getFactoryId() != null) {
+            factory = factoryRepository.findById(factory.getFactoryId())
+                .orElseThrow(() -> new RuntimeException("Factory not found"));
+            supplier.setFactory(factory);
+        }
 
         Supplier savedSupplier = supplierRepository.save(supplier);
         supplierRequestRepo.deleteById(requestId);

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "factory")
 public class Factory {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long factoryId;
 
     private String name;
