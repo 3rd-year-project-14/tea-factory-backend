@@ -40,7 +40,7 @@ public class User {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     @Column(name = "address")
     private String address;
