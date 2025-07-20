@@ -48,7 +48,11 @@ public class DriverService {
         driver.setVehicleCapacity(driverDTO.getVehicleCapacity());
         driver.setEmergencyContact(driverDTO.getEmergencyContact());
         driver.setIsActive(driverDTO.getIsActive());
-        driver.setCreatedAt(driverDTO.getCreatedAt());
+        if (driverDTO.getCreatedAt() != null) {
+            driver.setCreatedAt(driverDTO.getCreatedAt());
+        } else {
+            driver.setCreatedAt(java.time.LocalDateTime.now());
+        }
 
         if (driverDTO.getFactoryId() != null) {
             Factory factory = factoryRepository.findById(driverDTO.getFactoryId())

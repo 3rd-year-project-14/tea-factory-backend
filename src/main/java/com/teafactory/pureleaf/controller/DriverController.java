@@ -26,4 +26,10 @@ public class DriverController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping
+    public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
+        DriverDTO createdDriver = driverService.createDriver(driverDTO);
+        return ResponseEntity.ok(createdDriver);
+    }
 }
