@@ -27,7 +27,7 @@ public class SupplierService {
     @Autowired
     private FactoryRepository factoryRepository;
 
-    public Supplier approveSupplierRequest(Long requestId, Long routeId) {
+    public Supplier approveSupplierRequest(Long requestId, Long routeId, Integer initialBagCount) {
         SupplierRequest request = supplierRequestRepo.findById(requestId).orElse(null);
         if (request == null) return null;
 
@@ -47,6 +47,8 @@ public class SupplierService {
         supplier.setApprovedDate(LocalDate.now());
         supplier.setIsActive(true);
         supplier.setSupplierRequestId(requestId);
+        supplier.setFactory(request.getFactory());
+        supplier.setInitialBagCount(initialBagCount); // Make sure this is set from the query param
 
         Factory factory = request.getFactory();
         if (factory != null && factory.getFactoryId() != null) {

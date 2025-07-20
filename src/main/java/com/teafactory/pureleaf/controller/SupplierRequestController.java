@@ -11,8 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/supplier-requests")
 public class SupplierRequestController {
@@ -64,9 +65,9 @@ public class SupplierRequestController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<?> approveSupplierRequest(@PathVariable Long id, @RequestParam Long routeId) {
+    public ResponseEntity<?> approveSupplierRequest(@PathVariable Long id, @RequestParam Long routeId, @RequestParam(required = false) Integer initialBagCount) {
         try {
-            Supplier supplier = supplierService.approveSupplierRequest(id, routeId);
+            Supplier supplier = supplierService.approveSupplierRequest(id, routeId, initialBagCount);
             if (supplier == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier request not found");
             }
