@@ -22,7 +22,7 @@ public class Driver {
     private Integer vehicleCapacity;
     private String emergencyContact;
     private Boolean isActive;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "factory_id")
@@ -36,4 +36,3 @@ public class Driver {
     @JoinColumn(name = "user_id")
     private User user;
 }
-
