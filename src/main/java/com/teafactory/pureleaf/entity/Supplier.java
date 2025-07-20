@@ -34,5 +34,7 @@ public class Supplier {
     private LocalDate approvedDate;
     private Boolean isActive;
     private Long supplierRequestId;
+
+    @Column(name = "initial_bag_count")
     private Integer initialBagCount;
 }
