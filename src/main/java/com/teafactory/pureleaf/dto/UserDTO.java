@@ -5,12 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SignupRequest {
-    private String token;
+public class UserDTO {
+    private String firebaseUid;
+    private String email;
+    private String role;
     private String name;
     private String nic;
     private String contactNo;
-    private String email;
-    private String address;
-
 }
