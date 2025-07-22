@@ -6,10 +6,10 @@ import com.teafactory.pureleaf.dto.SignupRequest;
 import com.teafactory.pureleaf.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+
 public class AuthController {
 
     @Autowired

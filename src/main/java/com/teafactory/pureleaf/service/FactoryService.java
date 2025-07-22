@@ -37,6 +37,6 @@ public class FactoryService {
     }
 
     private FactoryDTO convertToDTO(Factory factory) {
-        return new FactoryDTO(factory.getFactoryId(), factory.getName(), factory.getAddress());
+        return new FactoryDTO(factory.getFactoryId(), factory.getName(), factory.getAddress(), factory.getImage());
     }
 }
