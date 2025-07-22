@@ -1,4 +1,3 @@
-
 package com.teafactory.pureleaf.service;
 
 import com.google.firebase.auth.FirebaseToken;
@@ -50,6 +49,6 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found with email: " + email));
 
-        return new AuthResponse(user.getRole().name(), user.getName());
+        return new AuthResponse(user.getRole().name(), user.getName(), user.getId());
     }
 }
