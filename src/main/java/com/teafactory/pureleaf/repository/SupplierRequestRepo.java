@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SupplierRequestRepo extends JpaRepository<SupplierRequest, Long> {
     List<SupplierRequest> findByStatusIn(List<String> statuses);
+    List<SupplierRequest> findByUser_Id(Long userId);
 }
