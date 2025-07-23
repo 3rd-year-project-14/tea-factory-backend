@@ -47,4 +47,8 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "factory_id", referencedColumnName = "factoryId")
+    private Factory factory;
 }
