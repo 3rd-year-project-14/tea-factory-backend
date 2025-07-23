@@ -39,10 +39,6 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
@@ -59,7 +55,7 @@
 		<dependency>
 			<groupId>com.google.firebase</groupId>
 			<artifactId>firebase-admin</artifactId>
-			<version>9.1.1</version> <!-- Latest stable version at time of writing -->
+			<version>9.1.1</version>
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>jakarta.validation</groupId>-->
