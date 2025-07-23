@@ -19,6 +19,7 @@ public class FirebaseConfig {
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setStorageBucket("tea-factory-project-902e0.firebasestorage.app")
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
