@@ -9,10 +9,17 @@ import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.repository.SupplierRequestRepo;
 import com.teafactory.pureleaf.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.google.firebase.cloud.StorageClient;
+import com.google.cloud.storage.Blob;
+import org.springframework.util.StringUtils;
 
 @Service
 public class SupplierRequestService {
@@ -106,6 +113,25 @@ public class SupplierRequestService {
         supplierRequest.setRejectReason(rejectReason);
         supplierRequest.setRejectedDate(LocalDateTime.now());
         return supplierRequestRepo.save(supplierRequest);
+    }
+    public String saveNicImage(Long supplierRequestId, MultipartFile file) throws IOException {
+        SupplierRequest supplierRequest = supplierRequestRepo.findById(supplierRequestId)
+                .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
+
+        String fileName = "nic_" + supplierRequestId + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+        Blob blob = StorageClient.getInstance().bucket().create(fileName, file.getInputStream(), file.getContentType());
+        String fileUrl = String.format("https://storage.googleapis.com/%s/%s", blob.getBucket(), blob.getName());
+        supplierRequest.setNicImage(fileUrl);
+        supplierRequestRepo.save(supplierRequest);
+        return fileUrl;
+    }
+    public String saveNicImageFile(MultipartFile file) throws IOException {
+        String fileName = "nic_" + System.currentTimeMillis() + "_" + org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+        com.google.cloud.storage.Blob blob = com.google.firebase.cloud.StorageClient.getInstance().bucket().create(fileName, file.getInputStream(), file.getContentType());
+        return String.format("https://storage.googleapis.com/%s/%s", blob.getBucket(), blob.getName());
+    }
+    public List<SupplierRequest> getSupplierRequestsByUserId(Long userId) {
+        return supplierRequestRepo.findByUser_Id(userId);
     }
     // This service currently does not have any methods, but you can add methods to handle supplier requests as needed.
 }
