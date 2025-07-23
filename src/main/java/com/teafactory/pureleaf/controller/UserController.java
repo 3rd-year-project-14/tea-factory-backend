@@ -1,8 +1,12 @@
 package com.teafactory.pureleaf.controller;
 
+import com.teafactory.pureleaf.dto.FactoryDTO;
 import com.teafactory.pureleaf.dto.UserDTO;
+import com.teafactory.pureleaf.entity.User;
 import com.teafactory.pureleaf.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class UserController {
-
-    private final UserService userService;
+    @Qualifier("userService")
+    @Autowired
+    private UserService userService;
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
@@ -41,4 +46,6 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }

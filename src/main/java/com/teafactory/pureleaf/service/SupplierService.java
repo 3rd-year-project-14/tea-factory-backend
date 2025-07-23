@@ -37,6 +37,9 @@ public class SupplierService {
         User user = request.getUser();
         User managedUser = userRepository.findById(user.getId())
             .orElseThrow(() -> new RuntimeException("User not found"));
+        managedUser.setRole(com.teafactory.pureleaf.entity.Role.SUPPLIER);
+        managedUser.setFactory(request.getFactory());
+        userRepository.save(managedUser);
         Supplier supplier = new Supplier();
         supplier.setUser(managedUser);
         supplier.setRoute(route);
