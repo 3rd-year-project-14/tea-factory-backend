@@ -1,6 +1,8 @@
 package com.teafactory.pureleaf.entity;
 
 public enum Role {
+    PENDING_USER,
+    PENDING_SUPPLIER,
     SUPPLIER,
     DRIVER,
     FACTORY_MANAGER,

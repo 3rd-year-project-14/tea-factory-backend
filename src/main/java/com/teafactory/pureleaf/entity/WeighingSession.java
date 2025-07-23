@@ -18,9 +18,6 @@ public class WeighingSession {
     @Column(name = "session_date")
     private LocalDate sessionDate;
 
-    @Column(name = "weighing_session")
-    private String weighingSession;
-
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
@@ -28,4 +25,3 @@ public class WeighingSession {
     @Column(name = "status")
     private String status;
 }
-

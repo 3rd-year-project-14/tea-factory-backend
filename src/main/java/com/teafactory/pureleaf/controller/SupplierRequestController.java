@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teafactory.pureleaf.dto.SupplierRequestDTO;
 import com.teafactory.pureleaf.entity.Supplier;
 import com.teafactory.pureleaf.entity.SupplierRequest;
@@ -9,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -25,12 +26,21 @@ public class SupplierRequestController {
     private SupplierService supplierService;
 
     @PostMapping("/")
-    ResponseEntity<?> createSupplierRequest(@RequestBody SupplierRequestDTO supplierRequest){
+    public ResponseEntity<?> createSupplierRequest(
+            @RequestPart("supplierRequest") String supplierRequestStr,
+            @RequestPart(value = "nicImage", required = false) MultipartFile nicImageFile) {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            SupplierRequestDTO supplierRequest = objectMapper.readValue(supplierRequestStr, SupplierRequestDTO.class);
+
+            if (nicImageFile != null && !nicImageFile.isEmpty()) {
+                String imageUrl = supplierRequestService.saveNicImageFile(nicImageFile);
+                supplierRequest.setNicImage(imageUrl);
+            }
             supplierRequestService.createSupplierRequest(supplierRequest);
             return new ResponseEntity<>(supplierRequest, HttpStatus.CREATED);
-        }catch (Exception e) {
-            return  ResponseEntity.badRequest().body( e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -64,6 +74,16 @@ public class SupplierRequestController {
         }
     }
 
+    @GetMapping(params = "userId")
+    public ResponseEntity<?> getSupplierRequestsByUserId(@RequestParam("userId") Long userId) {
+        try {
+            List<SupplierRequest> requests = supplierRequestService.getSupplierRequestsByUserId(userId);
+            return new ResponseEntity<>(requests, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/{id}/approve")
     public ResponseEntity<?> approveSupplierRequest(@PathVariable Long id, @RequestParam Long routeId, @RequestParam(required = false) Integer initialBagCount) {
         try {
@@ -84,6 +104,16 @@ public class SupplierRequestController {
             return new ResponseEntity<>(rejected, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/upload-nic-image")
+    public ResponseEntity<?> uploadNicImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            String imagePath = supplierRequestService.saveNicImage(id, file);
+            return ResponseEntity.ok(imagePath);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }
