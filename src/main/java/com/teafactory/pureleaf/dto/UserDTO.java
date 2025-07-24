@@ -1,12 +1,17 @@
 package com.teafactory.pureleaf.dto;
 
+import com.teafactory.pureleaf.entity.Role;
 import lombok.Data;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Optional;
 
 @Data
 public class UserDTO {
     private Long id;
+    private String firebaseUid;
     private String email;
-    private String role;
+    private Role role;
     private String name;
     private String nic;
     private String contactNo;
@@ -14,4 +19,8 @@ public class UserDTO {
     private String address;
     private Long factoryId;
     private FactoryDTO factory;
+
+    public Optional<ResponseEntity<Object>> map(Object o) {
+        return null;
+    }
 }
