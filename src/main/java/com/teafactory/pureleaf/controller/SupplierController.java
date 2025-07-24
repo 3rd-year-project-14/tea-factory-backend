@@ -38,4 +38,17 @@ public class SupplierController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/by-user")
+    public ResponseEntity<?> getSupplierByUserId(@RequestParam("userId") Long userId) {
+        try {
+            Supplier supplier = supplierRepository.findByUser_Id(userId);
+            if (supplier == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier not found for userId: " + userId);
+            }
+            return new ResponseEntity<>(supplier, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
