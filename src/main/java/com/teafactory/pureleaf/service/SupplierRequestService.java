@@ -120,7 +120,8 @@ public class SupplierRequestService {
 
         String fileName = "nic_" + supplierRequestId + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
         Blob blob = StorageClient.getInstance().bucket().create(fileName, file.getInputStream(), file.getContentType());
-        String fileUrl = String.format("https://storage.googleapis.com/%s/%s", blob.getBucket(), blob.getName());
+        // Generate Firebase public download URL
+        String fileUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media", blob.getBucket(), java.net.URLEncoder.encode(blob.getName(), java.nio.charset.StandardCharsets.UTF_8));
         supplierRequest.setNicImage(fileUrl);
         supplierRequestRepo.save(supplierRequest);
         return fileUrl;
