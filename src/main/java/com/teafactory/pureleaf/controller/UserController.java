@@ -4,40 +4,48 @@ import com.teafactory.pureleaf.dto.FactoryDTO;
 import com.teafactory.pureleaf.dto.UserDTO;
 import com.teafactory.pureleaf.entity.User;
 import com.teafactory.pureleaf.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class UserController {
+    @Qualifier("userService")
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long userId) {
-        return userService.getUserById(userId)
-                .map(user -> {
-                    UserDTO dto = new UserDTO();
-                    dto.setId(user.getId());
-                    dto.setEmail(user.getEmail());
-                    dto.setRole(user.getRole().name());
-                    dto.setName(user.getName());
-                    dto.setNic(user.getNic());
-                    dto.setContactNo(user.getContactNo());
-                    dto.setIsActive(user.getIsActive());
-                    dto.setAddress(user.getAddress());
-                    if (user.getFactory() != null) {
-                        FactoryDTO factoryDTO = new FactoryDTO();
-                        factoryDTO.setId(user.getFactory().getFactoryId());
-                        factoryDTO.setName(user.getFactory().getName());
-                        factoryDTO.setLocation(user.getFactory().getAddress());
-                        factoryDTO.setImage(user.getFactory().getImage());
-                        dto.setFactory(factoryDTO);
-                    }
-                    return ResponseEntity.ok(dto);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.createUser(userDTO));
     }
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.updateUser(id, userDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
