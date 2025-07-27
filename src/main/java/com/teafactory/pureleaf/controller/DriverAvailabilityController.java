@@ -33,4 +33,14 @@ public class DriverAvailabilityController {
         DriverAvailabilityDTO updated = driverAvailabilityService.updateAvailability(id, dto);
         return ResponseEntity.ok(updated);
     }
+
+    @GetMapping("/today/{driverId}")
+    public ResponseEntity<DriverAvailabilityDTO> getTodayAvailability(@PathVariable Long driverId) {
+        DriverAvailabilityDTO availability = driverAvailabilityService.getTodayAvailability(driverId);
+        if (availability != null) {
+            return ResponseEntity.ok(availability);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
