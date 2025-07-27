@@ -19,8 +19,13 @@ public class Trip {
     @JoinColumn(name = "driver_id", referencedColumnName = "driverId")
     private Driver driver;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "route_id", referencedColumnName = "routeId")
+    private Route route;
+
     private LocalDate tripDate;
     private LocalTime startTime;
     private LocalTime endTime;
-}
 
+    private String status;
+}

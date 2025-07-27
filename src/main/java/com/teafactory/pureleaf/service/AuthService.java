@@ -1,7 +1,7 @@
 package com.teafactory.pureleaf.service;
 
 import com.google.firebase.auth.FirebaseToken;
-import com.teafactory.pureleaf.dto.AuthResponse;
+import com.teafactory.pureleaf.dto.AuthDTO;
 import com.teafactory.pureleaf.dto.LoginRequest;
 import com.teafactory.pureleaf.dto.SignupRequest;
 import com.teafactory.pureleaf.entity.Role;
@@ -42,13 +42,34 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public AuthResponse login(LoginRequest request) throws Exception {
+    public AuthDTO login(LoginRequest request) throws Exception {
         FirebaseToken decodedToken = firebaseUtil.verifyToken(request.getToken());
         String email = decodedToken.getEmail();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found with email: " + email));
 
-        return new AuthResponse(user.getRole().name(), user.getName(), user.getId());
+        Long factoryId = null;
+        String factoryName = null;
+        String factoryAddress = null;
+        if (user.getFactory() != null) {
+            factoryId = user.getFactory().getFactoryId();
+            factoryName = user.getFactory().getName();
+            factoryAddress = user.getFactory().getAddress();
+        }
+
+        return new AuthDTO(
+                user.getRole().name(),
+                user.getEmail(),
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getAddress(),
+                user.getNic(),
+                user.getContactNo(),
+                factoryId,
+                factoryName,
+                factoryAddress
+        );
     }
 }

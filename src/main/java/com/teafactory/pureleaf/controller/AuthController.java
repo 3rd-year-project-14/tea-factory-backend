@@ -1,6 +1,6 @@
 package com.teafactory.pureleaf.controller;
 
-import com.teafactory.pureleaf.dto.AuthResponse;
+import com.teafactory.pureleaf.dto.AuthDTO;
 import com.teafactory.pureleaf.dto.LoginRequest;
 import com.teafactory.pureleaf.dto.SignupRequest;
 import com.teafactory.pureleaf.service.AuthService;
@@ -22,7 +22,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) throws Exception {
+    public AuthDTO login(@RequestBody LoginRequest request) throws Exception {
         return authService.login(request);
     }
 }
