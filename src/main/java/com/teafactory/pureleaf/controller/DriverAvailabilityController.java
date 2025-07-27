@@ -23,6 +23,7 @@ public class DriverAvailabilityController {
 
     @PostMapping
     public ResponseEntity<DriverAvailabilityDTO> createAvailability(@RequestBody DriverAvailabilityDTO dto) {
+        dto.setDate(java.time.LocalDate.now()); // Set date to current date
         DriverAvailabilityDTO created = driverAvailabilityService.createAvailability(dto);
         return ResponseEntity.ok(created);
     }
