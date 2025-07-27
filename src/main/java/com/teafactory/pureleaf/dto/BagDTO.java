@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BagDTO {
-    private Long bagId;
+    private String bagNumber;
     private Long routeId;
+    private String status;
 }
-

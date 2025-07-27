@@ -1,30 +1,27 @@
 package com.teafactory.pureleaf.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import java.io.Serializable;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "bag")
 @IdClass(Bag.BagId.class)
 public class Bag {
     @Id
-    private Long bagId;
+    private String bagNumber; // e.g., "001", "002", "003"
 
     @Id
     @ManyToOne
     @JoinColumn(name = "route_id", nullable = false)
     private Route route;
 
+    private String status;
+
     public static class BagId implements Serializable {
-        private Long bagId;
+        private String bagNumber;
         private Long route;
         public BagId() {}
-        public BagId(Long bagId, Long route) {
-            this.bagId = bagId;
+        public BagId(String bagNumber, Long route) {
+            this.bagNumber = bagNumber;
             this.route = route;
         }
         @Override
@@ -32,11 +29,30 @@ public class Bag {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             BagId that = (BagId) o;
-            return bagId.equals(that.bagId) && route.equals(that.route);
+            return bagNumber.equals(that.bagNumber) && route.equals(that.route);
         }
         @Override
         public int hashCode() {
-            return java.util.Objects.hash(bagId, route);
+            return java.util.Objects.hash(bagNumber, route);
         }
+    }
+
+    public String getBagNumber() {
+        return bagNumber;
+    }
+    public void setBagNumber(String bagNumber) {
+        this.bagNumber = bagNumber;
+    }
+    public Route getRoute() {
+        return route;
+    }
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

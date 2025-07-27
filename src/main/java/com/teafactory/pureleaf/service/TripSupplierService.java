@@ -27,10 +27,11 @@ public class TripSupplierService {
     private TripSupplierDTO convertToDTO(TripSupplier ts) {
         return new TripSupplierDTO(
                 ts.getTrip().getTripId(),
-                ts.getSupplier().getSupplierId(),
+                ts.getTeaSupplyRequest().getRequestId(),
                 ts.getArrivedTime(),
                 ts.getCompletedTime(),
-                ts.getStatus()
+                ts.getStatus(),
+                ts.getDate()
         );
     }
 }
