@@ -19,28 +19,33 @@ public class TripSupplier {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "supplier_id", nullable = false)
-    private Supplier supplier;
+    @JoinColumn(name = "supply_request_id", nullable = false)
+    private TeaSupplyRequest teaSupplyRequest;
 
     private LocalTime arrivedTime;
     private LocalTime completedTime;
     private String status;
+    private java.time.LocalDate date;
 
     public static class TripSupplierId implements Serializable {
         private Long trip;
-        private Long supplier;
+        private Long teaSupplyRequest;
         // equals and hashCode
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             TripSupplierId that = (TripSupplierId) o;
-            return trip.equals(that.trip) && supplier.equals(that.supplier);
+            return trip.equals(that.trip) && teaSupplyRequest.equals(that.teaSupplyRequest);
         }
         @Override
         public int hashCode() {
-            return java.util.Objects.hash(trip, supplier);
+            return java.util.Objects.hash(trip, teaSupplyRequest);
+        }
+        public TripSupplierId() {}
+        public TripSupplierId(Long trip, Long teaSupplyRequest) {
+            this.trip = trip;
+            this.teaSupplyRequest = teaSupplyRequest;
         }
     }
 }
-
