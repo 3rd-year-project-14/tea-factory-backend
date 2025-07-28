@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.entity;
 
+import com.teafactory.pureleaf.auth.entity.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

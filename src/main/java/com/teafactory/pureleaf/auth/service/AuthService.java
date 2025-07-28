@@ -1,10 +1,10 @@
-package com.teafactory.pureleaf.service;
+package com.teafactory.pureleaf.auth.service;
 
 import com.google.firebase.auth.FirebaseToken;
-import com.teafactory.pureleaf.dto.AuthDTO;
-import com.teafactory.pureleaf.dto.LoginRequest;
-import com.teafactory.pureleaf.dto.SignupRequest;
-import com.teafactory.pureleaf.entity.Role;
+import com.teafactory.pureleaf.auth.dto.AuthResponse;
+import com.teafactory.pureleaf.auth.dto.LoginRequest;
+import com.teafactory.pureleaf.auth.dto.SignupRequest;
+import com.teafactory.pureleaf.auth.entity.Role;
 import com.teafactory.pureleaf.entity.User;
 import com.teafactory.pureleaf.repository.UserRepository;
 import com.teafactory.pureleaf.util.FirebaseUtil;
@@ -42,34 +42,13 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public AuthDTO login(LoginRequest request) throws Exception {
+    public AuthResponse login(LoginRequest request) throws Exception {
         FirebaseToken decodedToken = firebaseUtil.verifyToken(request.getToken());
         String email = decodedToken.getEmail();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found with email: " + email));
 
-        Long factoryId = null;
-        String factoryName = null;
-        String factoryAddress = null;
-        if (user.getFactory() != null) {
-            factoryId = user.getFactory().getFactoryId();
-            factoryName = user.getFactory().getName();
-            factoryAddress = user.getFactory().getAddress();
-        }
-
-        return new AuthDTO(
-                user.getRole().name(),
-                user.getEmail(),
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getAddress(),
-                user.getNic(),
-                user.getContactNo(),
-                factoryId,
-                factoryName,
-                factoryAddress
-        );
+        return new AuthResponse(user.getRole().name(), user.getName(), user.getId());
     }
 }

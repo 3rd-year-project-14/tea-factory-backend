@@ -1,9 +1,9 @@
-package com.teafactory.pureleaf.controller;
+package com.teafactory.pureleaf.auth.controller;
 
-import com.teafactory.pureleaf.dto.AuthDTO;
-import com.teafactory.pureleaf.dto.LoginRequest;
-import com.teafactory.pureleaf.dto.SignupRequest;
-import com.teafactory.pureleaf.service.AuthService;
+import com.teafactory.pureleaf.auth.dto.AuthResponse;
+import com.teafactory.pureleaf.auth.dto.LoginRequest;
+import com.teafactory.pureleaf.auth.dto.SignupRequest;
+import com.teafactory.pureleaf.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +22,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthDTO login(@RequestBody LoginRequest request) throws Exception {
+    public AuthResponse login(@RequestBody LoginRequest request) throws Exception {
         return authService.login(request);
     }
 }
