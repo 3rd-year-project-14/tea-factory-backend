@@ -1,10 +1,10 @@
-package com.teafactory.pureleaf.service;
+package com.teafactory.pureleaf.auth.service;
 
 import com.google.firebase.auth.FirebaseToken;
-import com.teafactory.pureleaf.dto.AuthResponse;
-import com.teafactory.pureleaf.dto.LoginRequest;
-import com.teafactory.pureleaf.dto.SignupRequest;
-import com.teafactory.pureleaf.entity.Role;
+import com.teafactory.pureleaf.auth.dto.AuthResponse;
+import com.teafactory.pureleaf.auth.dto.LoginRequest;
+import com.teafactory.pureleaf.auth.dto.SignupRequest;
+import com.teafactory.pureleaf.auth.entity.Role;
 import com.teafactory.pureleaf.entity.User;
 import com.teafactory.pureleaf.repository.UserRepository;
 import com.teafactory.pureleaf.util.FirebaseUtil;

@@ -1,4 +1,4 @@
-package com.teafactory.pureleaf.entity;
+package com.teafactory.pureleaf.auth.entity;
 
 public enum Role {
     PENDING_USER,
