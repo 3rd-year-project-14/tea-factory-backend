@@ -1,6 +1,6 @@
 package com.teafactory.pureleaf.dto;
 
-import com.teafactory.pureleaf.entity.Role;
+import com.teafactory.pureleaf.auth.entity.Role;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
 

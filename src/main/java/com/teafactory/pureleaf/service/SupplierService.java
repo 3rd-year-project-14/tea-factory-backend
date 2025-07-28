@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.service;
 
+import com.teafactory.pureleaf.auth.entity.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.teafactory.pureleaf.repository.SupplierRequestRepo;
@@ -37,7 +38,7 @@ public class SupplierService {
         User user = request.getUser();
         User managedUser = userRepository.findById(user.getId())
             .orElseThrow(() -> new RuntimeException("User not found"));
-        managedUser.setRole(com.teafactory.pureleaf.entity.Role.SUPPLIER);
+        managedUser.setRole(Role.SUPPLIER);
         managedUser.setFactory(request.getFactory());
         userRepository.save(managedUser);
         Supplier supplier = new Supplier();
