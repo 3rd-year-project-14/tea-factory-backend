@@ -21,5 +21,6 @@ public class TeaSupplyRequest {
     private LocalDate supplyDate;
     private Integer estimatedBagCount;
     private String status;
-}
 
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+}

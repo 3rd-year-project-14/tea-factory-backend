@@ -2,6 +2,8 @@ package com.teafactory.pureleaf.service;
 
 import com.teafactory.pureleaf.dto.RouteDTO;
 import com.teafactory.pureleaf.entity.Route;
+import com.teafactory.pureleaf.repository.DriverRepository;
+import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.repository.RouteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,10 @@ import java.util.stream.Collectors;
 public class RouteService {
     @Autowired
     private RouteRepository routeRepository;
+    @Autowired
+    private FactoryRepository factoryRepository;
+    @Autowired
+    private DriverRepository driverRepository;
 
     public List<RouteDTO> getAllRoutes() {
         List<Route> routes = routeRepository.findAll();
@@ -21,6 +27,24 @@ public class RouteService {
 
     public RouteDTO getRouteById(Long id) {
         return routeRepository.findById(id).map(this::convertToDTO).orElse(null);
+    }
+
+    public RouteDTO createRoute(RouteDTO dto) {
+        Route route = new Route();
+        route.setName(dto.getName());
+        route.setStartLocation(dto.getStartLocation());
+        route.setEndLocation(dto.getEndLocation());
+        route.setBagCount(dto.getBagCount());
+        route.setDistance(dto.getDistance());
+        route.setSupplierCount(dto.getSupplierCount());
+        route.setStatus(dto.getStatus());
+        route.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : java.time.LocalDateTime.now());
+        if (dto.getFactoryId() != null) {
+            route.setFactory(factoryRepository.findById(dto.getFactoryId()).orElse(null));
+        }
+        // Optionally set driver if you add driverId to DTO
+        Route saved = routeRepository.save(route);
+        return convertToDTO(saved);
     }
 
     private RouteDTO convertToDTO(Route route) {
@@ -40,4 +64,3 @@ public class RouteService {
         return dto;
     }
 }
-

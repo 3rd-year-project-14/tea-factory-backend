@@ -23,9 +23,9 @@ public class DriverService {
     @Autowired
     private FactoryRepository factoryRepository;
     @Autowired
-    private RouteRepository routeRepository;
-    @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private RouteRepository routeRepository;
 
     public List<DriverDTO> getAllDrivers() {
         return driverRepository.findAll().stream()
@@ -43,7 +43,7 @@ public class DriverService {
         driver.setDriverType(driverDTO.getDriverType());
         driver.setLicenseImage(driverDTO.getLicenseImage());
         driver.setLicenseStatus(driverDTO.getLicenseStatus());
-        driver.setLicenseExpiry(driverDTO.getLicenseExpiry());
+        driver.setLicenseExpiry(driverDTO.getLicenseExpiry() != null ? driverDTO.getLicenseExpiry().atStartOfDay() : null);
         driver.setVehicleNo(driverDTO.getVehicleNo());
         driver.setVehicleCapacity(driverDTO.getVehicleCapacity());
         driver.setEmergencyContact(driverDTO.getEmergencyContact());
@@ -59,11 +59,6 @@ public class DriverService {
                     .orElseThrow(() -> new RuntimeException("Factory not found"));
             driver.setFactory(factory);
         }
-        if (driverDTO.getRouteId() != null) {
-            Route route = routeRepository.findById(driverDTO.getRouteId())
-                    .orElseThrow(() -> new RuntimeException("Route not found"));
-            driver.setRoute(route);
-        }
         if (driverDTO.getUserId() != null) {
             User user = userRepository.findById(driverDTO.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -74,21 +69,36 @@ public class DriverService {
         return convertToDTO(savedDriver);
     }
 
+    public DriverDTO getDriverDetailsByUserId(Long userId) {
+        Driver driver = driverRepository.findByUser_Id(userId);
+        if (driver == null) return null;
+        DriverDTO dto = convertToDTO(driver);
+        // Only set route details if needed
+        Route route = routeRepository.findFirstByDriver_DriverId(driver.getDriverId());
+        if (route != null) {
+            dto.setRouteId(route.getRouteId());
+            dto.setRouteName(route.getName());
+            dto.setRouteStartLocation(route.getStartLocation());
+            dto.setRouteEndLocation(route.getEndLocation());
+        }
+        return dto;
+    }
+
     private DriverDTO convertToDTO(Driver driver) {
-        return new DriverDTO(
-                driver.getDriverId(),
-                driver.getDriverType(),
-                driver.getLicenseImage(),
-                driver.getLicenseStatus(),
-                driver.getLicenseExpiry(),
-                driver.getVehicleNo(),
-                driver.getVehicleCapacity(),
-                driver.getEmergencyContact(),
-                driver.getIsActive(),
-                driver.getCreatedAt(),
-                driver.getFactory() != null ? driver.getFactory().getFactoryId() : null,
-                driver.getRoute() != null ? driver.getRoute().getRouteId() : null,
-                driver.getUser() != null ? driver.getUser().getId() : null
-        );
+        DriverDTO dto = new DriverDTO();
+        dto.setDriverId(driver.getDriverId());
+        dto.setDriverType(driver.getDriverType());
+        dto.setLicenseImage(driver.getLicenseImage());
+        dto.setLicenseStatus(driver.getLicenseStatus());
+        dto.setLicenseExpiry(driver.getLicenseExpiry() != null ? driver.getLicenseExpiry().toLocalDate() : null);
+        dto.setVehicleNo(driver.getVehicleNo());
+        dto.setVehicleCapacity(driver.getVehicleCapacity());
+        dto.setEmergencyContact(driver.getEmergencyContact());
+        dto.setIsActive(driver.getIsActive());
+        dto.setCreatedAt(driver.getCreatedAt());
+        dto.setFactoryId(driver.getFactory() != null ? driver.getFactory().getFactoryId() : null);
+        dto.setUserId(driver.getUser() != null ? driver.getUser().getId() : null);
+        // RouteId and route details will be set in getDriverDetailsByUserId if needed
+        return dto;
     }
 }

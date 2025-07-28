@@ -26,7 +26,9 @@ public class WeighingSessionService {
 
     private WeighingSessionDTO toDTO(WeighingSession session) {
         WeighingSessionDTO dto = new WeighingSessionDTO();
-        dto.setTripId(session.getTripId());
+        if (session.getTrip() != null) {
+            dto.setTripId(session.getTrip().getTripId());
+        }
         dto.setSessionDate(session.getSessionDate());
         if (session.getUser() != null) {
             dto.setUserId(session.getUser().getId());
