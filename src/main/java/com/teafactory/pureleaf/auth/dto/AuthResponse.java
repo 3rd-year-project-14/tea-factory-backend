@@ -1,4 +1,4 @@
-package com.teafactory.pureleaf.dto;
+package com.teafactory.pureleaf.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
