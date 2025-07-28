@@ -33,4 +33,13 @@ public class DriverController {
         DriverDTO createdDriver = driverService.createDriver(driverDTO);
         return ResponseEntity.ok(createdDriver);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<DriverDTO> getDriverDetailsByUserId(@PathVariable Long userId) {
+        DriverDTO dto = driverService.getDriverDetailsByUserId(userId);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
+    }
 }

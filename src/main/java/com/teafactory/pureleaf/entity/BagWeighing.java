@@ -12,33 +12,18 @@ import java.time.LocalDateTime;
 public class BagWeighing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "weighing_id")
-    private Long weighingId;
+    private Long id;
 
-    @Column(name = "bag_id")
-    private String bagId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_bag_id", referencedColumnName = "id")
+    private TripBag tripBag;
 
-    @ManyToOne
-    @JoinColumn(name = "session_id", referencedColumnName = "trip_id")
-    private WeighingSession session;
-
-    @Column(name = "bag_weighing")
-    private Double bagWeighing;
-
-    @Column(name = "other_weight_reason")
-    private String otherWeightReason;
-
-    @Column(name = "recorded_at")
-    private LocalDateTime recordedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", referencedColumnName = "session_id")
+    private WeighingSession weighingSession;
 
     @Column(name = "gross_weight")
     private Double grossWeight;
-
-    @Column(name = "other_weight")
-    private Double otherWeight;
-
-    @Column(name = "wet")
-    private Boolean wet;
 
     @Column(name = "tare_weight")
     private Double tareWeight;
@@ -46,7 +31,21 @@ public class BagWeighing {
     @Column(name = "net_weight")
     private Double netWeight;
 
-    @Column(name = "coarse")
-    private Double coarse;
-}
+    @Column(name = "wet")
+    private Boolean wet;
 
+    @Column(name = "coarse")
+    private Boolean coarse;
+
+    @Column(name = "other_weight")
+    private Double otherWeight;
+
+    @Column(name = "other_weight_reason")
+    private String otherWeightReason;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "recorded_at")
+    private LocalDateTime recordedAt;
+}
