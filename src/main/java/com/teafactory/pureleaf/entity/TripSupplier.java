@@ -25,7 +25,6 @@ public class TripSupplier {
     private LocalTime arrivedTime;
     private LocalTime completedTime;
     private String status;
-    private java.time.LocalDate date;
 
     public static class TripSupplierId implements Serializable {
         private Long trip;
