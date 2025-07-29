@@ -27,5 +27,10 @@ public class TripController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-}
 
+    @PostMapping
+    public ResponseEntity<TripDTO> createTrip(@RequestBody TripDTO tripDTO) {
+        TripDTO createdTrip = tripService.createTrip(tripDTO.getDriverId(), tripDTO.getRouteId());
+        return ResponseEntity.ok(createdTrip);
+    }
+}
