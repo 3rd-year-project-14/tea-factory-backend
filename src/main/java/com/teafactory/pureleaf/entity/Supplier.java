@@ -37,4 +37,8 @@ public class Supplier {
 
     @Column(name = "initial_bag_count")
     private Integer initialBagCount;
+
+    @Column(name = "pickup_to_route_start_distance")
+    private Double pickupToRouteStartDistance;
 }
+
