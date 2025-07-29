@@ -26,4 +26,13 @@ public class TripSupplierController {
         List<TripSupplierDTO> all = tripSupplierService.getAllTripSuppliers();
         return ResponseEntity.ok(all);
     }
+
+    @PostMapping
+    public ResponseEntity<TripSupplierDTO> createTripSupplier(@RequestBody TripSupplierDTO tripSupplierDTO) {
+        TripSupplierDTO created = tripSupplierService.createTripSupplier(
+            tripSupplierDTO.getTripId(),
+            tripSupplierDTO.getSupplyRequestId()
+        );
+        return ResponseEntity.ok(created);
+    }
 }

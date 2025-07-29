@@ -3,7 +3,6 @@ package com.teafactory.pureleaf.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
@@ -15,5 +14,4 @@ public class TripSupplierDTO {
     private LocalTime arrivedTime;
     private LocalTime completedTime;
     private String status;
-    private LocalDate date;
 }

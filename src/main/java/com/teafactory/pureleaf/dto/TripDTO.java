@@ -12,8 +12,9 @@ import java.time.LocalTime;
 public class TripDTO {
     private Long tripId;
     private Long driverId;
+    private Long routeId;
     private LocalDate tripDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String status;
 }
-
