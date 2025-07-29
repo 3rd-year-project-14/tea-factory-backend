@@ -39,12 +39,20 @@ public class TeaSupplyProcessService {
                 routeId
             );
         List<TeaSupplyProcessResponseDTO.TeaSupplyRequestInfo> requestInfos = requests.stream()
-            .map(r -> new TeaSupplyProcessResponseDTO.TeaSupplyRequestInfo(
-                r.getRequestId(),
-                r.getEstimatedBagCount(),
-                r.getSupplier().getSupplierId(),
-                r.getSupplier().getUser() != null ? r.getSupplier().getUser().getName() : null
-            ))
+            .map(r -> {
+                String supplierName = r.getSupplier().getUser() != null ? r.getSupplier().getUser().getName() : null;
+                String contactNo = r.getSupplier().getUser() != null ? r.getSupplier().getUser().getContactNo() : null;
+                String pickupLocation = r.getSupplier().getPickupLocation();
+                return new TeaSupplyProcessResponseDTO.TeaSupplyRequestInfo(
+                    r.getRequestId(),
+                    r.getEstimatedBagCount(),
+                    r.getSupplier().getSupplierId(),
+                    supplierName,
+                    r.getSupplier().getPickupToRouteStartDistance(),
+                    contactNo,
+                    pickupLocation
+                );
+            })
             .collect(Collectors.toList());
         return new TeaSupplyProcessResponseDTO(requestInfos);
     }
