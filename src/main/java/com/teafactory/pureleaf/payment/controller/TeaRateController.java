@@ -31,6 +31,11 @@ public class TeaRateController {
         return teaRateService.getAllTeaRateDTOs();
     }
 
+    @GetMapping("/approved")
+    public List<TeaRateResponseDTO> getApprovedTeaRates() {
+        return teaRateService.getApprovedTeaRateDTOs();
+    }
+
     @PatchMapping("/{id}/approve")
     public ResponseEntity<TeaRateResponseDTO> approveTeaRate(@PathVariable Long id) {
         TeaRateResponseDTO updatedTeaRate = teaRateService.approveTeaRate(id);
