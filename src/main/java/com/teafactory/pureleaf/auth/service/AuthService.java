@@ -49,6 +49,15 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found with email: " + email));
 
-        return new AuthResponse(user.getRole().name(), user.getName(), user.getId());
+        Long factoryId = user.getFactory() != null ? user.getFactory().getFactoryId() : null;
+        return new AuthResponse(
+            user.getAddress(),
+            user.getContactNo(),
+            user.getEmail(),
+            user.getName(),
+            user.getRole().name(),
+            factoryId,
+            user.getId()
+        );
     }
 }

@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface BagRepository extends JpaRepository<Bag, BagId> {
     List<Bag> findByRoute_RouteId(Long routeId);
+    List<Bag> findByRoute_RouteIdAndStatus(Long routeId, String status);
 }
-

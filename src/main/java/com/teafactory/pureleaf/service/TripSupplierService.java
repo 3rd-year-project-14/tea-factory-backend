@@ -10,7 +10,6 @@ import com.teafactory.pureleaf.repository.TripSupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,8 @@ public class TripSupplierService {
         TripSupplier tripSupplier = new TripSupplier();
         tripSupplier.setTrip(trip);
         tripSupplier.setTeaSupplyRequest(supplyRequest);
-        tripSupplier.setArrivedTime(LocalTime.now());
+        tripSupplier.setId(new com.teafactory.pureleaf.entity.TripSupplierId(tripId, supplyRequestId));
+        tripSupplier.setArrivalTime(java.time.LocalTime.now());
         tripSupplier.setStatus("pending");
         TripSupplier saved = tripSupplierRepository.save(tripSupplier);
         return convertToDTO(saved);
@@ -49,8 +49,8 @@ public class TripSupplierService {
         return new TripSupplierDTO(
                 ts.getTrip().getTripId(),
                 ts.getTeaSupplyRequest().getRequestId(),
-                ts.getArrivedTime(),
-                ts.getCompletedTime(),
+                ts.getArrivalTime(),
+                ts.getCompletionTime(),
                 ts.getStatus()
         );
     }

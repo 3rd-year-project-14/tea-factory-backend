@@ -50,7 +50,8 @@ public class TeaSupplyProcessService {
                     supplierName,
                     r.getSupplier().getPickupToRouteStartDistance(),
                     contactNo,
-                    pickupLocation
+                    pickupLocation,
+                    r.getStatus() // add status from entity
                 );
             })
             .collect(Collectors.toList());
