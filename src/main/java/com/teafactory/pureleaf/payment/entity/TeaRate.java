@@ -39,6 +39,11 @@ public class TeaRate {
 
     private BigDecimal totalPayout;
 
+    private BigDecimal adjustedRate;
+
+    @Column(nullable = true)
+    private String adjustmentReason;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 

@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.payment.service;
 
 
 import com.teafactory.pureleaf.payment.dto.TeaRateRequestDTO;
+import com.teafactory.pureleaf.payment.dto.TeaRateResponseDTO;
 import com.teafactory.pureleaf.payment.entity.TeaRate;
 import com.teafactory.pureleaf.entity.User;
 import com.teafactory.pureleaf.payment.repository.TeaRateRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +38,52 @@ public class TeaRateService {
                 .build();
 
         teaRateRepository.save(teaRate);
+    }
+
+    public List<TeaRate> getAllTeaRates() {
+        return teaRateRepository.findAll();
+    }
+
+    public List<TeaRateResponseDTO> getAllTeaRateDTOs() {
+        return teaRateRepository.findAll().stream()
+            .map(rate -> toResponseDTO(rate))
+            .toList();
+    }
+
+    public TeaRateResponseDTO approveTeaRate(Long id) {
+        TeaRate teaRate = teaRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tea rate not found"));
+        teaRate.setStatus(TeaRate.Status.APPROVED);
+        teaRateRepository.save(teaRate);
+        return toResponseDTO(teaRate);
+    }
+
+    public TeaRateResponseDTO adjustTeaRate(Long id, java.math.BigDecimal adjustedRate, String adjustmentReason) {
+        TeaRate teaRate = teaRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tea rate not found"));
+        teaRate.setAdjustedRate(adjustedRate);
+        teaRate.setAdjustmentReason(adjustmentReason);
+        teaRateRepository.save(teaRate);
+        return toResponseDTO(teaRate);
+    }
+
+    private TeaRateResponseDTO toResponseDTO(TeaRate rate) {
+        String createdAt = rate.getCalculatedDate() != null ? rate.getCalculatedDate().toString() : null;
+        return new TeaRateResponseDTO(
+                rate.getMonth(),
+                rate.getNsa(),
+                rate.getGsa(),
+                rate.getMonthlyRate(),
+                rate.getTotalWeight(),
+                rate.getFinalRatePerKg(),
+                rate.getTotalPayout(),
+                createdAt,
+                rate.getUser() != null && rate.getUser().getFactory() != null ? rate.getUser().getFactory().getFactoryId() : null,
+                rate.getUser() != null && rate.getUser().getFactory() != null ? rate.getUser().getFactory().getName() : null,
+                rate.getUser() != null ? rate.getUser().getName() : null,
+                rate.getStatus() != null ? rate.getStatus().name() : null,
+                rate.getAdjustedRate(),
+                rate.getAdjustmentReason()
+        );
     }
 }
