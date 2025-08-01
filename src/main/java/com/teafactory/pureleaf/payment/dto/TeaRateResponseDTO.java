@@ -24,4 +24,5 @@ public class TeaRateResponseDTO {
     private String status;
     private BigDecimal adjustedRate;
     private String adjustmentReason;
+    private Long teaRateId;
 }

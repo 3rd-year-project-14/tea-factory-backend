@@ -54,6 +54,10 @@ public class TeaRateService {
         TeaRate teaRate = teaRateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tea rate not found"));
         teaRate.setStatus(TeaRate.Status.APPROVED);
+        // If adjustedRate is null, set it to monthlyRate
+        if (teaRate.getAdjustedRate() == null) {
+            teaRate.setAdjustedRate(teaRate.getMonthlyRate());
+        }
         teaRateRepository.save(teaRate);
         return toResponseDTO(teaRate);
     }
@@ -63,8 +67,16 @@ public class TeaRateService {
                 .orElseThrow(() -> new RuntimeException("Tea rate not found"));
         teaRate.setAdjustedRate(adjustedRate);
         teaRate.setAdjustmentReason(adjustmentReason);
+        teaRate.setStatus(TeaRate.Status.APPROVED); // Always set to APPROVED when adjusted
         teaRateRepository.save(teaRate);
         return toResponseDTO(teaRate);
+    }
+
+    public List<TeaRateResponseDTO> getApprovedTeaRateDTOs() {
+        return teaRateRepository.findAll().stream()
+            .filter(rate -> rate.getStatus() == TeaRate.Status.APPROVED)
+            .map(this::toResponseDTO)
+            .toList();
     }
 
     private TeaRateResponseDTO toResponseDTO(TeaRate rate) {
@@ -83,7 +95,8 @@ public class TeaRateService {
                 rate.getUser() != null ? rate.getUser().getName() : null,
                 rate.getStatus() != null ? rate.getStatus().name() : null,
                 rate.getAdjustedRate(),
-                rate.getAdjustmentReason()
+                rate.getAdjustmentReason(),
+                rate.getTeaRateId()
         );
     }
 }
