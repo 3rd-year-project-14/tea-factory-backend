@@ -42,4 +42,10 @@ public class BagController {
         BagDTO createdBag = bagService.createBag(bagDTO);
         return ResponseEntity.ok(createdBag);
     }
+
+    @GetMapping("/route/{routeId}/not-assigned-bag-numbers")
+    public ResponseEntity<List<String>> getNotAssignedBagNumbersByRouteId(@PathVariable Long routeId) {
+        List<String> bagNumbers = bagService.getNotAssignedBagNumbersByRouteId(routeId);
+        return ResponseEntity.ok(bagNumbers);
+    }
 }
