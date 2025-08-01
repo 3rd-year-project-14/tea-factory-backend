@@ -4,9 +4,11 @@ import com.teafactory.pureleaf.dto.TripDTO;
 import com.teafactory.pureleaf.entity.Driver;
 import com.teafactory.pureleaf.entity.Route;
 import com.teafactory.pureleaf.entity.Trip;
+import com.teafactory.pureleaf.entity.TripSupplier;
 import com.teafactory.pureleaf.repository.DriverRepository;
 import com.teafactory.pureleaf.repository.RouteRepository;
 import com.teafactory.pureleaf.repository.TripRepository;
+import com.teafactory.pureleaf.repository.TripSupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ public class TripService {
     private DriverRepository driverRepository;
     @Autowired
     private RouteRepository routeRepository;
+    @Autowired
+    private TripSupplierRepository tripSupplierRepository;
 
     public List<TripDTO> getAllTrips() {
         return tripRepository.findAll().stream()
@@ -47,6 +51,29 @@ public class TripService {
         trip.setStatus("pending");
         Trip savedTrip = tripRepository.save(trip);
         return convertToDTO(savedTrip);
+    }
+
+    public Optional<TripDTO> getTodayTripByDriverId(Long driverId) {
+        LocalDate today = LocalDate.now();
+        return tripRepository.findByDriver_DriverIdAndTripDate(driverId, today)
+                .map(this::convertToDTO);
+    }
+
+    public Optional<TripDTO> completeTripIfSuppliersCompleted(Long tripId) {
+        List<TripSupplier> suppliers = tripSupplierRepository.findByTrip_TripId(tripId);
+        boolean allCompleted = suppliers.stream().allMatch(s -> "completed".equalsIgnoreCase(s.getStatus()));
+        if (!allCompleted) {
+            return Optional.empty();
+        }
+        Optional<Trip> tripOpt = tripRepository.findById(tripId);
+        if (tripOpt.isPresent()) {
+            Trip trip = tripOpt.get();
+            trip.setStatus("completed");
+            trip.setEndTime(LocalTime.now());
+            tripRepository.save(trip);
+            return Optional.of(convertToDTO(trip));
+        }
+        return Optional.empty();
     }
 
     private TripDTO convertToDTO(Trip trip) {
