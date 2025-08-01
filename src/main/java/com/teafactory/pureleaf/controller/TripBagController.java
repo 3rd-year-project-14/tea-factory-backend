@@ -1,6 +1,7 @@
 package com.teafactory.pureleaf.controller;
 
 import com.teafactory.pureleaf.dto.TripBagDTO;
+import com.teafactory.pureleaf.dto.SupplierRequestBagSummaryDTO;
 import com.teafactory.pureleaf.service.TripBagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +36,28 @@ public class TripBagController {
         TripBagDTO created = tripBagService.createTripBag(tripBagDTO);
         return ResponseEntity.ok(created);
     }
-}
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TripBagDTO>> createTripBags(@RequestBody List<TripBagDTO> tripBagDTOs) {
+        List<TripBagDTO> created = tripBagService.createTripBags(tripBagDTOs);
+        return ResponseEntity.ok(created);
+    }
+
+    @GetMapping("/by-supply-request/{supplyRequestId}/trip/{tripId}")
+    public ResponseEntity<List<TripBagDTO>> getTripBagsBySupplyRequestAndTrip(@PathVariable Long supplyRequestId, @PathVariable Long tripId) {
+        List<TripBagDTO> tripBags = tripBagService.getTripBagsBySupplyRequestAndTrip(supplyRequestId, tripId);
+        return ResponseEntity.ok(tripBags);
+    }
+
+    @GetMapping("/summary/by-trip/{tripId}")
+    public ResponseEntity<List<SupplierRequestBagSummaryDTO>> getSupplierRequestBagSummaryByTripId(@PathVariable Long tripId) {
+        List<SupplierRequestBagSummaryDTO> summary = tripBagService.getSupplierRequestBagSummaryByTripId(tripId);
+        return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/summary/by-supply-request/{supplyRequestId}")
+    public ResponseEntity<SupplierRequestBagSummaryDTO> getSupplierRequestBagSummaryBySupplyRequestId(@PathVariable Long supplyRequestId) {
+        SupplierRequestBagSummaryDTO summary = tripBagService.getSupplierRequestBagSummaryBySupplyRequestId(supplyRequestId);
+        return ResponseEntity.ok(summary);
+    }
+}

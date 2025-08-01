@@ -31,5 +31,6 @@ public class TeaSupplyProcessResponseDTO {
         private Double pickupToRouteStartDistance;
         private String contactNo;
         private String pickupLocation;
+        private String status;
     }
 }

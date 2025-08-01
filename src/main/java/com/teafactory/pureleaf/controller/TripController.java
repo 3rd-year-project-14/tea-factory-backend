@@ -33,4 +33,18 @@ public class TripController {
         TripDTO createdTrip = tripService.createTrip(tripDTO.getDriverId(), tripDTO.getRouteId());
         return ResponseEntity.ok(createdTrip);
     }
+
+    @GetMapping("/today/{driverId}")
+    public ResponseEntity<TripDTO> getTodayTripByDriverId(@PathVariable Long driverId) {
+        return tripService.getTodayTripByDriverId(driverId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<TripDTO> completeTrip(@PathVariable Long id) {
+        return tripService.completeTripIfSuppliersCompleted(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().body(null));
+    }
 }

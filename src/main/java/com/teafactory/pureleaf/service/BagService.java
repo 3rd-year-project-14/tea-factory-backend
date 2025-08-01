@@ -37,9 +37,19 @@ public class BagService {
         Route route = new Route();
         route.setRouteId(bagDTO.getRouteId());
         bag.setRoute(route);
-        bag.setStatus(bagDTO.getStatus()); // Set status if present in DTO
+        // Set status to 'not-assigned' by default if not provided
+        if (bagDTO.getStatus() == null || bagDTO.getStatus().isEmpty()) {
+            bag.setStatus("not-assigned");
+        } else {
+            bag.setStatus(bagDTO.getStatus());
+        }
         Bag savedBag = bagRepository.save(bag);
         return convertToDTO(savedBag);
+    }
+
+    public List<String> getNotAssignedBagNumbersByRouteId(Long routeId) {
+        List<Bag> bags = bagRepository.findByRoute_RouteIdAndStatus(routeId, "not-assigned");
+        return bags.stream().map(Bag::getBagNumber).collect(Collectors.toList());
     }
 
     private BagDTO convertToDTO(Bag bag) {
