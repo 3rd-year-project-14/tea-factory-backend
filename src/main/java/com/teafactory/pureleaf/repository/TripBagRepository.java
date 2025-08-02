@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface TripBagRepository extends JpaRepository<TripBag, Long> {
     List<TripBag> findByTripSupplier_TeaSupplyRequest_RequestIdAndTripSupplier_Trip_TripId(Long supplyRequestId, Long tripId);
+    long countByTripSupplier_Trip_TripId(Long tripId);
+    List<TripBag> findByTripSupplier_Trip_TripId(Long tripId);
 }
