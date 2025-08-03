@@ -11,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long> {
     Optional<Trip> findByDriver_DriverIdAndTripDate(Long driverId, LocalDate tripDate);
+
+    List<Trip> findByRoute_Factory_FactoryIdAndTripDate(Long factoryId, LocalDate tripDate);
 }
