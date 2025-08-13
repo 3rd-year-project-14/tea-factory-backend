@@ -81,6 +81,12 @@ public class DriverService {
             dto.setRouteStartLocation(route.getStartLocation());
             dto.setRouteEndLocation(route.getEndLocation());
         }
+        // Set factory name and mapUrl if factory exists
+        Factory factory = driver.getFactory();
+        if (factory != null) {
+            dto.setFactoryName(factory.getName());
+            dto.setFactoryMapUrl(factory.getMapUrl());
+        }
         return dto;
     }
 

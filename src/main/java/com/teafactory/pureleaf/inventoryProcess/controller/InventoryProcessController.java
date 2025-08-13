@@ -27,4 +27,20 @@ public class InventoryProcessController {
     public ResponseEntity<?> getBagsByTripId(@PathVariable Long tripId) {
         return ResponseEntity.ok(inventoryProcessService.getBagsByTripId(tripId));
     }
+
+    @GetMapping("/trip/{tripId}/bags/pending")
+    public ResponseEntity<?> getPendingBagsByTripId(@PathVariable Long tripId) {
+        return ResponseEntity.ok(inventoryProcessService.getPendingBagsByTripId(tripId));
+    }
+
+    @GetMapping("/trip/{tripId}/bags/weighed")
+    public ResponseEntity<?> getWeighedBagsByTripId(@PathVariable Long tripId) {
+        return ResponseEntity.ok(inventoryProcessService.getWeighedBagsByTripId(tripId));
+    }
+
+    @GetMapping("/supply-request/{supplyRequestId}/bagweight-id")
+    public ResponseEntity<List<Long>> getBagWeightIdsBySupplyRequestAndDate(@PathVariable Long supplyRequestId) {
+        List<Long> bagWeightIds = inventoryProcessService.getBagWeightIdsBySupplyRequestAndDate(supplyRequestId);
+        return ResponseEntity.ok(bagWeightIds);
+    }
 }
