@@ -12,5 +12,6 @@ public class FactoryDTO {
     private String name;
     private String location;
     private String image;
+    private String mapUrl;
     // Add other fields as needed
 }
