@@ -59,17 +59,14 @@ public class TripService {
                 .map(this::convertToDTO);
     }
 
-    public Optional<TripDTO> completeTripIfSuppliersCompleted(Long tripId) {
-        List<TripSupplier> suppliers = tripSupplierRepository.findByTrip_TripId(tripId);
-        boolean allCompleted = suppliers.stream().allMatch(s -> "completed".equalsIgnoreCase(s.getStatus()));
-        if (!allCompleted) {
-            return Optional.empty();
-        }
+    public Optional<TripDTO> updateTripStatus(Long tripId, String status) {
         Optional<Trip> tripOpt = tripRepository.findById(tripId);
         if (tripOpt.isPresent()) {
             Trip trip = tripOpt.get();
-            trip.setStatus("completed");
-            trip.setEndTime(LocalTime.now());
+            trip.setStatus(status);
+            if ("complete".equalsIgnoreCase(status) || "completed".equalsIgnoreCase(status)) {
+                trip.setEndTime(LocalTime.now());
+            }
             tripRepository.save(trip);
             return Optional.of(convertToDTO(trip));
         }

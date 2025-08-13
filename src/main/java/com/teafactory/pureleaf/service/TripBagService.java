@@ -37,7 +37,7 @@ public class TripBagService {
         tripBag.setWet(dto.getWet());
         tripBag.setCoarse(dto.getCoarse());
         tripBag.setType(dto.getType());
-        tripBag.setNote(dto.getNote());
+        tripBag.setStatus("pending");
 
         TripSupplier tripSupplier = tripSupplierRepository.findById(new TripSupplierId(dto.getTripId(), dto.getSupplyRequestId()))
                 .orElseThrow(() -> new RuntimeException("TripSupplier not found"));
@@ -123,7 +123,7 @@ public class TripBagService {
                 tripBag.getWet(),
                 tripBag.getCoarse(),
                 tripBag.getType(),
-                tripBag.getNote()
+                tripBag.getStatus()
         );
     }
 }
