@@ -41,9 +41,9 @@ public class TripController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}/complete")
-    public ResponseEntity<TripDTO> completeTrip(@PathVariable Long id) {
-        return tripService.completeTripIfSuppliersCompleted(id)
+    @PutMapping("/{id}/status")
+    public ResponseEntity<TripDTO> updateTripStatus(@PathVariable Long id, @RequestBody TripDTO tripDTO) {
+        return tripService.updateTripStatus(id, tripDTO.getStatus())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().body(null));
     }

@@ -26,4 +26,6 @@ public class DriverDTO {
     private String routeName;
     private String routeStartLocation;
     private String routeEndLocation;
+    private String factoryName;
+    private String factoryMapUrl;
 }
