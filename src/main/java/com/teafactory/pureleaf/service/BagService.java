@@ -33,7 +33,8 @@ public class BagService {
 
     public BagDTO createBag(BagDTO bagDTO) {
         Bag bag = new Bag();
-        bag.setBagNumber(bagDTO.getBagNumber()); // Use setBagNumber instead of setBagId
+        bag.setBagNumber(bagDTO.getBagNumber());
+        bag.setRouteId(bagDTO.getRouteId()); // <-- Ensure routeId is set
         Route route = new Route();
         route.setRouteId(bagDTO.getRouteId());
         bag.setRoute(route);

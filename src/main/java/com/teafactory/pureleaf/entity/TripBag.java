@@ -33,6 +33,5 @@ public class TripBag {
     private Boolean wet;
     private Boolean coarse;
     private String type;
-    private String note;
+    private String status = "pending";
 }
-

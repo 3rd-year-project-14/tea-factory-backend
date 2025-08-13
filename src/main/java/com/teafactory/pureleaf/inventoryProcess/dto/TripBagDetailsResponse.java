@@ -16,4 +16,5 @@ public class TripBagDetailsResponse {
     private Boolean wet;
     private Boolean coarse;
     private Long bagId;
+    private String status;
 }
