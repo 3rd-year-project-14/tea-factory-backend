@@ -10,4 +10,10 @@ import java.util.List;
 @Repository
 public interface BagWeightRepository extends JpaRepository<BagWeight, Long> {
     List<BagWeight> findBySupplyRequest_RequestIdAndDate(Long supplyRequestId, LocalDate date);
+
+    // Sum grossWeight for a given sessionId
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(b.grossWeight) FROM BagWeight b WHERE b.weighingSession.sessionId = :sessionId")
+    Double sumGrossWeightBySessionId(Long sessionId);
+
+    List<BagWeight> findByWeighingSession_SessionId(Long sessionId);
 }

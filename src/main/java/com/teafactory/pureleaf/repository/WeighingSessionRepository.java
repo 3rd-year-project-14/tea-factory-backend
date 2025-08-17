@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface WeighingSessionRepository extends JpaRepository<WeighingSession, Long> {
     List<WeighingSession> findByTrip_TripId(Long tripId);
+    WeighingSession findFirstByTrip_TripId(Long tripId);
 }
