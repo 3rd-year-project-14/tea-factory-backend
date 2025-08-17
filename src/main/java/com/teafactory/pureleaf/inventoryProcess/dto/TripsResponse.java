@@ -16,4 +16,6 @@ public class TripsResponse {
     private String tripDate;
     private String tripStatus;
     private int bagCount;
+    private Long sessionId;
+    private Double totalGrossWeight;
 }

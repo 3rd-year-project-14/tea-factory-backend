@@ -1,7 +1,9 @@
 package com.teafactory.pureleaf.service;
 
 import com.teafactory.pureleaf.dto.BagWeightDTO;
+import com.teafactory.pureleaf.dto.BagWeightWithSupplierDTO;
 import com.teafactory.pureleaf.entity.BagWeight;
+import com.teafactory.pureleaf.entity.Supplier;
 import com.teafactory.pureleaf.entity.TeaSupplyRequest;
 import com.teafactory.pureleaf.entity.Trip;
 import com.teafactory.pureleaf.entity.TripBag;
@@ -18,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BagWeightService {
@@ -145,5 +148,29 @@ public class BagWeightService {
         updateTripBagStatusToWeighed(dto.getSupplyRequestId(), dto.getBagNumbers());
         updateSupplyRequestStatusIfAllBagsWeighed(dto.getSupplyRequestId());
         return saved;
+    }
+
+    public List<BagWeightWithSupplierDTO> getBagWeightsWithSupplierBySessionId(Long sessionId) {
+        List<BagWeight> bagWeights = bagWeightRepository.findByWeighingSession_SessionId(sessionId);
+        return bagWeights.stream().map(bagWeight -> {
+            BagWeightWithSupplierDTO dto = new BagWeightWithSupplierDTO();
+            dto.setBagWeightId(bagWeight.getId());
+            dto.setCoarse(bagWeight.getCoarse());
+            dto.setWater(bagWeight.getWater());
+            dto.setGrossWeight(bagWeight.getGrossWeight());
+            dto.setNetWeight(bagWeight.getNetWeight());
+            dto.setTareWeight(bagWeight.getTareWeight());
+            dto.setOtherWeight(bagWeight.getOtherWeight());
+            dto.setReason(bagWeight.getReason());
+            dto.setBagTotal(bagWeight.getBagTotal());
+            Supplier supplier = bagWeight.getSupplyRequest().getSupplier();
+            dto.setSupplierId(supplier.getSupplierId());
+            if (supplier.getUser() != null) {
+                dto.setSupplierName(supplier.getUser().getName());
+            } else {
+                dto.setSupplierName(null);
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
