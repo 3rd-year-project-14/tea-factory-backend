@@ -3,6 +3,7 @@ package com.teafactory.pureleaf.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,7 +14,7 @@ public class DriverDTO {
     private String driverType;
     private String licenseImage;
     private String licenseStatus;
-    private LocalDateTime licenseExpiry;
+    private LocalDate licenseExpiry;
     private String vehicleNo;
     private Integer vehicleCapacity;
     private String emergencyContact;
@@ -22,4 +23,9 @@ public class DriverDTO {
     private Long factoryId;
     private Long routeId;
     private Long userId;
+    private String routeName;
+    private String routeStartLocation;
+    private String routeEndLocation;
+    private String factoryName;
+    private String factoryMapUrl;
 }

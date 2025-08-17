@@ -3,44 +3,28 @@ package com.teafactory.pureleaf.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.io.Serializable;
 import java.time.LocalTime;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "trip_supplier")
-@IdClass(TripSupplier.TripSupplierId.class)
 public class TripSupplier {
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "trip_id", nullable = false)
+    @EmbeddedId
+    private TripSupplierId id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("tripId")
+    @JoinColumn(name = "trip_id")
     private Trip trip;
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "supplier_id", nullable = false)
-    private Supplier supplier;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("requestId")
+    @JoinColumn(name = "supply_request_id")
+    private TeaSupplyRequest teaSupplyRequest;
 
-    private LocalTime arrivedTime;
-    private LocalTime completedTime;
+    private LocalTime arrivalTime;
+    private LocalTime completionTime;
+
     private String status;
-
-    public static class TripSupplierId implements Serializable {
-        private Long trip;
-        private Long supplier;
-        // equals and hashCode
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            TripSupplierId that = (TripSupplierId) o;
-            return trip.equals(that.trip) && supplier.equals(that.supplier);
-        }
-        @Override
-        public int hashCode() {
-            return java.util.Objects.hash(trip, supplier);
-        }
-    }
 }
-

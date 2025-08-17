@@ -27,5 +27,24 @@ public class TripController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-}
 
+    @PostMapping
+    public ResponseEntity<TripDTO> createTrip(@RequestBody TripDTO tripDTO) {
+        TripDTO createdTrip = tripService.createTrip(tripDTO.getDriverId(), tripDTO.getRouteId());
+        return ResponseEntity.ok(createdTrip);
+    }
+
+    @GetMapping("/today/{driverId}")
+    public ResponseEntity<TripDTO> getTodayTripByDriverId(@PathVariable Long driverId) {
+        return tripService.getTodayTripByDriverId(driverId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<TripDTO> updateTripStatus(@PathVariable Long id, @RequestBody TripDTO tripDTO) {
+        return tripService.updateTripStatus(id, tripDTO.getStatus())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().body(null));
+    }
+}

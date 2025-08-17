@@ -10,9 +10,8 @@ import java.time.LocalTime;
 @NoArgsConstructor
 public class TripSupplierDTO {
     private Long tripId;
-    private Long supplierId;
+    private Long supplyRequestId;
     private LocalTime arrivedTime;
     private LocalTime completedTime;
     private String status;
 }
-

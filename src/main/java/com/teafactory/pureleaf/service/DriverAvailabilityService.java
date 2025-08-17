@@ -84,4 +84,10 @@ public class DriverAvailabilityService {
         DriverAvailability saved = driverAvailabilityRepository.save(availability);
         return convertToDTO(saved);
     }
+
+    public DriverAvailabilityDTO getTodayAvailability(Long driverId) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        DriverAvailability availability = driverAvailabilityRepository.findByDriver_DriverIdAndDate(driverId, today);
+        return availability != null ? convertToDTO(availability) : null;
+    }
 }

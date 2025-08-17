@@ -23,6 +23,7 @@ public class DriverAvailabilityController {
 
     @PostMapping
     public ResponseEntity<DriverAvailabilityDTO> createAvailability(@RequestBody DriverAvailabilityDTO dto) {
+        dto.setDate(java.time.LocalDate.now()); // Set date to current date
         DriverAvailabilityDTO created = driverAvailabilityService.createAvailability(dto);
         return ResponseEntity.ok(created);
     }
@@ -31,5 +32,15 @@ public class DriverAvailabilityController {
     public ResponseEntity<DriverAvailabilityDTO> updateAvailability(@PathVariable Long id, @RequestBody DriverAvailabilityDTO dto) {
         DriverAvailabilityDTO updated = driverAvailabilityService.updateAvailability(id, dto);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/today/{driverId}")
+    public ResponseEntity<DriverAvailabilityDTO> getTodayAvailability(@PathVariable Long driverId) {
+        DriverAvailabilityDTO availability = driverAvailabilityService.getTodayAvailability(driverId);
+        if (availability != null) {
+            return ResponseEntity.ok(availability);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
