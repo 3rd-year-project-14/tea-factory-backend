@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.controller;
 
 import com.teafactory.pureleaf.dto.BagWeightDTO;
 import com.teafactory.pureleaf.dto.BagWeightResponseDTO;
+import com.teafactory.pureleaf.dto.BagWeightWithSupplierDTO;
 import com.teafactory.pureleaf.entity.BagWeight;
 import com.teafactory.pureleaf.service.BagWeightService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,12 @@ public class BagWeightController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @GetMapping("/session/{sessionId}")
+    public ResponseEntity<List<BagWeightWithSupplierDTO>> getBagWeightsWithSupplierBySessionId(@PathVariable Long sessionId) {
+        List<BagWeightWithSupplierDTO> result = bagWeightService.getBagWeightsWithSupplierBySessionId(sessionId);
+        return ResponseEntity.ok(result);
+    }
+
     private BagWeightResponseDTO mapToResponseDTO(BagWeight bagWeight) {
         BagWeightResponseDTO dto = new BagWeightResponseDTO();
         dto.setId(bagWeight.getId());
@@ -56,7 +63,10 @@ public class BagWeightController {
         dto.setNetWeight(bagWeight.getNetWeight());
         dto.setRecordedAt(bagWeight.getRecordedAt());
         dto.setTareWeight(bagWeight.getTareWeight());
+        dto.setOtherWeight(bagWeight.getOtherWeight());
+        dto.setReason(bagWeight.getReason());
         dto.setBagTotal(bagWeight.getBagTotal());
         return dto;
     }
+
 }

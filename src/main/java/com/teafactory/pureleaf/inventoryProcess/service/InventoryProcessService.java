@@ -1,19 +1,17 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
-import com.teafactory.pureleaf.entity.Trip;
-import com.teafactory.pureleaf.entity.TripBag;
+import com.teafactory.pureleaf.entity.*;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
 import com.teafactory.pureleaf.repository.TripBagRepository;
 import com.teafactory.pureleaf.repository.TripRepository;
 import com.teafactory.pureleaf.repository.BagWeightRepository;
-import com.teafactory.pureleaf.entity.BagWeight;
+import com.teafactory.pureleaf.repository.WeighingSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,18 +25,33 @@ public class InventoryProcessService {
     @Autowired
     private BagWeightRepository bagWeightRepository;
 
+    @Autowired
+    private WeighingSessionRepository weighingSessionRepository;
+
     public List<TripsResponse> getTodayTripsByFactory(Long factoryId) {
         LocalDate today = LocalDate.now();
         List<Trip> trips = tripRepository.findByRoute_Factory_FactoryIdAndTripDate(factoryId, today);
-        return trips.stream().map(trip -> new TripsResponse(
+        return trips.stream().map(trip -> {
+            // Get the single weighing session for this trip
+            WeighingSession session = weighingSessionRepository.findFirstByTrip_TripId(trip.getTripId());
+            Long sessionId = null;
+            Double totalGrossWeight = null;
+            if (session != null) {
+                sessionId = session.getSessionId();
+                totalGrossWeight = bagWeightRepository.sumGrossWeightBySessionId(sessionId);
+            }
+            return new TripsResponse(
                 trip.getTripId(),
                 trip.getDriver() != null && trip.getDriver().getUser() != null ? trip.getDriver().getUser().getName() : null,
                 trip.getRoute() != null ? trip.getRoute().getRouteId(): null,
                 trip.getRoute() != null ? trip.getRoute().getName() : null,
                 trip.getTripDate() != null ? trip.getTripDate().toString() : null,
                 trip.getStatus(),
-                (int) tripBagRepository.countByTripSupplier_Trip_TripId(trip.getTripId())
-        )).collect(Collectors.toList());
+                (int) tripBagRepository.countByTripSupplier_Trip_TripId(trip.getTripId()),
+                sessionId,
+                totalGrossWeight
+            );
+        }).collect(Collectors.toList());
     }
 
     public List<TripBagDetailsResponse> getBagsByTripId(Long tripId) {
@@ -86,4 +99,5 @@ public class InventoryProcessService {
                 .filter(bag -> "weighed".equalsIgnoreCase(bag.getStatus()))
                 .collect(Collectors.toList());
     }
+
 }
