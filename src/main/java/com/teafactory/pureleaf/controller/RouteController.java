@@ -28,5 +28,10 @@ public class RouteController {
         }
         return ResponseEntity.ok(dto);
     }
-}
 
+    @PostMapping
+    public ResponseEntity<RouteDTO> createRoute(@RequestBody RouteDTO routeDTO) {
+        RouteDTO created = routeService.createRoute(routeDTO);
+        return ResponseEntity.ok(created);
+    }
+}

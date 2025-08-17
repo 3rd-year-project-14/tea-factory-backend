@@ -28,4 +28,20 @@ public class WeighingSessionController {
         }
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping("/trip/{tripId}")
+    public ResponseEntity<WeighingSessionDTO> getWeighingSessionByTripId(@PathVariable Long tripId) {
+        WeighingSessionDTO dto = weighingSessionService.getWeighingSessionsByTripId(tripId)
+            .stream().findFirst().orElse(null);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping
+    public ResponseEntity<WeighingSessionDTO> createWeighingSession(@RequestBody WeighingSessionDTO weighingSessionDTO) {
+        WeighingSessionDTO created = weighingSessionService.createWeighingSession(weighingSessionDTO);
+        return ResponseEntity.ok(created);
+    }
 }

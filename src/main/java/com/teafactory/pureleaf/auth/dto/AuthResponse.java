@@ -1,4 +1,4 @@
-package com.teafactory.pureleaf.dto;
+package com.teafactory.pureleaf.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AuthResponse {
+    private String address;
+    private String contactNo;
+    private String email;
+    private String name;
     private String role;
-    private String username;
+    private Long factoryId;
     private Long userId;
 }

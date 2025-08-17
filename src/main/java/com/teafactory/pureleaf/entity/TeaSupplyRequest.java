@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public class TeaSupplyRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "request_id")
     private Long requestId;
 
     @ManyToOne
@@ -21,5 +22,6 @@ public class TeaSupplyRequest {
     private LocalDate supplyDate;
     private Integer estimatedBagCount;
     private String status;
-}
 
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+}

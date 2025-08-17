@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface DriverAvailabilityRepository extends JpaRepository<DriverAvailability, Long> {
     List<DriverAvailability> findByDriver_DriverId(Long driverId);
+    DriverAvailability findByDriver_DriverIdAndDate(Long driverId, java.time.LocalDate date);
 }
-

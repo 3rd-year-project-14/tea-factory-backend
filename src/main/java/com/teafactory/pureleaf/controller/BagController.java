@@ -27,9 +27,9 @@ public class BagController {
         return ResponseEntity.ok(bags);
     }
 
-    @GetMapping("/{routeId}/{bagId}")
-    public ResponseEntity<BagDTO> getBagByRouteIdAndBagId(@PathVariable Long routeId, @PathVariable Long bagId) {
-        BagDTO bag = bagService.getBagByRouteIdAndBagId(routeId, bagId);
+    @GetMapping("/{routeId}/{bagNumber}")
+    public ResponseEntity<BagDTO> getBagByRouteIdAndBagNumber(@PathVariable Long routeId, @PathVariable String bagNumber) {
+        BagDTO bag = bagService.getBagByRouteIdAndBagNumber(routeId, bagNumber);
         if (bag != null) {
             return ResponseEntity.ok(bag);
         } else {
@@ -41,5 +41,11 @@ public class BagController {
     public ResponseEntity<BagDTO> createBag(@RequestBody BagDTO bagDTO) {
         BagDTO createdBag = bagService.createBag(bagDTO);
         return ResponseEntity.ok(createdBag);
+    }
+
+    @GetMapping("/route/{routeId}/not-assigned-bag-numbers")
+    public ResponseEntity<List<String>> getNotAssignedBagNumbersByRouteId(@PathVariable Long routeId) {
+        List<String> bagNumbers = bagService.getNotAssignedBagNumbersByRouteId(routeId);
+        return ResponseEntity.ok(bagNumbers);
     }
 }

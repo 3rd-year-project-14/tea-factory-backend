@@ -30,6 +30,7 @@ public class TeaSupplyRequestController {
     public ResponseEntity<TeaSupplyRequestDTO> createTeaSupplyRequest(@RequestBody TeaSupplyRequestDTO dto) {
         // Ignore status from request, always set to pending in service
         dto.setStatus(null);
+        dto.setSupplyDate(java.time.LocalDate.now()); // Set request sending date
         TeaSupplyRequestDTO created = teaSupplyRequestService.createTeaSupplyRequest(dto);
         return ResponseEntity.ok(created);
     }
