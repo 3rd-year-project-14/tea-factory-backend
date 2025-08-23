@@ -15,5 +15,8 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long> {
     @org.springframework.data.jpa.repository.Query("SELECT SUM(b.grossWeight) FROM BagWeight b WHERE b.weighingSession.sessionId = :sessionId")
     Double sumGrossWeightBySessionId(Long sessionId);
 
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(b.tareWeight) FROM BagWeight b WHERE b.weighingSession.sessionId = :sessionId")
+    Double sumTareWeightBySessionId(Long sessionId);
+
     List<BagWeight> findByWeighingSession_SessionId(Long sessionId);
 }

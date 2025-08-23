@@ -11,3 +11,4 @@ public interface WeighingSessionRepository extends JpaRepository<WeighingSession
     List<WeighingSession> findByTrip_TripId(Long tripId);
     WeighingSession findFirstByTrip_TripId(Long tripId);
 }
+
