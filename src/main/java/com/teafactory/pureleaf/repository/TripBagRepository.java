@@ -16,3 +16,4 @@ public interface TripBagRepository extends JpaRepository<TripBag, Long> {
     List<TripBag> findByTripSupplier_TeaSupplyRequest_RequestId(Long supplyRequestId);
     List<TripBag> findByTripSupplier_TeaSupplyRequest_RequestIdAndBag_BagNumberIn(Long supplyRequestId, List<String> bagNumbers);
 }
+

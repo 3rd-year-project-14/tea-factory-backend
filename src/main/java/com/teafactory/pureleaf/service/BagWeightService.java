@@ -78,16 +78,15 @@ public class BagWeightService {
         List<TripBag> tripBagsForTrip = tripBagRepository.findByTripSupplier_Trip_TripId(tripId);
         boolean allWeighedForTrip = tripBagsForTrip.stream().allMatch(bag -> "weighed".equalsIgnoreCase(bag.getStatus()));
         if (allWeighedForTrip) {
-            // Update WeighingSession status and endTime
+            // Update WeighingSession status
             List<WeighingSession> sessions = weighingSessionRepository.findByTrip_TripId(tripId);
             for (WeighingSession session : sessions) {
-                session.setStatus("completed");
-                session.setEndTime(java.time.LocalTime.now());
+                session.setStatus("weighed");
             }
             weighingSessionRepository.saveAll(sessions);
             // Update Trip status
             Trip trip = weighingSession.getTrip();
-            trip.setStatus("completed");
+            trip.setStatus("weighed");
             tripRepository.save(trip);
         }
         return saved;
