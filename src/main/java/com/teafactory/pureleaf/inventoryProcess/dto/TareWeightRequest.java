@@ -1,14 +1,8 @@
 package com.teafactory.pureleaf.inventoryProcess.dto;
 
+import lombok.Data;
+
+@Data
 public class TareWeightRequest {
     private Double tareWeight;
-
-    public Double getTareWeight() {
-        return tareWeight;
-    }
-
-    public void setTareWeight(Double tareWeight) {
-        this.tareWeight = tareWeight;
-    }
 }
-
