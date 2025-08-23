@@ -11,3 +11,4 @@ public interface TeaSupplyRequestRepository extends JpaRepository<TeaSupplyReque
     @org.springframework.data.jpa.repository.Query("SELECT r FROM TeaSupplyRequest r WHERE r.supplyDate = :date AND r.supplier.factory.factoryId = :factoryId AND r.supplier.route.routeId = :routeId")
     List<TeaSupplyRequest> findTodayTeaSuppliers(java.time.LocalDate date, Long factoryId, Long routeId);
 }
+

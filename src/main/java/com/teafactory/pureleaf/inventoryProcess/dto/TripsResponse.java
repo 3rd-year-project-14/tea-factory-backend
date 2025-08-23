@@ -18,4 +18,5 @@ public class TripsResponse {
     private int bagCount;
     private Long sessionId;
     private Double totalGrossWeight;
+    private Double totalTareWeight;
 }

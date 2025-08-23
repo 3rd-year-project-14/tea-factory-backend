@@ -1,6 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.entity.Trip;
+import com.teafactory.pureleaf.inventoryProcess.dto.TareWeightRequest;
 import com.teafactory.pureleaf.inventoryProcess.service.InventoryProcessService;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +43,13 @@ public class InventoryProcessController {
     public ResponseEntity<List<Long>> getBagWeightIdsBySupplyRequestAndDate(@PathVariable Long supplyRequestId) {
         List<Long> bagWeightIds = inventoryProcessService.getBagWeightIdsBySupplyRequestAndDate(supplyRequestId);
         return ResponseEntity.ok(bagWeightIds);
+    }
+
+    @PutMapping("/empty-bag/{bagWeightId}")
+    public ResponseEntity<?> updateTareWeight(
+            @PathVariable Long bagWeightId,
+            @RequestBody TareWeightRequest tareWeightRequest) {
+        inventoryProcessService.updateTareWeightAndCompleteProcess(bagWeightId, tareWeightRequest.getTareWeight());
+        return ResponseEntity.ok().build();
     }
 }
