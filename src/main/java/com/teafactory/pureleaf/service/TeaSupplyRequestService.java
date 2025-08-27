@@ -36,7 +36,7 @@ public class TeaSupplyRequestService {
         } else {
             request.setStatus(dto.getStatus());
         }
-        com.teafactory.pureleaf.entity.Supplier supplier = new com.teafactory.pureleaf.entity.Supplier();
+        com.teafactory.pureleaf.supplier.entity.Supplier supplier = new com.teafactory.pureleaf.supplier.entity.Supplier();
         supplier.setSupplierId(dto.getSupplierId());
         request.setSupplier(supplier);
         TeaSupplyRequest saved = teaSupplyRequestRepository.save(request);

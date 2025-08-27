@@ -1,8 +1,11 @@
-package com.teafactory.pureleaf.entity;
+package com.teafactory.pureleaf.supplier.entity;
 
 
 import java.time.LocalDate;
 
+import com.teafactory.pureleaf.entity.Factory;
+import com.teafactory.pureleaf.entity.Route;
+import com.teafactory.pureleaf.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,4 +44,5 @@ public class Supplier {
     @Column(name = "pickup_to_route_start_distance")
     private Double pickupToRouteStartDistance;
 }
+
 
