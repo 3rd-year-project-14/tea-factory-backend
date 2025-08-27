@@ -2,8 +2,10 @@ package com.teafactory.pureleaf.supplier.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierRequestDTO;
 import com.teafactory.pureleaf.supplier.dto.RequestSuppliersDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierRequestDetailsDTO;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.service.SupplierRequestService;
@@ -125,4 +127,9 @@ public class SupplierRequestController {
             return new ResponseEntity<>(requests, HttpStatus.OK);
     }
 
+    @GetMapping("/details/{requestId}")
+    public ResponseEntity<SupplierRequestDetailsDTO> getSupplierRequestDetails(@PathVariable Long requestId) {
+        SupplierRequestDetailsDTO requestDetails = supplierRequestService.getSupplierRequestDetails(requestId);
+        return new ResponseEntity<>(requestDetails, HttpStatus.OK);
+    }
 }

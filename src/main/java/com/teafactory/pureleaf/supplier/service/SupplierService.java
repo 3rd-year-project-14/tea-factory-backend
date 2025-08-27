@@ -9,6 +9,7 @@ import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.*;
 import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
 import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
@@ -153,6 +154,14 @@ public class SupplierService {
         Long pendingRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("pending", factoryId);
         Long rejectedRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("rejected", factoryId);
         return new SupplierCountDTO(activeSupplierCount, pendingRequestCount, rejectedRequestCount);
+    }
+
+    public SupplierDetailsDTO getSupplierDetails (Long supplierId) {
+        if (!supplierRepository.existsById((supplierId))) {
+            throw new ResourceNotFoundException("Supplier not found with id: " + supplierId);
+        }
+        SupplierDetailsDTO supplierDetails = supplierRepository.findSupplierDetails(supplierId);
+        return supplierDetails;
     }
 
 }
