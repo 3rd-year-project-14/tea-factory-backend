@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "supplier_request")
@@ -39,8 +39,11 @@ public class SupplierRequest {
     @Column(name = "nic_image")
     private String nicImage;
 
-    @Column(name = "rejected_date", columnDefinition = "timestamp without time zone")
-    private LocalDateTime rejectedDate;
+    @Column( name="requested_date")
+    private LocalDate requestedDate;
+
+    @Column(name = "rejected_date")
+    private LocalDate rejectedDate;
 
     @Column(name = "reject_reason")
     private String rejectReason;

@@ -1,10 +1,9 @@
 package com.teafactory.pureleaf.supplier.controller;
 
 
-import com.teafactory.pureleaf.config.ErrorResponse;
 import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierDTO;
-import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
 import com.teafactory.pureleaf.supplier.service.SupplierService;
@@ -72,9 +71,9 @@ public class SupplierController {
         }
     }
 
-    @GetMapping("/factory/{factoryId}")
-    public ResponseEntity<?> getSuppliersByFactoryId(@PathVariable Long factoryId) {
-        List<SupplierDetailsDTO> suppliers = supplierService.getSupplierDetailsByFactoryId(factoryId);
+    @GetMapping("/active/factory/{factoryId}")
+    public ResponseEntity<?> getActiveSuppliersByFactoryId(@PathVariable Long factoryId) {
+        List<ActiveSuppliersDTO> suppliers = supplierService.getActiveSuppliersByFactoryId(factoryId);
         return new ResponseEntity<>(suppliers, HttpStatus.OK);
     }
 
