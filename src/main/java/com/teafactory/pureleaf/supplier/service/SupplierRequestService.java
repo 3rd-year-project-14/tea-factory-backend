@@ -3,8 +3,10 @@ package com.teafactory.pureleaf.supplier.service;
 
 import com.teafactory.pureleaf.entity.Factory;
 import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.repository.UserRepository;
+import com.teafactory.pureleaf.supplier.dto.RequestSuppliersDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierRequestDTO;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRequestRepository;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,14 +25,14 @@ import org.springframework.util.StringUtils;
 
 @Service
 public class SupplierRequestService {
-    @Autowired
-    private SupplierRequestRepository supplierRequestRepo;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private FactoryRepository factoryRepository;
+    @Autowired
+    private SupplierRequestRepository supplierRequestRepository;
 
     // Fetch the User entity from DB
 
@@ -55,7 +58,7 @@ public class SupplierRequestService {
                     .orElseThrow(() -> new RuntimeException("Factory not found"));
             supplierRequest.setFactory(factory);
         }
-        supplierRequestRepo.save(supplierRequest);
+        supplierRequestRepository.save(supplierRequest);
         return convertToDTO(supplierRequest);
     }
 
@@ -76,7 +79,7 @@ public class SupplierRequestService {
         );
     }
     public SupplierRequestDTO updateSupplierRequest(Long id, SupplierRequestDTO requestDTO) {
-        SupplierRequest supplierRequest = supplierRequestRepo.findById(id)
+        SupplierRequest supplierRequest = supplierRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
 
         if (requestDTO.getUserId() != null) {
@@ -93,28 +96,28 @@ public class SupplierRequestService {
         if (requestDTO.getPickupLocation() != null) supplierRequest.setPickupLocation(requestDTO.getPickupLocation());
         if (requestDTO.getLandLocation() != null) supplierRequest.setLandLocation(requestDTO.getLandLocation());
 
-        supplierRequestRepo.save(supplierRequest);
+        supplierRequestRepository.save(supplierRequest);
         return requestDTO;
     }
 
     public SupplierRequest getSupplierRequestById(Long id) {
-        return supplierRequestRepo.findById(id)
+        return supplierRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
     }
 
     public List<SupplierRequest> getAllSupplierRequests() {
-        return supplierRequestRepo.findAll();
+        return supplierRequestRepository.findAll();
     }
     public SupplierRequest rejectSupplierRequest(Long id, String rejectReason) {
-        SupplierRequest supplierRequest = supplierRequestRepo.findById(id)
+        SupplierRequest supplierRequest = supplierRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
         supplierRequest.setStatus("rejected");
         supplierRequest.setRejectReason(rejectReason);
-        supplierRequest.setRejectedDate(LocalDateTime.now());
-        return supplierRequestRepo.save(supplierRequest);
+        supplierRequest.setRejectedDate(LocalDate.now());
+        return supplierRequestRepository.save(supplierRequest);
     }
     public String saveNicImage(Long supplierRequestId, MultipartFile file) throws IOException {
-        SupplierRequest supplierRequest = supplierRequestRepo.findById(supplierRequestId)
+        SupplierRequest supplierRequest = supplierRequestRepository.findById(supplierRequestId)
                 .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
 
         String fileName = "nic_" + supplierRequestId + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
@@ -122,7 +125,7 @@ public class SupplierRequestService {
         // Generate Firebase public download URL
         String fileUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media", blob.getBucket(), java.net.URLEncoder.encode(blob.getName(), java.nio.charset.StandardCharsets.UTF_8));
         supplierRequest.setNicImage(fileUrl);
-        supplierRequestRepo.save(supplierRequest);
+        supplierRequestRepository.save(supplierRequest);
         return fileUrl;
     }
     public String saveNicImageFile(MultipartFile file) throws IOException {
@@ -131,7 +134,16 @@ public class SupplierRequestService {
         return String.format("https://storage.googleapis.com/%s/%s", blob.getBucket(), blob.getName());
     }
     public List<SupplierRequest> getSupplierRequestsByUserId(Long userId) {
-        return supplierRequestRepo.findByUser_Id(userId);
+        return supplierRequestRepository.findByUser_Id(userId);
     }
-    // This service currently does not have any methods, but you can add methods to handle supplier requests as needed.
+
+    public List<RequestSuppliersDTO> getRequestsByFactoryIdAndStatus(Long factoryId, String status) {
+        Factory factory = factoryRepository.findById(factoryId).orElse(null);
+        if (factory == null) {
+            throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
+        }
+        List<RequestSuppliersDTO> requests = supplierRequestRepository.findRequestsByFactoryIdAndStatus(factoryId, status);
+        return requests;
+    }
+
 }
