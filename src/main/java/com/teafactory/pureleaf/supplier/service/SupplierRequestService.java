@@ -8,6 +8,7 @@ import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.repository.UserRepository;
 import com.teafactory.pureleaf.supplier.dto.RequestSuppliersDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierRequestDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierRequestDetailsDTO;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.google.firebase.cloud.StorageClient;
@@ -144,6 +144,14 @@ public class SupplierRequestService {
         }
         List<RequestSuppliersDTO> requests = supplierRequestRepository.findRequestsByFactoryIdAndStatus(factoryId, status);
         return requests;
+    }
+
+    public SupplierRequestDetailsDTO getSupplierRequestDetails (Long supplierId) {
+        if(!supplierRequestRepository.existsById(supplierId)) {
+            throw new ResourceNotFoundException("Supplier not found with id: " + supplierId);
+        }
+        SupplierRequestDetailsDTO requestDetails = supplierRequestRepository.findRequestDetailsById(supplierId);
+        return requestDetails;
     }
 
 }
