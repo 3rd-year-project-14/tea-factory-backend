@@ -1,7 +1,8 @@
-package com.teafactory.pureleaf.dto;
+package com.teafactory.pureleaf.supplier.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDate;
 
 @Getter
