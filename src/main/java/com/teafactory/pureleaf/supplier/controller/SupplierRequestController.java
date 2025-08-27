@@ -3,6 +3,7 @@ package com.teafactory.pureleaf.supplier.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teafactory.pureleaf.supplier.dto.SupplierRequestDTO;
+import com.teafactory.pureleaf.supplier.dto.RequestSuppliersDTO;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.service.SupplierRequestService;
@@ -117,5 +118,11 @@ public class SupplierRequestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
-}
 
+    @GetMapping("/factory/{factoryId}/status/{status}")
+    public ResponseEntity<?> getRequestsByFactoryIdAndStatus(@PathVariable Long factoryId, @PathVariable String status) {
+            List<RequestSuppliersDTO> requests = supplierRequestService.getRequestsByFactoryIdAndStatus(factoryId, status);
+            return new ResponseEntity<>(requests, HttpStatus.OK);
+    }
+
+}

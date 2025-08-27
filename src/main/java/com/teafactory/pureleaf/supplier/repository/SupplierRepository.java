@@ -1,7 +1,7 @@
 package com.teafactory.pureleaf.supplier.repository;
 
 import com.teafactory.pureleaf.supplier.entity.Supplier;
-import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +13,7 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
     Supplier findByUser_Id(Long userId);
     long countByIsActiveIsTrueAndFactory_factoryId(Long factoryId);
 
-    @Query("SELECT new com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO(s.supplierId, s.user.name, s.route.name, s.approvedDate) FROM Supplier s WHERE s.factory.factoryId = :factoryId")
-    List<SupplierDetailsDTO> findSupplierDetailsByFactoryId(@Param("factoryId") Long factoryId);
+    @Query("SELECT new com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO(s.supplierId, s.user.name, s.route.name, s.approvedDate) FROM Supplier s WHERE s.factory.factoryId = :factoryId AND s.isActive = true")
+    List<ActiveSuppliersDTO> findSupplierDetailsByFactoryId(@Param("factoryId") Long factoryId);
+
 }
