@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SupplierDetailsDTO {
+public class ActiveSuppliersDTO {
     private Long supplierId;
     private String supplierName;
     private String routeName;

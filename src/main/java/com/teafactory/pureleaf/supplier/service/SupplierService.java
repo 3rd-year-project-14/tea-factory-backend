@@ -8,7 +8,7 @@ import com.teafactory.pureleaf.entity.*;
 import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.*;
 import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
-import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
@@ -132,12 +132,12 @@ public class SupplierService {
         return savedSupplier;
     }
 
-    public List<SupplierDetailsDTO> getSupplierDetailsByFactoryId(Long factoryId) {
+    public List<ActiveSuppliersDTO> getActiveSuppliersByFactoryId(Long factoryId) {
         Factory factory = factoryRepository.findById(factoryId).orElse(null);
         if (factory == null) {
             throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
         }
-        List<SupplierDetailsDTO> suppliers = supplierRepository.findSupplierDetailsByFactoryId(factoryId);
+        List<ActiveSuppliersDTO> suppliers = supplierRepository.findSupplierDetailsByFactoryId(factoryId);
         if (suppliers == null || suppliers.isEmpty()) {
             throw new ResourceNotFoundException("No suppliers found for factoryId: " + factoryId);
         }
@@ -150,13 +150,9 @@ public class SupplierService {
             throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
         }
         Long activeSupplierCount = supplierRepository.countByIsActiveIsTrueAndFactory_factoryId(factoryId);
-        Long pendingRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("PENDING", factoryId);
-        Long rejectedRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("REJECTED", factoryId);
-        // You can add more counts as needed
-        SupplierCountDTO dto = new SupplierCountDTO();
-        dto.setActiveSupplierCount(activeSupplierCount);
-        dto.setPendingRequestCount(pendingRequestCount);
-        dto.setRejectedRequestCount(rejectedRequestCount);
-        return dto;
+        Long pendingRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("pending", factoryId);
+        Long rejectedRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("rejected", factoryId);
+        return new SupplierCountDTO(activeSupplierCount, pendingRequestCount, rejectedRequestCount);
     }
+
 }
