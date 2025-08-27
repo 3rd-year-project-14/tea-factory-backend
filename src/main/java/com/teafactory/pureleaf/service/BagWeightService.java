@@ -3,7 +3,6 @@ package com.teafactory.pureleaf.service;
 import com.teafactory.pureleaf.dto.BagWeightDTO;
 import com.teafactory.pureleaf.dto.BagWeightWithSupplierDTO;
 import com.teafactory.pureleaf.entity.BagWeight;
-import com.teafactory.pureleaf.entity.Supplier;
 import com.teafactory.pureleaf.entity.TeaSupplyRequest;
 import com.teafactory.pureleaf.entity.Trip;
 import com.teafactory.pureleaf.entity.TripBag;
@@ -13,6 +12,7 @@ import com.teafactory.pureleaf.repository.TeaSupplyRequestRepository;
 import com.teafactory.pureleaf.repository.TripBagRepository;
 import com.teafactory.pureleaf.repository.TripRepository;
 import com.teafactory.pureleaf.repository.WeighingSessionRepository;
+import com.teafactory.pureleaf.supplier.entity.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,28 +1,30 @@
-package com.teafactory.pureleaf.service;
+package com.teafactory.pureleaf.supplier.service;
 
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teafactory.pureleaf.auth.entity.Role;
+import com.teafactory.pureleaf.entity.*;
+import com.teafactory.pureleaf.exception.ResourceNotFoundException;
+import com.teafactory.pureleaf.repository.*;
+import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.entity.Supplier;
+import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
+import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
+import com.teafactory.pureleaf.supplier.repository.SupplierRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.teafactory.pureleaf.repository.SupplierRequestRepo;
-import com.teafactory.pureleaf.repository.SupplierRepository;
-import com.teafactory.pureleaf.entity.SupplierRequest;
-import com.teafactory.pureleaf.entity.Supplier;
-import com.teafactory.pureleaf.entity.Route;
-import com.teafactory.pureleaf.repository.RouteRepository;
-import com.teafactory.pureleaf.entity.User;
-import com.teafactory.pureleaf.repository.UserRepository;
-import com.teafactory.pureleaf.entity.Factory;
-import com.teafactory.pureleaf.repository.FactoryRepository;
-import java.time.LocalDate;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class SupplierService {
     @Autowired
-    private SupplierRequestRepo supplierRequestRepo;
+    private SupplierRequestRepository supplierRequestRepo;
     @Autowired
     private SupplierRepository supplierRepository;
     @Autowired
@@ -34,6 +36,8 @@ public class SupplierService {
 
     @Value("${google.maps.api.key}")
     private String googleMapsApiKey;
+    @Autowired
+    private SupplierRequestRepository supplierRequestRepository;
 
     private double[] extractLatLng(String url) {
         // Example: https://maps.google.com/?q=6.321426274959198,80.43685999549393
@@ -91,7 +95,7 @@ public class SupplierService {
 
         User user = request.getUser();
         User managedUser = userRepository.findById(user.getId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         managedUser.setRole(Role.SUPPLIER);
         managedUser.setFactory(request.getFactory());
         userRepository.save(managedUser);
@@ -119,12 +123,40 @@ public class SupplierService {
         Factory factory = request.getFactory();
         if (factory != null && factory.getFactoryId() != null) {
             factory = factoryRepository.findById(factory.getFactoryId())
-                .orElseThrow(() -> new RuntimeException("Factory not found"));
+                    .orElseThrow(() -> new RuntimeException("Factory not found"));
             supplier.setFactory(factory);
         }
 
         Supplier savedSupplier = supplierRepository.save(supplier);
         supplierRequestRepo.deleteById(requestId);
         return savedSupplier;
+    }
+
+    public List<SupplierDetailsDTO> getSupplierDetailsByFactoryId(Long factoryId) {
+        Factory factory = factoryRepository.findById(factoryId).orElse(null);
+        if (factory == null) {
+            throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
+        }
+        List<SupplierDetailsDTO> suppliers = supplierRepository.findSupplierDetailsByFactoryId(factoryId);
+        if (suppliers == null || suppliers.isEmpty()) {
+            throw new ResourceNotFoundException("No suppliers found for factoryId: " + factoryId);
+        }
+        return suppliers;
+    }
+
+    public SupplierCountDTO getSuppliersCounts( Long factoryId) {
+        // Check if factory exists
+        if (!factoryRepository.existsById(factoryId)) {
+            throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
+        }
+        Long activeSupplierCount = supplierRepository.countByIsActiveIsTrueAndFactory_factoryId(factoryId);
+        Long pendingRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("PENDING", factoryId);
+        Long rejectedRequestCount = supplierRequestRepository.countByStatusAndFactory_factoryId("REJECTED", factoryId);
+        // You can add more counts as needed
+        SupplierCountDTO dto = new SupplierCountDTO();
+        dto.setActiveSupplierCount(activeSupplierCount);
+        dto.setPendingRequestCount(pendingRequestCount);
+        dto.setRejectedRequestCount(rejectedRequestCount);
+        return dto;
     }
 }

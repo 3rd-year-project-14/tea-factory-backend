@@ -1,11 +1,12 @@
-package com.teafactory.pureleaf.controller;
+package com.teafactory.pureleaf.supplier.controller;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.teafactory.pureleaf.dto.SupplierRequestDTO;
-import com.teafactory.pureleaf.entity.Supplier;
-import com.teafactory.pureleaf.entity.SupplierRequest;
-import com.teafactory.pureleaf.service.SupplierRequestService;
-import com.teafactory.pureleaf.service.SupplierService;
+import com.teafactory.pureleaf.supplier.dto.SupplierRequestDTO;
+import com.teafactory.pureleaf.supplier.entity.Supplier;
+import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
+import com.teafactory.pureleaf.supplier.service.SupplierRequestService;
+import com.teafactory.pureleaf.supplier.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -117,3 +118,4 @@ public class SupplierRequestController {
         }
     }
 }
+
