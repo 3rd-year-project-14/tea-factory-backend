@@ -1,8 +1,13 @@
-package com.teafactory.pureleaf.controller;
+package com.teafactory.pureleaf.supplier.controller;
 
-import com.teafactory.pureleaf.dto.SupplierDTO;
-import com.teafactory.pureleaf.entity.Supplier;
-import com.teafactory.pureleaf.repository.SupplierRepository;
+
+import com.teafactory.pureleaf.config.ErrorResponse;
+import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.entity.Supplier;
+import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
+import com.teafactory.pureleaf.supplier.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +21,9 @@ import java.util.List;
 public class SupplierController {
     @Autowired
     private SupplierRepository supplierRepository;
+
+    @Autowired
+    private SupplierService supplierService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllSuppliers() {
@@ -63,4 +71,17 @@ public class SupplierController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/factory/{factoryId}")
+    public ResponseEntity<?> getSuppliersByFactoryId(@PathVariable Long factoryId) {
+        List<SupplierDetailsDTO> suppliers = supplierService.getSupplierDetailsByFactoryId(factoryId);
+        return new ResponseEntity<>(suppliers, HttpStatus.OK);
+    }
+
+    @GetMapping("/count/{factoryId}")
+    public ResponseEntity<SupplierCountDTO> getSuppliersCountsByFactoryId(@PathVariable Long factoryId) {
+            SupplierCountDTO counts = supplierService.getSuppliersCounts(factoryId);
+            return new ResponseEntity<>(counts, HttpStatus.OK);
+    }
+
 }
