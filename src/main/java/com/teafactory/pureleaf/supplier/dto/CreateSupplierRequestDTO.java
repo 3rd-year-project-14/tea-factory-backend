@@ -9,17 +9,13 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SupplierRequestDTO {
+public class CreateSupplierRequestDTO {
     private Long id;
     private Long userId;
-    private String status;
     private Double landSize;
     private Double monthlySupply;
-    private String requestedRoute;
     private String nicImage;
-    private String rejectReason;
     private String pickupLocation;
     private String landLocation;
-    private LocalDate rejectedDate;
     private Long factoryId;
 }
