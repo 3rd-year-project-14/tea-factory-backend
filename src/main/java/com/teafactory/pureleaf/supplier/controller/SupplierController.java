@@ -73,7 +73,7 @@ public class SupplierController {
     }
 
     @GetMapping("/active/factory/{factoryId}")
-    public ResponseEntity<?> getActiveSuppliersByFactoryId(@PathVariable Long factoryId) {
+    public ResponseEntity<List<ActiveSuppliersDTO>> getActiveSuppliersByFactoryId(@PathVariable Long factoryId) {
         List<ActiveSuppliersDTO> suppliers = supplierService.getActiveSuppliersByFactoryId(factoryId);
         return new ResponseEntity<>(suppliers, HttpStatus.OK);
     }

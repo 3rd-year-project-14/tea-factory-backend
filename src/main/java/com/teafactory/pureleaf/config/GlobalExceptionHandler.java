@@ -71,5 +71,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    // Handles IllegalArgumentException and returns a 400 Bad Request
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
     // You can add more specific exception handlers here
 }

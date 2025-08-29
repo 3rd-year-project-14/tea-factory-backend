@@ -7,12 +7,12 @@ import com.teafactory.pureleaf.entity.Factory;
 import com.teafactory.pureleaf.entity.Route;
 import com.teafactory.pureleaf.entity.User;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class Supplier {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

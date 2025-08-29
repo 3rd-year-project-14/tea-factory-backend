@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.supplier.repository;
 
 import com.teafactory.pureleaf.supplier.dto.RequestSuppliersDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierRequestDetailsDTO;
+import com.teafactory.pureleaf.supplier.dto.SupplierRequestStatusDTO;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,7 @@ public interface SupplierRequestRepository extends JpaRepository<SupplierRequest
 
     @Query("SELECT new com.teafactory.pureleaf.supplier.dto.SupplierRequestDetailsDTO(r.id, r.user.name, r.user.nic, r.user.email, r.user.address, r.user.contactNo, r.monthlySupply, r.landSize, r.nicImage, r.pickupLocation, r.landLocation, r.requestedDate, r.rejectedDate, r.rejectReason, r.status) FROM SupplierRequest r WHERE r.id = :requestId")
     SupplierRequestDetailsDTO findRequestDetailsById(Long requestId);
+
+    @Query("SELECT new com.teafactory.pureleaf.supplier.dto.SupplierRequestStatusDTO(r.id, r.status, r.rejectReason, r.rejectedDate) FROM SupplierRequest r WHERE r.user.id = :userId" )
+    SupplierRequestStatusDTO findRequestStatusByUserId(Long userId);
 }
