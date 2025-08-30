@@ -16,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
@@ -31,13 +30,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
                 Object roleClaim = decodedToken.getClaims().get("role");
                 List<SimpleGrantedAuthority> authorities = Collections.emptyList();
                 if (roleClaim != null) {
-                    if (roleClaim instanceof List<?>) {
-                        authorities = ((List<?>) roleClaim).stream()
-                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString()))
-                                .collect(Collectors.toList());
-                    } else {
-                        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roleClaim.toString()));
-                    }
+                    authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roleClaim.toString()));
                 }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         decodedToken.getUid(), null, authorities);

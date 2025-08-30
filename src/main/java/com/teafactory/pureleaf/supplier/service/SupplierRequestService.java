@@ -11,7 +11,9 @@ import com.teafactory.pureleaf.supplier.dto.*;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRequestRepository;
 import jakarta.validation.Valid;
+import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -36,42 +38,44 @@ public class SupplierRequestService {
 
     // Create a new supplier request
     @Transactional
+    @PreAuthorize("hasRole('PENDING_USER')")
     public Long createSupplierRequest(@Valid CreateSupplierRequestDTO requestDTO) {
 
         // 1. Find and validate user
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + requestDTO.getUserId()));
 
-        if (!user.getRole().equals(Role.PENDING_USER)){
-            throw new IllegalArgumentException("User must have role PENDING_USER to create a supplier request");
-        }
-
         // 2. Find and validate factoryId provided
         Factory factory = factoryRepository.findById(requestDTO.getFactoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Factory not found: " + requestDTO.getFactoryId()));
 
         // 3. Build SupplierRequest entity
-        SupplierRequest supplierRequest = new SupplierRequest();
-        supplierRequest.setUser(user);
-        supplierRequest.setLandSize(requestDTO.getLandSize());
-        supplierRequest.setMonthlySupply(requestDTO.getMonthlySupply());
-        supplierRequest.setNicImage(requestDTO.getNicImage()); // initially can be null, will be updated after image upload
-        supplierRequest.setPickupLocation(requestDTO.getPickupLocation());
-        supplierRequest.setLandLocation(requestDTO.getLandLocation());
-        supplierRequest.setFactory(factory);
+        SupplierRequest supplierRequest = SupplierRequest.builder()
+        .user(user)
+        .landSize(requestDTO.getLandSize())
+        .monthlySupply(requestDTO.getMonthlySupply())
+        .pickupLocation(requestDTO.getPickupLocation())
+        .landLocation(requestDTO.getLandLocation())
+        .factory(factory)
+        .requestedDate(LocalDate.now())
+        .build();
 
         SupplierRequest savedRequest =  supplierRequestRepository.save(supplierRequest);
 
         return savedRequest.getId();
+
     }
 
     // Save NIC image to Firebase and update SupplierRequest with image path
     @Transactional
     public void saveNicImage(Long supplierRequestId, MultipartFile file) throws IOException {
+
         SupplierRequest supplierRequest = supplierRequestRepository.findById(supplierRequestId)
                 .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
 
-        String fileName = "nic_" + supplierRequestId + "_" + System.currentTimeMillis() + "_" +
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        String fileName = "nic_" + supplierRequestId + "_" + timestamp + "_" +
                 StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
         StorageClient.getInstance()
@@ -80,6 +84,7 @@ public class SupplierRequestService {
 
         supplierRequest.setNicImage(fileName);
         supplierRequestRepository.save(supplierRequest);
+
     }
 
     private SupplierRequestDTO convertToDTO(SupplierRequest supplierRequest) {
@@ -87,16 +92,15 @@ public class SupplierRequestService {
         return new SupplierRequestDTO(
                 supplierRequest.getId(),
                 supplierRequest.getUser().getId(),
+                factoryId,
                 supplierRequest.getStatus(),
                 supplierRequest.getLandSize(),
                 supplierRequest.getMonthlySupply(),
-                supplierRequest.getRequestedRoute(),
                 supplierRequest.getNicImage(),
                 supplierRequest.getRejectReason(),
                 supplierRequest.getPickupLocation(),
                 supplierRequest.getLandLocation(),
-                supplierRequest.getRejectedDate(),
-                factoryId
+                supplierRequest.getRejectedDate()
         );
     }
 
@@ -112,7 +116,6 @@ public class SupplierRequestService {
         if (requestDTO.getStatus() != null) supplierRequest.setStatus(requestDTO.getStatus());
         if (requestDTO.getLandSize() != null) supplierRequest.setLandSize(requestDTO.getLandSize());
         if (requestDTO.getMonthlySupply() != null) supplierRequest.setMonthlySupply(requestDTO.getMonthlySupply());
-        if (requestDTO.getRequestedRoute() != null) supplierRequest.setRequestedRoute(requestDTO.getRequestedRoute());
         if (requestDTO.getNicImage() != null) supplierRequest.setNicImage(requestDTO.getNicImage());
         if (requestDTO.getRejectReason() != null) supplierRequest.setRejectReason(requestDTO.getRejectReason());
         if (requestDTO.getPickupLocation() != null) supplierRequest.setPickupLocation(requestDTO.getPickupLocation());

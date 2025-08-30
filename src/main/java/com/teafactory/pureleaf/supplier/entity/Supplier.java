@@ -14,6 +14,7 @@ import lombok.Setter;
 @Entity
 @Data
 public class Supplier {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long supplierId;
@@ -31,11 +32,17 @@ public class Supplier {
     private Route route;
 
     private Double landSize;
+
     private String landLocation;
+
     private String pickupLocation;
+
     private String nicImage;
+
     private LocalDate approvedDate;
+
     private Boolean isActive;
+
     private Long supplierRequestId;
 
     @Column(name = "initial_bag_count")
