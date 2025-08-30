@@ -12,14 +12,13 @@ import java.time.LocalDate;
 public class SupplierRequestDTO {
     private Long id;
     private Long userId;
+    private Long factoryId;
     private String status;
     private Double landSize;
     private Double monthlySupply;
-    private String requestedRoute;
     private String nicImage;
     private String rejectReason;
     private String pickupLocation;
     private String landLocation;
     private LocalDate rejectedDate;
-    private Long factoryId;
 }

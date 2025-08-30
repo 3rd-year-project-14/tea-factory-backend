@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.auth.service;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import com.teafactory.pureleaf.auth.dto.AuthResponse;
 import com.teafactory.pureleaf.auth.dto.LoginRequest;
@@ -10,6 +11,9 @@ import com.teafactory.pureleaf.repository.UserRepository;
 import com.teafactory.pureleaf.util.FirebaseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -48,6 +52,11 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found with email: " + email));
+
+        // Set custom claim in Firebase for role
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole().name());
+        FirebaseAuth.getInstance().setCustomUserClaims(decodedToken.getUid(), claims);
 
         Long factoryId = user.getFactory() != null ? user.getFactory().getFactoryId() : null;
         return new AuthResponse(

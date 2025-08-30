@@ -10,5 +10,9 @@ public enum Role {
     FERTILIZER_MANAGER,
     ESTATE_MANAGER,
     TRANSPORT_MANAGER,
-    OWNER
+    OWNER;
+
+    public String getAuthority() {
+        return "ROLE_" + this.name();
+    }
 }

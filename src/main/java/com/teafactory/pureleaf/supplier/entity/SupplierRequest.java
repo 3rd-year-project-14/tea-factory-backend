@@ -4,15 +4,17 @@ package com.teafactory.pureleaf.supplier.entity;
 import com.teafactory.pureleaf.entity.Factory;
 import com.teafactory.pureleaf.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.sql.ConnectionBuilder;
 import java.time.LocalDate;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "supplier_request")
-@Getter
-@Setter
 public class SupplierRequest {
 
     @Id
@@ -20,9 +22,13 @@ public class SupplierRequest {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "factory_id")
+    private Factory factory;
 
     @Column(name = "status")
     private String status = "pending";
@@ -32,9 +38,6 @@ public class SupplierRequest {
 
     @Column(name = "monthly_supply")
     private Double monthlySupply;
-
-    @Column(name = "requested_route")
-    private String requestedRoute;
 
     @Column(name = "nic_image")
     private String nicImage;
@@ -54,8 +57,5 @@ public class SupplierRequest {
     @Column(name = "land_location")
     private String landLocation;
 
-    @ManyToOne
-    @JoinColumn(name = "factory_id")
-    private Factory factory;
 }
 

@@ -1,21 +1,30 @@
 package com.teafactory.pureleaf.supplier.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CreateSupplierRequestDTO {
-    private Long id;
+    @NotNull
     private Long userId;
-    private Double landSize;
-    private Double monthlySupply;
-    private String nicImage;
+
+    @NotNull
     private String pickupLocation;
-    private String landLocation;
+
+    @NotNull
     private Long factoryId;
+
+    private Double landSize;
+
+    private Double monthlySupply;
+
+    private String nicImage;
+
+    private String landLocation;
 }
