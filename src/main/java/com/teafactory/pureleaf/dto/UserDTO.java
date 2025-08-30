@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.dto;
 
+
 import com.teafactory.pureleaf.auth.entity.Role;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -22,4 +23,5 @@ public class UserDTO {
     public Optional<ResponseEntity<Object>> map(Object o) {
         return null;
     }
+
 }

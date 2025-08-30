@@ -52,4 +52,5 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "factory_id", referencedColumnName = "factoryId")
     private Factory factory;
+
 }
