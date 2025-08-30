@@ -24,7 +24,7 @@ public class SupplierRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "status", columnDefinition = "VARCHAR(20) DEFAULT 'pending'")
+    @Column(name = "status")
     private String status = "pending";
 
     @Column(name = "land_size")
