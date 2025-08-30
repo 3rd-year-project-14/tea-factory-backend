@@ -22,18 +22,13 @@ public class Driver {
     private Integer vehicleCapacity;
     private String emergencyContact;
     private Boolean isActive;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "factory_id")
     private Factory factory;
 
     @ManyToOne
-    @JoinColumn(name = "route_id")
-    private Route route;
-
-    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 }
-

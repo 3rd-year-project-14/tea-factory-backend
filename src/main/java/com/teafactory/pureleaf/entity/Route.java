@@ -26,5 +26,11 @@ public class Route {
     @ManyToOne
     @JoinColumn(name = "factory_id")
     private Factory factory;
-}
 
+    @ManyToOne
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
+
+    @Column(name = "route_code", unique = true)
+    private String routeCode;
+}

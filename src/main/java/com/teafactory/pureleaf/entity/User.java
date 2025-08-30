@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.entity;
 
+import com.teafactory.pureleaf.auth.entity.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,12 +41,16 @@ public class User {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     @Column(name = "address")
     private String address;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "factory_id", referencedColumnName = "factoryId")
+    private Factory factory;
 
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/routes")
 public class RouteController {
@@ -27,5 +28,10 @@ public class RouteController {
         }
         return ResponseEntity.ok(dto);
     }
-}
 
+    @PostMapping
+    public ResponseEntity<RouteDTO> createRoute(@RequestBody RouteDTO routeDTO) {
+        RouteDTO created = routeService.createRoute(routeDTO);
+        return ResponseEntity.ok(created);
+    }
+}

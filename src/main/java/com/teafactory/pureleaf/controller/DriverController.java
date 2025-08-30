@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
@@ -25,5 +26,20 @@ public class DriverController {
         return driverService.getDriverById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
+        DriverDTO createdDriver = driverService.createDriver(driverDTO);
+        return ResponseEntity.ok(createdDriver);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<DriverDTO> getDriverDetailsByUserId(@PathVariable Long userId) {
+        DriverDTO dto = driverService.getDriverDetailsByUserId(userId);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
     }
 }

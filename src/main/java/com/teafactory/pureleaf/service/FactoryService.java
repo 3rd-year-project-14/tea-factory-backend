@@ -31,12 +31,20 @@ public class FactoryService {
         Factory factory = new Factory();
         factory.setName(factoryDTO.getName());
         factory.setAddress(factoryDTO.getLocation());
+        factory.setImage(factoryDTO.getImage());
+        factory.setMapUrl(factoryDTO.getMapUrl());
         factory.setCreatedAt(LocalDateTime.now());
         Factory savedFactory = factoryRepository.save(factory);
         return convertToDTO(savedFactory);
     }
 
     private FactoryDTO convertToDTO(Factory factory) {
-        return new FactoryDTO(factory.getFactoryId(), factory.getName(), factory.getAddress());
+        return new FactoryDTO(
+            factory.getFactoryId(),
+            factory.getName(),
+            factory.getAddress(),
+            factory.getImage(),
+            factory.getMapUrl()
+        );
     }
 }

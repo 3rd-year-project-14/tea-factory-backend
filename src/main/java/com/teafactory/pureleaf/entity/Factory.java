@@ -17,6 +17,6 @@ public class Factory {
     private String name;
     private String address;
     private String image;
+    private String mapUrl;
     private LocalDateTime createdAt;
 }
-

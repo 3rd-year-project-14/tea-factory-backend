@@ -1,47 +1,50 @@
 package com.teafactory.pureleaf.controller;
 
+import com.teafactory.pureleaf.dto.FactoryDTO;
 import com.teafactory.pureleaf.dto.UserDTO;
-import com.teafactory.pureleaf.entity.Role;
 import com.teafactory.pureleaf.entity.User;
-import com.teafactory.pureleaf.repository.UserRepository;
+import com.teafactory.pureleaf.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:*")
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
-//@CrossOrigin(origins = "*") // ✅ allow frontend access
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class UserController {
-
+    @Qualifier("userService")
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
-        // Duplicate email check
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body("Email is already in use.");
-        }
-
-        // User object create
-        User user = new User();
-        user.setFirebaseUid(userDTO.getFirebaseUid());
-        user.setEmail(userDTO.getEmail());
-
-        // Enum Role mapping
-        try {
-            user.setRole(Role.valueOf(userDTO.getRole().toUpperCase().replace(" ", "_")));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid role provided.");
-        }
-
-        user.setName(userDTO.getName());
-        user.setNic(userDTO.getNic());
-        user.setContactNo(userDTO.getContactNo());
-
-        User savedUser = userRepository.save(user);
-
-        return ResponseEntity.ok(savedUser);
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.createUser(userDTO));
     }
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.updateUser(id, userDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
