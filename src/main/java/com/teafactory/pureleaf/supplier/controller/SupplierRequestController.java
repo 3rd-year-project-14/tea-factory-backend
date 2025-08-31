@@ -89,19 +89,13 @@ public class SupplierRequestController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @PostMapping("/{id}/approve")
-    public ResponseEntity<?> approveSupplierRequest(@PathVariable Long id, @RequestParam Long routeId, @RequestParam(required = false) Integer initialBagCount) {
-        try {
-            Supplier supplier = supplierService.approveSupplierRequest(id, routeId, initialBagCount);
-            if (supplier == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier request not found");
-            }
-            return new ResponseEntity<>(supplier, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> approveSupplierRequest(@PathVariable("id") Long supplierRequestId, @RequestBody ApproveSupplierRequestDTO dto) {
+
+        supplierService.approveSupplierRequest(supplierRequestId, dto);
+        return ResponseEntity.ok().build();
     }
+
 
     @PostMapping("/{id}/reject")
     public ResponseEntity<?> rejectSupplierRequest(@PathVariable Long id, @RequestParam(required = false) String reason) {
