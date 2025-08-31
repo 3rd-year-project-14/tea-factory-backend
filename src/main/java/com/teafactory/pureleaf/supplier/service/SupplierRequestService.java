@@ -40,10 +40,14 @@ public class SupplierRequestService {
     @Transactional
     @PreAuthorize("hasRole('PENDING_USER')")
     public Long createSupplierRequest(@Valid CreateSupplierRequestDTO requestDTO) {
-
         // 1. Find and validate user
         User user = userRepository.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + requestDTO.getUserId()));
+
+        // Check if a supplier request already exists for this user
+        if (!supplierRequestRepository.findByUser_Id(user.getId()).isEmpty()) {
+            throw new IllegalStateException("A supplier request already exists for this user.");
+        }
 
         // 2. Find and validate factoryId provided
         Factory factory = factoryRepository.findById(requestDTO.getFactoryId())
@@ -57,6 +61,7 @@ public class SupplierRequestService {
         .pickupLocation(requestDTO.getPickupLocation())
         .landLocation(requestDTO.getLandLocation())
         .factory(factory)
+        .status("pending")
         .requestedDate(LocalDate.now())
         .build();
 

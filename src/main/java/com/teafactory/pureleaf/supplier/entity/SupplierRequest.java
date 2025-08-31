@@ -23,7 +23,7 @@ public class SupplierRequest {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,7 +31,7 @@ public class SupplierRequest {
     private Factory factory;
 
     @Column(name = "status")
-    private String status = "pending";
+    private String status;
 
     @Column(name = "land_size")
     private Double landSize;

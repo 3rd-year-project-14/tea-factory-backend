@@ -13,12 +13,19 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.teafactory.pureleaf.repository.UserRepository;
+import com.teafactory.pureleaf.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -27,10 +34,13 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             try {
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-                Object roleClaim = decodedToken.getClaims().get("role");
+                String email = decodedToken.getEmail();
                 List<SimpleGrantedAuthority> authorities = Collections.emptyList();
-                if (roleClaim != null) {
-                    authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roleClaim.toString()));
+                if (email != null) {
+                    User user = userRepository.findByEmail(email).orElse(null);
+                    if (user != null && user.getRole() != null) {
+                        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+                    }
                 }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         decodedToken.getUid(), null, authorities);

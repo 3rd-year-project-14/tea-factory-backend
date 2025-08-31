@@ -59,6 +59,7 @@ public class AuthService {
         FirebaseAuth.getInstance().setCustomUserClaims(decodedToken.getUid(), claims);
 
         Long factoryId = user.getFactory() != null ? user.getFactory().getFactoryId() : null;
+        String factoryName = user.getFactory() != null ? user.getFactory().getName() : null;
         return new AuthResponse(
             user.getAddress(),
             user.getContactNo(),
@@ -66,6 +67,7 @@ public class AuthService {
             user.getName(),
             user.getRole().name(),
             factoryId,
+            factoryName,
             user.getId()
         );
     }

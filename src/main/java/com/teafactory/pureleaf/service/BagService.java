@@ -2,7 +2,7 @@ package com.teafactory.pureleaf.service;
 
 import com.teafactory.pureleaf.dto.BagDTO;
 import com.teafactory.pureleaf.entity.Bag;
-import com.teafactory.pureleaf.entity.Route;
+import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.repository.BagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

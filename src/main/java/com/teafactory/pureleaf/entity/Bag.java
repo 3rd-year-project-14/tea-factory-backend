@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.entity;
 
+import com.teafactory.pureleaf.routes.entity.Route;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import lombok.Data;
