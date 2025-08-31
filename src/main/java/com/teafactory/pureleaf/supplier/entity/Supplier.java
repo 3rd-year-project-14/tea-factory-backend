@@ -4,12 +4,10 @@ package com.teafactory.pureleaf.supplier.entity;
 import java.time.LocalDate;
 
 import com.teafactory.pureleaf.entity.Factory;
-import com.teafactory.pureleaf.entity.Route;
+import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Data
@@ -20,7 +18,7 @@ public class Supplier {
     private Long supplierId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
     private User user;
 
     @ManyToOne
@@ -51,5 +49,3 @@ public class Supplier {
     @Column(name = "pickup_to_route_start_distance")
     private Double pickupToRouteStartDistance;
 }
-
-

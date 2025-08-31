@@ -2,11 +2,10 @@ package com.teafactory.pureleaf.service;
 
 import com.teafactory.pureleaf.dto.TripDTO;
 import com.teafactory.pureleaf.entity.Driver;
-import com.teafactory.pureleaf.entity.Route;
+import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.entity.Trip;
-import com.teafactory.pureleaf.entity.TripSupplier;
 import com.teafactory.pureleaf.repository.DriverRepository;
-import com.teafactory.pureleaf.repository.RouteRepository;
+import com.teafactory.pureleaf.routes.repository.RouteRepository;
 import com.teafactory.pureleaf.repository.TripRepository;
 import com.teafactory.pureleaf.repository.TripSupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
