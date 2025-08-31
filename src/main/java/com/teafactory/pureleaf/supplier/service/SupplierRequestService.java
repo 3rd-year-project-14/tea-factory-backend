@@ -139,14 +139,7 @@ public class SupplierRequestService {
         return supplierRequestRepository.findAll();
     }
 
-    public SupplierRequest rejectSupplierRequest(Long id, String rejectReason) {
-        SupplierRequest supplierRequest = supplierRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
-        supplierRequest.setStatus("rejected");
-        supplierRequest.setRejectReason(rejectReason);
-        supplierRequest.setRejectedDate(LocalDate.now());
-        return supplierRequestRepository.save(supplierRequest);
-    }
+
 
     // ================= NIC Image Handling =================
 
@@ -185,4 +178,5 @@ public class SupplierRequestService {
 
         return supplierRequestRepository.findRequestStatusByUserId(userId);
     }
+
 }

@@ -98,13 +98,9 @@ public class SupplierRequestController {
 
 
     @PostMapping("/{id}/reject")
-    public ResponseEntity<?> rejectSupplierRequest(@PathVariable Long id, @RequestParam(required = false) String reason) {
-        try {
-            SupplierRequest rejected = supplierRequestService.rejectSupplierRequest(id, reason);
-            return new ResponseEntity<>(rejected, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> rejectSupplierRequest(@PathVariable Long id, @RequestBody RejectSupplierRequestDTO r) {
+            supplierService.rejectSupplierRequest(id, r);
+            return ResponseEntity.ok().build();
     }
 
     @GetMapping("/factory/{factoryId}/status/{status}")

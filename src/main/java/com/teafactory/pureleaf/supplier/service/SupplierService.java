@@ -9,10 +9,7 @@ import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.*;
 import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.routes.repository.RouteRepository;
-import com.teafactory.pureleaf.supplier.dto.ApproveSupplierRequestDTO;
-import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
-import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
-import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.dto.*;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
@@ -152,7 +149,15 @@ public class SupplierService {
         route.setBagCount(currentBagCount + initialBagCount);
         route.setSupplierCount(route.getSupplierCount() != null ? route.getSupplierCount() + 1 : 1);
         routeRepository.save(route);
+    }
 
+    public void rejectSupplierRequest(Long id, RejectSupplierRequestDTO dto) {
+        SupplierRequest supplierRequest = supplierRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier request not found with id: " + id));
+        supplierRequest.setStatus("rejected");
+        supplierRequest.setRejectReason(dto.getReason());
+        supplierRequest.setRejectedDate(LocalDate.now());
+        supplierRequestRepository.save(supplierRequest);
     }
 
 
