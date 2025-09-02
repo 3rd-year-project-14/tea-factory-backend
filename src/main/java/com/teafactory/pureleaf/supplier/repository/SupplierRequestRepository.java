@@ -5,11 +5,12 @@ import com.teafactory.pureleaf.supplier.dto.SupplierRequestDetailsDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierRequestStatusDTO;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface SupplierRequestRepository extends JpaRepository<SupplierRequest, Long> {
+public interface SupplierRequestRepository extends JpaRepository<SupplierRequest, Long>, JpaSpecificationExecutor<SupplierRequest> {
     List<SupplierRequest> findByStatusIn(List<String> statuses);
     List<SupplierRequest> findByUser_Id(Long userId);
     Long countByStatusAndFactory_factoryId(String status, Long factoryId);

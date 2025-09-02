@@ -10,9 +10,14 @@ import com.teafactory.pureleaf.repository.UserRepository;
 import com.teafactory.pureleaf.supplier.dto.*;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRequestRepository;
+import com.teafactory.pureleaf.supplier.specs.SupplierRequestSpecs;
+import com.teafactory.pureleaf.supplier.specs.SupplierSpecs;
 import jakarta.validation.Valid;
 import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,75 +97,38 @@ public class SupplierRequestService {
 
     }
 
-    private SupplierRequestDTO convertToDTO(SupplierRequest supplierRequest) {
-        Long factoryId = supplierRequest.getFactory() != null ? supplierRequest.getFactory().getFactoryId() : null;
-        return new SupplierRequestDTO(
-                supplierRequest.getId(),
-                supplierRequest.getUser().getId(),
-                factoryId,
-                supplierRequest.getStatus(),
-                supplierRequest.getLandSize(),
-                supplierRequest.getMonthlySupply(),
-                supplierRequest.getNicImage(),
-                supplierRequest.getRejectReason(),
-                supplierRequest.getPickupLocation(),
-                supplierRequest.getLandLocation(),
-                supplierRequest.getRejectedDate()
-        );
-    }
-
-    public SupplierRequestDTO updateSupplierRequest(Long id, SupplierRequestDTO requestDTO) {
-        SupplierRequest supplierRequest = supplierRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
-
-        if (requestDTO.getUserId() != null) {
-            User user = userRepository.findById(requestDTO.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            supplierRequest.setUser(user);
-        }
-        if (requestDTO.getStatus() != null) supplierRequest.setStatus(requestDTO.getStatus());
-        if (requestDTO.getLandSize() != null) supplierRequest.setLandSize(requestDTO.getLandSize());
-        if (requestDTO.getMonthlySupply() != null) supplierRequest.setMonthlySupply(requestDTO.getMonthlySupply());
-        if (requestDTO.getNicImage() != null) supplierRequest.setNicImage(requestDTO.getNicImage());
-        if (requestDTO.getRejectReason() != null) supplierRequest.setRejectReason(requestDTO.getRejectReason());
-        if (requestDTO.getPickupLocation() != null) supplierRequest.setPickupLocation(requestDTO.getPickupLocation());
-        if (requestDTO.getLandLocation() != null) supplierRequest.setLandLocation(requestDTO.getLandLocation());
-
-        supplierRequestRepository.save(supplierRequest);
-        return convertToDTO(supplierRequest);
-    }
-
-    public SupplierRequest getSupplierRequestById(Long id) {
-        return supplierRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("SupplierRequest not found"));
-    }
-
-    public List<SupplierRequest> getAllSupplierRequests() {
-        return supplierRequestRepository.findAll();
-    }
-
-
-
-    // ================= NIC Image Handling =================
-
-    /**
-     * Upload NIC image to Firebase (private) and update SupplierRequest with objectName
-     */
-
-
-
-    // ================= Queries =================
-
+    // Retrieves supplier requests for a specific user
     public List<SupplierRequest> getSupplierRequestsByUserId(Long userId) {
         return supplierRequestRepository.findByUser_Id(userId);
     }
 
+    // Retrieves supplier requests for a specific factory and status
     public List<RequestSuppliersDTO> getRequestsByFactoryIdAndStatus(Long factoryId, String status) {
         Factory factory = factoryRepository.findById(factoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Factory not found with id: " + factoryId));
         return supplierRequestRepository.findRequestsByFactoryIdAndStatus(factoryId, status);
     }
 
+    // Retrieves supplier requests for a specific factory, status with pagination and search
+    public Page<RequestSuppliersDTO> getRequestsByFactoryIdAndStatus(Long factoryId, String status, String search, Pageable pageable) {
+
+        Specification<SupplierRequest> spec = SupplierRequestSpecs.hasFactory(factoryId)
+                .and(SupplierRequestSpecs.hasStatus(status));
+
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and(SupplierRequestSpecs.searchByNameOrId(search));
+        }
+        Page<SupplierRequest> page = supplierRequestRepository.findAll(spec, pageable);
+        return page.map(s -> new RequestSuppliersDTO(
+            s.getId(),
+            s.getUser().getName(),
+            s.getMonthlySupply(),
+            s.getRequestedDate(),
+            s.getRejectedDate()
+        ));
+    }
+
+    // Gets detailed information about a supplier request by supplier ID
     public SupplierRequestDetailsDTO getSupplierRequestDetails(Long supplierId) {
         if (!supplierRequestRepository.existsById(supplierId)) {
             throw new ResourceNotFoundException("Supplier not found with id: " + supplierId);
@@ -168,6 +136,7 @@ public class SupplierRequestService {
         return supplierRequestRepository.findRequestDetailsById(supplierId);
     }
 
+    // Returns the status of a supplier request for a given user ID
     public SupplierRequestStatusDTO getSupplierRequestStatus(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
@@ -175,8 +144,6 @@ public class SupplierRequestService {
         if (!(user.getRole() == Role.PENDING_USER || user.getRole() == Role.SUPPLIER)) {
             throw new IllegalArgumentException("User does not have supplier or pending supplier role");
         }
-
         return supplierRequestRepository.findRequestStatusByUserId(userId);
     }
-
 }
