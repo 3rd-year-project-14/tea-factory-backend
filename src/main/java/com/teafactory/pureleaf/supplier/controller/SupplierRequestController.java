@@ -1,6 +1,5 @@
 package com.teafactory.pureleaf.supplier.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teafactory.pureleaf.supplier.dto.*;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
@@ -10,6 +9,7 @@ import com.teafactory.pureleaf.supplier.service.SupplierService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +29,7 @@ public class SupplierRequestController {
     @Autowired
     private SupplierService supplierService;
 
+    // Handles creation of a new supplier request, including NIC image upload
     @PostMapping()
     public ResponseEntity<?> createSupplierRequest(
             @RequestPart("supplierRequest") String supplierRequestStr,
@@ -48,77 +49,56 @@ public class SupplierRequestController {
             return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateSupplierRequest(@PathVariable Long id, @RequestBody SupplierRequestDTO supplierRequestDTO) {
-        try {
-            supplierRequestService.updateSupplierRequest(id, supplierRequestDTO);
-            return new ResponseEntity<>(supplierRequestDTO, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getSupplierRequest(@PathVariable Long id) {
-        try {
-            SupplierRequest supplierRequest = supplierRequestService.getSupplierRequestById(id);
-            return new ResponseEntity<>(supplierRequest, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<?> getAllSupplierRequests() {
-        try {
-            List<SupplierRequest> requests = supplierRequestService.getAllSupplierRequests();
-            return new ResponseEntity<>(requests, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
+    // Retrieves supplier requests for a specific user
     @GetMapping(params = "userId")
     public ResponseEntity<?> getSupplierRequestsByUserId(@RequestParam("userId") Long userId) {
-        try {
             List<SupplierRequest> requests = supplierRequestService.getSupplierRequestsByUserId(userId);
             return new ResponseEntity<>(requests, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
+
+    // Approves a supplier request by ID
     @PostMapping("/{id}/approve")
     public ResponseEntity<?> approveSupplierRequest(@PathVariable("id") Long supplierRequestId, @RequestBody ApproveSupplierRequestDTO dto) {
-
         supplierService.approveSupplierRequest(supplierRequestId, dto);
         return ResponseEntity.ok().build();
     }
 
-
+    // Rejects a supplier request by ID
     @PostMapping("/{id}/reject")
-    public ResponseEntity<?> rejectSupplierRequest(@PathVariable Long id, @RequestParam(required = false) String reason) {
-        try {
-            SupplierRequest rejected = supplierRequestService.rejectSupplierRequest(id, reason);
-            return new ResponseEntity<>(rejected, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> rejectSupplierRequest(@PathVariable Long id, @RequestBody RejectSupplierRequestDTO r) {
+        supplierService.rejectSupplierRequest(id, r);
+        return ResponseEntity.ok().build();
     }
 
+    // Retrieves supplier requests by factory ID and status with pagination, search, and sorting
     @GetMapping("/factory/{factoryId}/status/{status}")
-    public ResponseEntity<?> getRequestsByFactoryIdAndStatus(@PathVariable Long factoryId, @PathVariable String status) {
-            List<RequestSuppliersDTO> requests = supplierRequestService.getRequestsByFactoryIdAndStatus(factoryId, status);
-            return new ResponseEntity<>(requests, HttpStatus.OK);
+    public ResponseEntity<?> getRequestsByFactoryIdAndStatus(
+            @PathVariable Long factoryId,
+            @PathVariable String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "requestedDate,desc") String[] sort
+    ) {
+        String sortBy = sort[0];
+        String sortDir = sort.length > 1 ? sort[1] : "asc";
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page,
+                size,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.fromString(sortDir), sortBy)
+        );
+        var requests = supplierRequestService.getRequestsByFactoryIdAndStatus(factoryId, status, search, pageable);
+        return new ResponseEntity<>(requests, HttpStatus.OK);
     }
 
+    // Retrieves details of a specific supplier request
     @GetMapping("/details/{requestId}")
     public ResponseEntity<SupplierRequestDetailsDTO> getSupplierRequestDetails(@PathVariable Long requestId) {
         SupplierRequestDetailsDTO requestDetails = supplierRequestService.getSupplierRequestDetails(requestId);
         return new ResponseEntity<>(requestDetails, HttpStatus.OK);
     }
 
+    // Retrieves the status of supplier requests for a specific user
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<SupplierRequestStatusDTO> getSupplierRequestStatus(@PathVariable Long userId) {
             SupplierRequestStatusDTO requestStatus = supplierRequestService.getSupplierRequestStatus(userId);

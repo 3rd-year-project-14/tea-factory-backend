@@ -9,6 +9,10 @@ import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
 import com.teafactory.pureleaf.supplier.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,69 +30,43 @@ public class SupplierController {
     @Autowired
     private SupplierService supplierService;
 
-    @GetMapping("")
-    public ResponseEntity<?> getAllSuppliers() {
-        try {
-            List<Supplier> suppliers = supplierRepository.findAll();
-            return new ResponseEntity<>(suppliers, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getSupplierById(@PathVariable Long id) {
-        try {
-            Supplier supplier = supplierRepository.findById(id).orElse(null);
-            if (supplier == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier not found");
-            }
-            return new ResponseEntity<>(supplier, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/by-user")
-    public ResponseEntity<?> getSupplierByUserId(@RequestParam("userId") Long userId) {
-        try {
-            Supplier supplier = supplierRepository.findByUser_Id(userId);
-            if (supplier == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier not found for userId: " + userId);
-            }
-            // Map Supplier entity to SupplierDTO
-            SupplierDTO dto = new SupplierDTO();
-            dto.setFactoryId(supplier.getFactory() != null ? supplier.getFactory().getFactoryId() : null);
-            dto.setRouteId(supplier.getRoute() != null ? supplier.getRoute().getRouteId() : null);
-            dto.setLandSize(supplier.getLandSize());
-            dto.setLandLocation(supplier.getLandLocation());
-            dto.setPickupLocation(supplier.getPickupLocation());
-            dto.setNicImage(supplier.getNicImage());
-            dto.setApprovedDate(supplier.getApprovedDate());
-            dto.setIsActive(supplier.getIsActive());
-            dto.setSupplierId(supplier.getSupplierId());
-            return new ResponseEntity<>(dto, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
+    // Retrieves active suppliers for a specific factory with pagination, search, and filters
     @GetMapping("/active/factory/{factoryId}")
-    public ResponseEntity<List<ActiveSuppliersDTO>> getActiveSuppliersByFactoryId(@PathVariable Long factoryId) {
-        List<ActiveSuppliersDTO> suppliers = supplierService.getActiveSuppliersByFactoryId(factoryId);
+    public ResponseEntity<?> getActiveSuppliers(
+            @PathVariable Long factoryId,
+            @RequestParam(required = false) Long routeId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "approvedDate,desc") String[] sort
+    ) {
+        String sortBy = sort[0];
+        String sortDir = sort.length > 1 ? sort[1] : "asc";
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.fromString(sortDir), sortBy)
+        );
+
+        Page<ActiveSuppliersDTO> suppliers = supplierService.getActiveSuppliers(factoryId, routeId, status, search, pageable);
+
         return new ResponseEntity<>(suppliers, HttpStatus.OK);
     }
 
+
+    // Gets supplier count statistics for a factory
     @GetMapping("/count/{factoryId}")
     public ResponseEntity<SupplierCountDTO> getSuppliersCountsByFactoryId(@PathVariable Long factoryId) {
             SupplierCountDTO counts = supplierService.getSuppliersCounts(factoryId);
             return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 
+    // Retrieves detailed information for a supplier by ID
     @GetMapping("/details/{supplierId}")
     public ResponseEntity<SupplierDetailsDTO> getSupplierDetailsById(@PathVariable Long supplierId) {
         SupplierDetailsDTO supplierDetails = supplierService.getSupplierDetails(supplierId);
         return new ResponseEntity<>(supplierDetails, HttpStatus.OK);
     }
-
 }

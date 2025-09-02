@@ -9,17 +9,18 @@ import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.*;
 import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.routes.repository.RouteRepository;
-import com.teafactory.pureleaf.supplier.dto.ApproveSupplierRequestDTO;
-import com.teafactory.pureleaf.supplier.dto.SupplierCountDTO;
-import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
-import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
+import com.teafactory.pureleaf.supplier.dto.*;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.entity.SupplierRequest;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
 import com.teafactory.pureleaf.supplier.repository.SupplierRequestRepository;
+import com.teafactory.pureleaf.supplier.specs.SupplierSpecs;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,20 +32,27 @@ import java.util.List;
 public class SupplierService {
     @Autowired
     private SupplierRequestRepository supplierRequestRepo;
+
     @Autowired
     private SupplierRepository supplierRepository;
+
     @Autowired
     private RouteRepository routeRepository;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private FactoryRepository factoryRepository;
 
-    @Value("${google.maps.api.key}")
-    private String googleMapsApiKey;
     @Autowired
     private SupplierRequestRepository supplierRequestRepository;
 
+    // Google Maps API key for geolocation services
+    @Value("${google.maps.api.key}")
+    private String googleMapsApiKey;
+
+    // Extracts latitude and longitude from a Google Maps URL
     private double[] extractLatLng(String url) {
         // Example: https://maps.google.com/?q=6.321426274959198,80.43685999549393
         try {
@@ -61,6 +69,7 @@ public class SupplierService {
         }
     }
 
+    // Calculates the great-circle distance between two points using the Haversine formula
     private double haversine(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Radius of the earth in km
         double latDistance = Math.toRadians(lat2 - lat1);
@@ -72,6 +81,7 @@ public class SupplierService {
         return R * c; // distance in km
     }
 
+    // Gets the road distance between two coordinates using Google Maps API
     private Double getRoadDistance(double[] origin, double[] destination) {
         String origins = origin[0] + "," + origin[1];
         String destinations = destination[0] + "," + destination[1];
@@ -87,11 +97,12 @@ public class SupplierService {
                 return meters / 1000.0; // Convert to km
             }
         } catch (Exception e) {
-            // Log error if needed
+            return haversine(origin[0], origin[1], destination[0], destination[1]);
         }
         return null;
     }
 
+    // Approves a supplier request, creates a Supplier, updates user and route, and deletes the request
     @Transactional
     public void approveSupplierRequest(Long supplierRequestId, ApproveSupplierRequestDTO dto) {
         // 1. Find and validate supplier request
@@ -152,24 +163,57 @@ public class SupplierService {
         route.setBagCount(currentBagCount + initialBagCount);
         route.setSupplierCount(route.getSupplierCount() != null ? route.getSupplierCount() + 1 : 1);
         routeRepository.save(route);
+    }
 
+    // Rejects a supplier request and records the reason and date
+    public void rejectSupplierRequest(Long id, RejectSupplierRequestDTO dto) {
+        SupplierRequest supplierRequest = supplierRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier request not found with id: " + id));
+        supplierRequest.setStatus("rejected");
+        supplierRequest.setRejectReason(dto.getReason());
+        supplierRequest.setRejectedDate(LocalDate.now());
+        supplierRequestRepository.save(supplierRequest);
     }
 
 
-    public List<ActiveSuppliersDTO> getActiveSuppliersByFactoryId(Long factoryId) {
-        Factory factory = factoryRepository.findById(factoryId).orElse(null);
-        if (factory == null) {
-            throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
+    // Retrieves a list of active suppliers for a given factory
+    public Page<ActiveSuppliersDTO> getActiveSuppliers(Long factoryId,
+                                                       Long routeId,
+                                                       String status,
+                                                       String search,
+                                                       Pageable pageable) {
+
+        // Start with mandatory filters
+        Specification<Supplier> spec = SupplierSpecs.hasFactory(factoryId)
+                .and(SupplierSpecs.isActive());
+
+        // Optional filters
+        if (routeId != null) {
+            spec = spec.and(SupplierSpecs.hasRoute(routeId));
         }
-        List<ActiveSuppliersDTO> suppliers = supplierRepository.findSupplierDetailsByFactoryId(factoryId);
-        if (suppliers == null || suppliers.isEmpty()) {
-            throw new ResourceNotFoundException("No suppliers found for factoryId: " + factoryId);
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and(SupplierSpecs.hasStatus(status));
         }
-        return suppliers;
+        if (search != null && !search.isEmpty()) {
+            // Combine name and supplierId search
+            spec = spec.and(SupplierSpecs.nameOrSupplierId(search));
+        }
+
+
+        // Execute query with pageable
+        Page<Supplier> page = supplierRepository.findAll(spec, pageable);
+
+        // Map Supplier entity to ActiveSuppliersDTO
+        return page.map(s -> new ActiveSuppliersDTO(
+                s.getSupplierId(),
+                s.getUser().getName(),
+                s.getRoute().getName(),
+                s.getApprovedDate()
+        ));
     }
 
+    // Returns the count of active, pending, and rejected suppliers for a given factory.
     public SupplierCountDTO getSuppliersCounts( Long factoryId) {
-        // Check if factory exists
         if (!factoryRepository.existsById(factoryId)) {
             throw new ResourceNotFoundException("Factory not found with id: " + factoryId);
         }
@@ -179,6 +223,7 @@ public class SupplierService {
         return new SupplierCountDTO(activeSupplierCount, pendingRequestCount, rejectedRequestCount);
     }
 
+    // Retrieves detailed information for a supplier by supplier ID.
     public SupplierDetailsDTO getSupplierDetails (Long supplierId) {
         if (!supplierRepository.existsById((supplierId))) {
             throw new ResourceNotFoundException("Supplier not found with id: " + supplierId);
@@ -186,7 +231,5 @@ public class SupplierService {
         SupplierDetailsDTO supplierDetails = supplierRepository.findSupplierDetails(supplierId);
         return supplierDetails;
     }
-
-
-
 }
+

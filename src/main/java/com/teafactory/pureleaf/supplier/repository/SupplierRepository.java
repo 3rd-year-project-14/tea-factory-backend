@@ -4,12 +4,14 @@ import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.dto.ActiveSuppliersDTO;
 import com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface SupplierRepository extends JpaRepository<Supplier, Long> {
+public interface SupplierRepository extends JpaRepository<Supplier,Long>, JpaSpecificationExecutor<Supplier> {
+
     List<Supplier> findByIsActiveTrue();
     Supplier findByUser_Id(Long userId);
     long countByIsActiveIsTrueAndFactory_factoryId(Long factoryId);
