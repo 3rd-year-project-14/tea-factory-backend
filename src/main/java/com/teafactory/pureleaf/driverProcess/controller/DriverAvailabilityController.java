@@ -1,7 +1,7 @@
-package com.teafactory.pureleaf.controller;
+package com.teafactory.pureleaf.driverProcess.controller;
 
-import com.teafactory.pureleaf.dto.DriverAvailabilityDTO;
-import com.teafactory.pureleaf.service.DriverAvailabilityService;
+import com.teafactory.pureleaf.driverProcess.dto.DriverAvailabilityDTO;
+import com.teafactory.pureleaf.driverProcess.service.DriverAvailabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

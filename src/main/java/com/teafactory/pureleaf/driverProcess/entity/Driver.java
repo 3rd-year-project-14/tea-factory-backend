@@ -1,8 +1,12 @@
-package com.teafactory.pureleaf.entity;
+package com.teafactory.pureleaf.driverProcess.entity;
 
+import com.teafactory.pureleaf.entity.Factory;
+import com.teafactory.pureleaf.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,12 +21,12 @@ public class Driver {
     private String driverType; // inhouse or privet
     private String licenseImage;
     private String licenseStatus;
-    private LocalDateTime licenseExpiry;
+    private LocalDate licenseExpiry;
     private String vehicleNo;
     private Integer vehicleCapacity;
     private String emergencyContact;
     private Boolean isActive;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "factory_id")

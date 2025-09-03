@@ -1,4 +1,4 @@
-package com.teafactory.pureleaf.entity;
+package com.teafactory.pureleaf.driverProcess.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -3,7 +3,7 @@ package com.teafactory.pureleaf.service;
 import com.teafactory.pureleaf.dto.TeaSupplyProcessResponseDTO;
 import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.entity.TeaSupplyRequest;
-import com.teafactory.pureleaf.repository.DriverRepository;
+import com.teafactory.pureleaf.driverProcess.repository.DriverRepository;
 import com.teafactory.pureleaf.routes.repository.RouteRepository;
 import com.teafactory.pureleaf.repository.TeaSupplyRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;

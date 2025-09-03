@@ -1,10 +1,10 @@
-package com.teafactory.pureleaf.service;
+package com.teafactory.pureleaf.driverProcess.service;
 
-import com.teafactory.pureleaf.dto.DriverAvailabilityDTO;
-import com.teafactory.pureleaf.entity.Driver;
-import com.teafactory.pureleaf.entity.DriverAvailability;
-import com.teafactory.pureleaf.repository.DriverAvailabilityRepository;
-import com.teafactory.pureleaf.repository.DriverRepository;
+import com.teafactory.pureleaf.driverProcess.dto.DriverAvailabilityDTO;
+import com.teafactory.pureleaf.driverProcess.entity.Driver;
+import com.teafactory.pureleaf.driverProcess.entity.DriverAvailability;
+import com.teafactory.pureleaf.driverProcess.repository.DriverAvailabilityRepository;
+import com.teafactory.pureleaf.driverProcess.repository.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

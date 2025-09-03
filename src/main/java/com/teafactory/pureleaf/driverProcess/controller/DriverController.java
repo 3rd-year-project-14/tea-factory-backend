@@ -1,7 +1,7 @@
-package com.teafactory.pureleaf.controller;
+package com.teafactory.pureleaf.driverProcess.controller;
 
-import com.teafactory.pureleaf.dto.DriverDTO;
-import com.teafactory.pureleaf.service.DriverService;
+import com.teafactory.pureleaf.driverProcess.dto.DriverDTO;
+import com.teafactory.pureleaf.driverProcess.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,14 +12,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
+
     @Autowired
     private DriverService driverService;
 
-    @GetMapping
-    public ResponseEntity<List<DriverDTO>> getAllDrivers() {
-        List<DriverDTO> driverDTOs = driverService.getAllDrivers();
-        return ResponseEntity.ok(driverDTOs);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<DriverDTO> getDriverById(@PathVariable Long id) {
@@ -37,9 +33,6 @@ public class DriverController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<DriverDTO> getDriverDetailsByUserId(@PathVariable Long userId) {
         DriverDTO dto = driverService.getDriverDetailsByUserId(userId);
-        if (dto == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(dto);
     }
 }

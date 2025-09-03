@@ -1,10 +1,10 @@
 package com.teafactory.pureleaf.service;
 
 import com.teafactory.pureleaf.dto.TripDTO;
-import com.teafactory.pureleaf.entity.Driver;
+import com.teafactory.pureleaf.driverProcess.entity.Driver;
 import com.teafactory.pureleaf.routes.entity.Route;
 import com.teafactory.pureleaf.entity.Trip;
-import com.teafactory.pureleaf.repository.DriverRepository;
+import com.teafactory.pureleaf.driverProcess.repository.DriverRepository;
 import com.teafactory.pureleaf.routes.repository.RouteRepository;
 import com.teafactory.pureleaf.repository.TripRepository;
 import com.teafactory.pureleaf.repository.TripSupplierRepository;

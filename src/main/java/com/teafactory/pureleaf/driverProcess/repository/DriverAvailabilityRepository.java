@@ -1,6 +1,6 @@
-package com.teafactory.pureleaf.repository;
+package com.teafactory.pureleaf.driverProcess.repository;
 
-import com.teafactory.pureleaf.entity.DriverAvailability;
+import com.teafactory.pureleaf.driverProcess.entity.DriverAvailability;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
