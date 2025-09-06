@@ -1,6 +1,5 @@
 package com.teafactory.pureleaf.inventoryProcess.controller;
 
-import com.teafactory.pureleaf.entity.Trip;
 import com.teafactory.pureleaf.inventoryProcess.dto.TareWeightRequest;
 import com.teafactory.pureleaf.inventoryProcess.service.InventoryProcessService;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
