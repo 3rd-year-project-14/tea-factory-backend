@@ -231,5 +231,23 @@ public class SupplierService {
         SupplierDetailsDTO supplierDetails = supplierRepository.findSupplierDetails(supplierId);
         return supplierDetails;
     }
+
+    public SupplierDTO getSupplierByUserId(Long userId) {
+        Supplier supplier = supplierRepository.findByUser_Id(userId);
+        if (supplier == null) {
+            throw new ResourceNotFoundException("Supplier not found for userId: " + userId);
+        }
+        SupplierDTO dto = new SupplierDTO();
+        dto.setFactoryId(supplier.getFactory() != null ? supplier.getFactory().getFactoryId() : null);
+        dto.setRouteId(supplier.getRoute() != null ? supplier.getRoute().getRouteId() : null);
+        dto.setLandSize(supplier.getLandSize());
+        dto.setLandLocation(supplier.getLandLocation());
+        dto.setPickupLocation(supplier.getPickupLocation());
+        dto.setNicImage(supplier.getNicImage());
+        dto.setApprovedDate(supplier.getApprovedDate());
+        dto.setIsActive(supplier.getIsActive());
+        dto.setSupplierId(supplier.getSupplierId());
+        return dto;
+    }
 }
 

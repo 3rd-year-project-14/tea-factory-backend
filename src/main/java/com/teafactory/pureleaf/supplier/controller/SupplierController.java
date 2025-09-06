@@ -69,4 +69,12 @@ public class SupplierController {
         SupplierDetailsDTO supplierDetails = supplierService.getSupplierDetails(supplierId);
         return new ResponseEntity<>(supplierDetails, HttpStatus.OK);
     }
+
+    // Retrieves supplier details by userId
+    @GetMapping("/by-user")
+    public ResponseEntity<SupplierDTO> getSupplierByUserId(@RequestParam Long userId) {
+        SupplierDTO supplierDTO = supplierService.getSupplierByUserId(userId);
+        return new ResponseEntity<>(supplierDTO, HttpStatus.OK);
+    }
+
 }

@@ -1,8 +1,7 @@
 package com.teafactory.pureleaf.routes.entity;
 
-import com.teafactory.pureleaf.entity.Driver;
+import com.teafactory.pureleaf.driverProcess.entity.Driver;
 import com.teafactory.pureleaf.entity.Factory;
-import jakarta.annotation.Resource;
 import jakarta.persistence.*;
 import lombok.*;
 
