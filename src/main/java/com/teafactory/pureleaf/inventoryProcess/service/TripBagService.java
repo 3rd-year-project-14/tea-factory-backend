@@ -11,13 +11,19 @@ import com.teafactory.pureleaf.inventoryProcess.repository.BagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripSupplierRepository;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagBriefDTO;
+import com.teafactory.pureleaf.inventoryProcess.spec.TripBagSpecs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 @Service
 public class TripBagService {
@@ -117,6 +123,30 @@ public class TripBagService {
             }
         }
         return new SupplierRequestBagSummaryDTO(supplyRequestId, totalBags, totalWeight);
+    }
+
+    public Page<TripBagBriefDTO> getTodayTripBagsBrief(Long tripId, String search, Pageable pageable) {
+        Specification<TripBag> spec = Specification.allOf(
+                TripBagSpecs.belongsToTrip(tripId),
+                TripBagSpecs.forDate(LocalDate.now()),
+                TripBagSpecs.searchByBagNumber(search)
+        );
+
+        Page<TripBag> page = tripBagRepository.findAll(spec, pageable);
+        return page.map(this::toBriefDTO);
+    }
+
+    private TripBagBriefDTO toBriefDTO(TripBag bag) {
+        String bagNo = bag.getBag() != null ? bag.getBag().getBagNumber() : null;
+        Double weight = bag.getDriverWeight();
+        Boolean wet = bag.getWet();
+        Boolean coarse = bag.getCoarse();
+        return TripBagBriefDTO.builder()
+                .bagNo(bagNo)
+                .weight(weight)
+                .wet(wet)
+                .coarse(coarse)
+                .build();
     }
 
     private TripBagDTO convertToDTO(TripBag tripBag) {

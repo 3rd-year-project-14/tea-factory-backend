@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.inventoryProcess.service;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
 import com.teafactory.pureleaf.inventoryProcess.entity.*;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
@@ -173,4 +174,24 @@ public class InventoryProcessService {
         }
     }
 
+    public TripBagSummaryResponse getTodayTripBagSummary(Long tripId) {
+        LocalDate today = LocalDate.now();
+        long totalBags = tripBagRepository.countByTripSupplier_Trip_TripIdAndTripSupplier_Trip_TripDate(tripId, today);
+        long supplierRequestCount = tripBagRepository.countDistinctSupplyRequestsByTripIdAndDate(tripId, today);
+        Double totalWeight = tripBagRepository.sumDriverWeightByTripIdAndDate(tripId, today);
+
+        WeighingSession session = weighingSessionRepository
+                .findFirstByTrip_TripIdAndSessionDateOrderByStartTimeDesc(tripId, today);
+        Long sessionId = session != null ? session.getSessionId() : null;
+        Long userId = (session != null && session.getUser() != null) ? session.getUser().getId() : null;
+
+        return TripBagSummaryResponse.builder()
+                .tripId(tripId)
+                .sessionId(sessionId)
+                .userId(userId)
+                .supplierRequestCount(supplierRequestCount)
+                .totalBags(totalBags)
+                .totalWeight(totalWeight != null ? totalWeight : 0.0)
+                .build();
+    }
 }

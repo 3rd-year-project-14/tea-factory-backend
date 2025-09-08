@@ -3,6 +3,7 @@ package com.teafactory.pureleaf.inventoryProcess.controller;
 import com.teafactory.pureleaf.inventoryProcess.dto.TareWeightRequest;
 import com.teafactory.pureleaf.inventoryProcess.service.InventoryProcessService;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,11 @@ public class InventoryProcessController {
     @GetMapping("/trip/{tripId}/bags")
     public ResponseEntity<?> getBagsByTripId(@PathVariable Long tripId) {
         return ResponseEntity.ok(inventoryProcessService.getBagsByTripId(tripId));
+    }
+
+    @GetMapping("/trip/{tripId}/summary")
+    public ResponseEntity<TripBagSummaryResponse> getTripBagSummary(@PathVariable Long tripId) {
+        return ResponseEntity.ok(inventoryProcessService.getTodayTripBagSummary(tripId));
     }
 
     @GetMapping("/trip/{tripId}/bags/pending")
