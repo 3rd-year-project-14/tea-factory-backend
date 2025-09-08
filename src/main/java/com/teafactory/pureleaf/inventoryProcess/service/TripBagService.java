@@ -129,6 +129,7 @@ public class TripBagService {
         Specification<TripBag> spec = Specification.allOf(
                 TripBagSpecs.belongsToTrip(tripId),
                 TripBagSpecs.forDate(LocalDate.now()),
+                TripBagSpecs.hasStatus("pending"),
                 TripBagSpecs.searchByBagNumber(search)
         );
 

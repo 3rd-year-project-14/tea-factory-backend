@@ -20,5 +20,9 @@ public class TripBagSpecs {
         String like = "%" + search.toLowerCase() + "%";
         return (root, query, cb) -> cb.like(cb.lower(root.get("bag").get("bagNumber")), like);
     }
-}
 
+    public static Specification<TripBag> hasStatus(String status) {
+        if (status == null || status.isBlank()) return null;
+        return (root, query, cb) -> cb.equal(cb.lower(root.get("status")), status.toLowerCase());
+    }
+}
