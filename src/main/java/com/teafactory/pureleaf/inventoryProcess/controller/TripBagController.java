@@ -3,6 +3,8 @@ package com.teafactory.pureleaf.inventoryProcess.controller;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDTO;
 import com.teafactory.pureleaf.inventoryProcess.dto.SupplierRequestBagSummaryDTO;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagBriefDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.SupplierInfoDTO;
 import com.teafactory.pureleaf.inventoryProcess.service.TripBagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -74,5 +76,19 @@ public class TripBagController {
     public ResponseEntity<SupplierRequestBagSummaryDTO> getSupplierRequestBagSummaryBySupplyRequestId(@PathVariable Long supplyRequestId) {
         SupplierRequestBagSummaryDTO summary = tripBagService.getSupplierRequestBagSummaryBySupplyRequestId(supplyRequestId);
         return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/by-supply-request/{supplyRequestId}/details")
+    public ResponseEntity<List<TripBagDetailsDTO>> getTripBagDetailsBySupplyRequestId(
+            @PathVariable Long supplyRequestId,
+            @RequestParam String status) {
+        List<TripBagDetailsDTO> details = tripBagService.getTripBagDetailsBySupplyRequestIdAndStatus(supplyRequestId, status);
+        return ResponseEntity.ok(details);
+    }
+
+    @GetMapping("/supplier-info/by-supply-request/{supplyRequestId}")
+    public ResponseEntity<SupplierInfoDTO> getSupplierInfoBySupplyRequestId(@PathVariable Long supplyRequestId) {
+        SupplierInfoDTO supplierInfo = tripBagService.getSupplierInfoBySupplyRequestId(supplyRequestId);
+        return ResponseEntity.ok(supplierInfo);
     }
 }

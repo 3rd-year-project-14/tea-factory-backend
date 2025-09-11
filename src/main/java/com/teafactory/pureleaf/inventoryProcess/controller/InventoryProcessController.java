@@ -2,8 +2,8 @@ package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.TareWeightRequest;
 import com.teafactory.pureleaf.inventoryProcess.service.InventoryProcessService;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +17,6 @@ import java.util.List;
 public class InventoryProcessController {
     @Autowired
     private InventoryProcessService inventoryProcessService;
-
-    @GetMapping("/factory/{factoryId}")
-    public ResponseEntity<?> getByFactoryId(@PathVariable Long factoryId){
-        List<TripsResponse> trips = inventoryProcessService.getTodayTripsByFactory(factoryId);
-        return ResponseEntity.ok(trips);
-    }
 
     @GetMapping("/trip/{tripId}/bags")
     public ResponseEntity<?> getBagsByTripId(@PathVariable Long tripId) {
@@ -56,5 +50,13 @@ public class InventoryProcessController {
             @RequestBody TareWeightRequest tareWeightRequest) {
         inventoryProcessService.updateTareWeightAndCompleteProcess(bagWeightId, tareWeightRequest.getTareWeight());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/trip/{tripId}/weighing-summary")
+    public ResponseEntity<WeighingSummaryResponse> getWeighingSummary(
+            @PathVariable Long tripId,
+            @RequestParam String status) {
+        WeighingSummaryResponse resp = inventoryProcessService.getTodayWeighingSummaryByTripAndStatus(tripId, status);
+        return ResponseEntity.ok(resp);
     }
 }

@@ -1,8 +1,6 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
-import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDTO;
-import com.teafactory.pureleaf.inventoryProcess.dto.SupplierRequestBagSummaryDTO;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripSupplierId;
+import com.teafactory.pureleaf.inventoryProcess.dto.*;
 import com.teafactory.pureleaf.inventoryProcess.entity.Bag;
 import com.teafactory.pureleaf.inventoryProcess.entity.TeaSupplyRequest;
 import com.teafactory.pureleaf.inventoryProcess.entity.TripBag;
@@ -11,7 +9,6 @@ import com.teafactory.pureleaf.inventoryProcess.repository.BagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripSupplierRepository;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripBagBriefDTO;
 import com.teafactory.pureleaf.inventoryProcess.spec.TripBagSpecs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -97,6 +94,26 @@ public class TripBagService {
                 .collect(Collectors.toList());
     }
 
+
+
+    public List<TripBagDetailsDTO> getTripBagDetailsBySupplyRequestIdAndStatus(Long supplyRequestId, String status) {
+        if (status == null || status.isEmpty()) {
+            throw new IllegalArgumentException("Status parameter is required");
+        }
+        List<TripBag> tripBags = tripBagRepository.findByTripSupplier_TeaSupplyRequest_RequestId(supplyRequestId)
+            .stream()
+            .filter(bag -> status.equalsIgnoreCase(bag.getStatus()))
+            .collect(Collectors.toList());
+        return tripBags.stream()
+                .map(bag -> new TripBagDetailsDTO(
+                        bag.getBag() != null ? bag.getBag().getBagNumber() : null,
+                        bag.getDriverWeight(),
+                        bag.getWet(),
+                        bag.getCoarse()
+                ))
+                .collect(Collectors.toList());
+    }
+
     public List<SupplierRequestBagSummaryDTO> getSupplierRequestBagSummaryByTripId(Long tripId) {
         List<TripBag> tripBags = tripBagRepository.findAll();
         Map<Long, SupplierRequestBagSummaryDTO> summaryMap = new HashMap<>();
@@ -142,11 +159,13 @@ public class TripBagService {
         Double weight = bag.getDriverWeight();
         Boolean wet = bag.getWet();
         Boolean coarse = bag.getCoarse();
+        Long supplyRequestId = bag.getTripSupplier().getTeaSupplyRequest().getRequestId();
         return TripBagBriefDTO.builder()
                 .bagNo(bagNo)
                 .weight(weight)
                 .wet(wet)
                 .coarse(coarse)
+                .supplyRequestId(supplyRequestId)
                 .build();
     }
 
@@ -163,5 +182,13 @@ public class TripBagService {
                 tripBag.getType(),
                 tripBag.getStatus()
         );
+    }
+
+    public SupplierInfoDTO getSupplierInfoBySupplyRequestId(Long supplyRequestId) {
+        TeaSupplyRequest teaSupplyRequest = teaSupplyRequestRepository.findById(supplyRequestId)
+            .orElseThrow(() -> new RuntimeException("TeaSupplyRequest not found"));
+        Long supplierId = teaSupplyRequest.getSupplier().getSupplierId();
+        String supplierName = teaSupplyRequest.getSupplier().getUser().getName();
+        return new SupplierInfoDTO(supplierId, supplierName);
     }
 }

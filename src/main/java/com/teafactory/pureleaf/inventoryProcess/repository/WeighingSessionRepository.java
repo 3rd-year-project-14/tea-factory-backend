@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @Repository
 public interface WeighingSessionRepository extends JpaRepository<WeighingSession, Long> {
     List<WeighingSession> findByTrip_TripId(Long tripId);
-    WeighingSession findFirstByTrip_TripId(Long tripId);
 
     // Get today's session for a trip (latest by start time)
     WeighingSession findFirstByTrip_TripIdAndSessionDateOrderByStartTimeDesc(Long tripId, LocalDate sessionDate);

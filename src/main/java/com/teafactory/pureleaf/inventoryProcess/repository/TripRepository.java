@@ -17,8 +17,6 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificationExecutor<Trip> {
     Optional<Trip> findByDriver_DriverIdAndTripDate(Long driverId, LocalDate tripDate);
 
-    List<Trip> findByRoute_Factory_FactoryIdAndTripDate(Long factoryId, LocalDate tripDate);
-
 
     // Projection for aggregated counts
     interface TripStatusAggregation {

@@ -1,8 +1,8 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsResponse;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse;
 import com.teafactory.pureleaf.inventoryProcess.entity.*;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
@@ -37,35 +37,6 @@ public class InventoryProcessService {
 
     @Autowired
     private BagRepository bagRepository;
-
-    public List<TripsResponse> getTodayTripsByFactory(Long factoryId) {
-        LocalDate today = LocalDate.now();
-        List<Trip> trips = tripRepository.findByRoute_Factory_FactoryIdAndTripDate(factoryId, today);
-        return trips.stream().map(trip -> {
-            // Get the single weighing session for this trip
-            WeighingSession session = weighingSessionRepository.findFirstByTrip_TripId(trip.getTripId());
-            Long sessionId = null;
-            Double totalGrossWeight = null;
-            Double totalTareWeight = null;
-            if (session != null) {
-                sessionId = session.getSessionId();
-                totalGrossWeight = bagWeightRepository.sumGrossWeightBySessionId(sessionId);
-                totalTareWeight = bagWeightRepository.sumTareWeightBySessionId(sessionId);
-            }
-            return new TripsResponse(
-                trip.getTripId(),
-                trip.getDriver() != null && trip.getDriver().getUser() != null ? trip.getDriver().getUser().getName() : null,
-                trip.getRoute() != null ? trip.getRoute().getRouteId(): null,
-                trip.getRoute() != null ? trip.getRoute().getName() : null,
-                trip.getTripDate() != null ? trip.getTripDate().toString() : null,
-                trip.getStatus(),
-                (int) tripBagRepository.countByTripSupplier_Trip_TripId(trip.getTripId()),
-                sessionId,
-                totalGrossWeight,
-                totalTareWeight
-            );
-        }).collect(Collectors.toList());
-    }
 
     public List<TripBagDetailsResponse> getBagsByTripId(Long tripId) {
         List<TripBag> tripBags = tripBagRepository.findByTripSupplier_Trip_TripId(tripId);
@@ -176,9 +147,13 @@ public class InventoryProcessService {
 
     public TripBagSummaryResponse getTodayTripBagSummary(Long tripId) {
         LocalDate today = LocalDate.now();
-        long totalBags = tripBagRepository.countByTripSupplier_Trip_TripIdAndTripSupplier_Trip_TripDate(tripId, today);
-        long supplierRequestCount = tripBagRepository.countDistinctSupplyRequestsByTripIdAndDate(tripId, today);
-        Double totalWeight = tripBagRepository.sumDriverWeightByTripIdAndDate(tripId, today);
+        String status = "pending";
+        long totalBags = tripBagRepository
+                .countByTripSupplier_Trip_TripIdAndTripSupplier_Trip_TripDateAndStatus(tripId, today, status);
+        long supplierRequestCount = tripBagRepository
+                .countDistinctSupplyRequestsByTripIdAndDateAndStatus(tripId, today, status);
+        Double totalWeight = tripBagRepository
+                .sumDriverWeightByTripIdAndDateAndStatus(tripId, today, status);
 
         WeighingSession session = weighingSessionRepository
                 .findFirstByTrip_TripIdAndSessionDateOrderByStartTimeDesc(tripId, today);
@@ -193,5 +168,14 @@ public class InventoryProcessService {
                 .totalBags(totalBags)
                 .totalWeight(totalWeight != null ? totalWeight : 0.0)
                 .build();
+    }
+
+    public com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse getTodayWeighingSummaryByTripAndStatus(Long tripId, String status) {
+        LocalDate today = LocalDate.now();
+        BagWeightRepository.TodayWeighingSummaryProjection p = bagWeightRepository.getTodayWeighingSummaryByTripAndStatus(tripId, status, today);
+        long totalSuppliers = p != null && p.getTotalSuppliers() != null ? p.getTotalSuppliers() : 0L;
+        long totalBags = p != null && p.getTotalBags() != null ? p.getTotalBags() : 0L;
+        double totalGrossWeight = p != null && p.getTotalGrossWeight() != null ? p.getTotalGrossWeight() : 0.0;
+        return new WeighingSummaryResponse(totalSuppliers, totalBags, totalGrossWeight);
     }
 }

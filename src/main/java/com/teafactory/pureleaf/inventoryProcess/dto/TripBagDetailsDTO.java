@@ -1,18 +1,17 @@
 package com.teafactory.pureleaf.inventoryProcess.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TripBagBriefDTO {
+public class TripBagDetailsDTO {
     private String bagNo;
-    private Double weight;
+    private Double driverWeight;
     private Boolean wet;
     private Boolean coarse;
-    private Long supplyRequestId;
 }
+
+
