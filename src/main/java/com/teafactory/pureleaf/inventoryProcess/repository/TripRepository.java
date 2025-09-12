@@ -44,22 +44,6 @@ public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificat
             "FROM Trip t WHERE t.route.factory.factoryId = :factoryId AND t.tripDate = :tripDate")
     TripStatusAggregation aggregateStatusCounts(@Param("factoryId") Long factoryId, @Param("tripDate") LocalDate tripDate);
 
-    // Existing (non-paginated) summaries
-    @Query("SELECT t.tripId AS tripId, r.routeId AS routeId, r.name AS routeName, u.name AS driverName, COUNT(tb.id) AS bagCount " +
-            "FROM Trip t " +
-            "LEFT JOIN t.route r " +
-            "LEFT JOIN t.driver d " +
-            "LEFT JOIN d.user u " +
-            "LEFT JOIN TripSupplier ts ON ts.trip = t " +
-            "LEFT JOIN TripBag tb ON tb.tripSupplier = ts " +
-            "WHERE r.factory.factoryId = :factoryId " +
-            "AND t.tripDate = :tripDate " +
-            "AND ((LOWER(:status) = 'pending' AND LOWER(t.status) IN ('pending','collected')) OR (LOWER(:status) <> 'pending' AND LOWER(t.status) = LOWER(:status))) " +
-            "GROUP BY t.tripId, r.routeId, r.name, u.name")
-    List<TripSummaryProjection> findTripSummaries(@Param("factoryId") Long factoryId,
-                                                  @Param("status") String status,
-                                                  @Param("tripDate") LocalDate tripDate);
-
     // New paginated + searchable summaries
     @Query(value = "SELECT t.tripId AS tripId, r.routeId AS routeId, r.name AS routeName, u.name AS driverName, COUNT(tb.id) AS bagCount " +
             "FROM Trip t " +

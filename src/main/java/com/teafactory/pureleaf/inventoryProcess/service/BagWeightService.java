@@ -1,7 +1,6 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDTO;
-import com.teafactory.pureleaf.inventoryProcess.controller.BagWeightWithSupplierDTO;
 import com.teafactory.pureleaf.inventoryProcess.entity.BagWeight;
 import com.teafactory.pureleaf.inventoryProcess.entity.TeaSupplyRequest;
 import com.teafactory.pureleaf.inventoryProcess.entity.Trip;
@@ -12,29 +11,35 @@ import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepos
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.WeighingSessionRepository;
-import com.teafactory.pureleaf.supplier.entity.Supplier;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagWeightDetailsDTO;
+import com.teafactory.pureleaf.inventoryProcess.spec.BagWeightSpecs;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class BagWeightService {
 
-    @Autowired
-    private BagWeightRepository bagWeightRepository;
-    @Autowired
-    private TeaSupplyRequestRepository teaSupplyRequestRepository;
-    @Autowired
-    private WeighingSessionRepository weighingSessionRepository;
-    @Autowired
-    private TripBagRepository tripBagRepository;
-    @Autowired
-    private TripRepository tripRepository;
+    private final BagWeightRepository bagWeightRepository;
+    private final TeaSupplyRequestRepository teaSupplyRequestRepository;
+    private final WeighingSessionRepository weighingSessionRepository;
+    private final TripBagRepository tripBagRepository;
+    private final TripRepository tripRepository;
+
+    public BagWeightService(BagWeightRepository bagWeightRepository, TeaSupplyRequestRepository teaSupplyRequestRepository, WeighingSessionRepository weighingSessionRepository, TripBagRepository tripBagRepository, TripRepository tripRepository) {
+        this.bagWeightRepository = bagWeightRepository;
+        this.teaSupplyRequestRepository = teaSupplyRequestRepository;
+        this.weighingSessionRepository = weighingSessionRepository;
+        this.tripBagRepository = tripBagRepository;
+        this.tripRepository = tripRepository;
+    }
 
     public List<BagWeight> getAllBagWeights() {
         return bagWeightRepository.findAll();
@@ -44,12 +49,13 @@ public class BagWeightService {
         return bagWeightRepository.findById(id);
     }
 
+    @Transactional
     public BagWeight createBagWeight(BagWeightDTO dto) {
         TeaSupplyRequest supplyRequest = teaSupplyRequestRepository.findById(dto.getSupplyRequestId())
                 .orElseThrow(() -> new RuntimeException("SupplyRequest not found"));
         WeighingSession weighingSession = weighingSessionRepository.findById(dto.getSessionId())
                 .orElseThrow(() -> new RuntimeException("WeighingSession not found"));
-        System.out.println( "weighingSession id: " + weighingSession.getSessionId());;
+        System.out.println( "weighingSession id: " + weighingSession.getSessionId());
 
         BagWeight bagWeight = new BagWeight();
 
@@ -91,7 +97,6 @@ public class BagWeightService {
         }
         return saved;
     }
-
 
 
     public void updateTripBagStatusToWeighed(Long supplyRequestId, List<String> bagNumbers) {
@@ -149,27 +154,49 @@ public class BagWeightService {
         return saved;
     }
 
-    public List<BagWeightWithSupplierDTO> getBagWeightsWithSupplierBySessionId(Long sessionId) {
-        List<BagWeight> bagWeights = bagWeightRepository.findByWeighingSession_SessionId(sessionId);
-        return bagWeights.stream().map(bagWeight -> {
-            BagWeightWithSupplierDTO dto = new BagWeightWithSupplierDTO();
-            dto.setBagWeightId(bagWeight.getId());
-            dto.setCoarse(bagWeight.getCoarse());
-            dto.setWater(bagWeight.getWater());
-            dto.setGrossWeight(bagWeight.getGrossWeight());
-            dto.setNetWeight(bagWeight.getNetWeight());
-            dto.setTareWeight(bagWeight.getTareWeight());
-            dto.setOtherWeight(bagWeight.getOtherWeight());
-            dto.setReason(bagWeight.getReason());
-            dto.setBagTotal(bagWeight.getBagTotal());
-            Supplier supplier = bagWeight.getSupplyRequest().getSupplier();
-            dto.setSupplierId(supplier.getSupplierId());
-            if (supplier.getUser() != null) {
-                dto.setSupplierName(supplier.getUser().getName());
-            } else {
-                dto.setSupplierName(null);
+    public com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponseDTO mapToResponseDTO(BagWeight bagWeight) {
+        com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponseDTO dto = new com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponseDTO();
+        dto.setId(bagWeight.getId());
+        dto.setCoarse(bagWeight.getCoarse());
+        dto.setGrossWeight(bagWeight.getGrossWeight());
+        dto.setNetWeight(bagWeight.getNetWeight());
+        dto.setRecordedAt(bagWeight.getRecordedAt());
+        dto.setTareWeight(bagWeight.getTareWeight());
+        dto.setOtherWeight(bagWeight.getOtherWeight());
+        dto.setReason(bagWeight.getReason());
+        dto.setBagTotal(bagWeight.getBagTotal());
+        return dto;
+    }
+
+    public Page<WeighedBagWeightDetailsDTO> getBagWeightDetailsBySessionIdPaged(Long sessionId, String search, String status, Pageable pageable) {
+        Specification<com.teafactory.pureleaf.inventoryProcess.entity.BagWeight> spec = Specification
+            .where(BagWeightSpecs.hasSessionId(sessionId))
+            .and(BagWeightSpecs.searchSupplier(search))
+            .and(BagWeightSpecs.hasStatus(status));
+        Page<com.teafactory.pureleaf.inventoryProcess.entity.BagWeight> page = bagWeightRepository.findAll(spec, pageable);
+        return page.map(bagWeight -> {
+            Long supplierId = null;
+            String supplierName = null;
+            String statusVal = null;
+            if (bagWeight.getSupplyRequest() != null && bagWeight.getSupplyRequest().getSupplier() != null) {
+                supplierId = bagWeight.getSupplyRequest().getSupplier().getSupplierId();
+                if (bagWeight.getSupplyRequest().getSupplier().getUser() != null) {
+                    supplierName = bagWeight.getSupplyRequest().getSupplier().getUser().getName();
+                }
             }
-            return dto;
-        }).collect(Collectors.toList());
+            if (bagWeight.getSupplyRequest() != null) {
+                statusVal = bagWeight.getSupplyRequest().getStatus();
+            }
+            return new WeighedBagWeightDetailsDTO(
+                bagWeight.getId(),
+                bagWeight.getBagTotal(),
+                (int) bagWeight.getCoarse(),
+                bagWeight.getGrossWeight(),
+                bagWeight.getTareWeight(),
+                supplierId,
+                supplierName,
+                statusVal
+            );
+        });
     }
 }

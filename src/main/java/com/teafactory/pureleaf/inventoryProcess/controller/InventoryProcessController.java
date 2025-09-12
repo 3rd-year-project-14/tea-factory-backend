@@ -39,9 +39,9 @@ public class InventoryProcessController {
     }
 
     @GetMapping("/supply-request/{supplyRequestId}/bagweight-id")
-    public ResponseEntity<List<Long>> getBagWeightIdsBySupplyRequestAndDate(@PathVariable Long supplyRequestId) {
-        List<Long> bagWeightIds = inventoryProcessService.getBagWeightIdsBySupplyRequestAndDate(supplyRequestId);
-        return ResponseEntity.ok(bagWeightIds);
+    public ResponseEntity<Long> getBagWeightIdBySupplyRequestAndDate(@PathVariable Long supplyRequestId) {
+        Long bagWeightId = inventoryProcessService.getBagWeightIdBySupplyRequestAndDate(supplyRequestId);
+        return ResponseEntity.ok(bagWeightId);
     }
 
     @PutMapping("/empty-bag/{bagWeightId}")

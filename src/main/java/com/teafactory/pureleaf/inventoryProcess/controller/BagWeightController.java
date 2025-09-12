@@ -2,9 +2,14 @@ package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDTO;
 import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponseDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagWeightDetailsDTO;
 import com.teafactory.pureleaf.inventoryProcess.entity.BagWeight;
 import com.teafactory.pureleaf.inventoryProcess.service.BagWeightService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,37 +40,30 @@ public class BagWeightController {
         BagWeight createdBagWeight = bagWeightService.createBagWeight(bagWeightDTO);
         // Update TripBag status to 'weighed' only for the sent bag numbers and supplyRequestId
         bagWeightService.updateTripBagStatusToWeighed(bagWeightDTO.getSupplyRequestId(), bagWeightDTO.getBagNumbers());
-        BagWeightResponseDTO responseDTO = mapToResponseDTO(createdBagWeight);
+        BagWeightResponseDTO responseDTO = bagWeightService.mapToResponseDTO(createdBagWeight);
         return ResponseEntity.ok(responseDTO);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BagWeightResponseDTO> updateBagWeight(@PathVariable Long id, @RequestBody BagWeightDTO bagWeightDTO) {
         BagWeight updatedBagWeight = bagWeightService.updateBagWeight(id, bagWeightDTO);
-        BagWeightResponseDTO responseDTO = mapToResponseDTO(updatedBagWeight);
+        BagWeightResponseDTO responseDTO = bagWeightService.mapToResponseDTO(updatedBagWeight);
         return ResponseEntity.ok(responseDTO);
     }
 
-    @GetMapping("/session/{sessionId}")
-    public ResponseEntity<List<BagWeightWithSupplierDTO>> getBagWeightsWithSupplierBySessionId(@PathVariable Long sessionId) {
-        List<BagWeightWithSupplierDTO> result = bagWeightService.getBagWeightsWithSupplierBySessionId(sessionId);
+    @GetMapping("/session/{sessionId}/paged")
+    public ResponseEntity<Page<WeighedBagWeightDetailsDTO>> getBagWeightDetailsBySessionIdPaged(
+            @PathVariable Long sessionId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int size,
+            @RequestParam(defaultValue = "id,desc") String[] sort,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status) {
+        Sort.Direction direction = sort.length > 1 && sort[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
+        Page<WeighedBagWeightDetailsDTO> result = bagWeightService.getBagWeightDetailsBySessionIdPaged(sessionId, search, status, pageable);
         return ResponseEntity.ok(result);
     }
 
-    private BagWeightResponseDTO mapToResponseDTO(BagWeight bagWeight) {
-        BagWeightResponseDTO dto = new BagWeightResponseDTO();
-        dto.setId(bagWeight.getId());
-        dto.setCoarse(bagWeight.getCoarse());
-        dto.setWater(bagWeight.getWater());
-        dto.setDate(bagWeight.getDate());
-        dto.setGrossWeight(bagWeight.getGrossWeight());
-        dto.setNetWeight(bagWeight.getNetWeight());
-        dto.setRecordedAt(bagWeight.getRecordedAt());
-        dto.setTareWeight(bagWeight.getTareWeight());
-        dto.setOtherWeight(bagWeight.getOtherWeight());
-        dto.setReason(bagWeight.getReason());
-        dto.setBagTotal(bagWeight.getBagTotal());
-        return dto;
-    }
 
 }

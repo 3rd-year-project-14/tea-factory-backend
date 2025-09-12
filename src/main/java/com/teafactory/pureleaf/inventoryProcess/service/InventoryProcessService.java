@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
+import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse;
@@ -67,9 +68,12 @@ public class InventoryProcessService {
         }).collect(Collectors.toList());
     }
 
-    public List<Long> getBagWeightIdsBySupplyRequestAndDate(Long supplyRequestId) {
+    public Long getBagWeightIdBySupplyRequestAndDate(Long supplyRequestId) {
         List<BagWeight> bagWeights = bagWeightRepository.findBySupplyRequest_RequestIdAndDate(supplyRequestId, java.time.LocalDate.now());
-        return bagWeights.stream().map(BagWeight::getId).collect(Collectors.toList());
+        if (bagWeights.isEmpty()) {
+            throw new ResourceNotFoundException("No BagWeight found for supplyRequestId: " + supplyRequestId + " and today's date");
+        }
+        return bagWeights.get(0).getId();
     }
 
     public List<TripBagDetailsResponse> getPendingBagsByTripId(Long tripId) {
