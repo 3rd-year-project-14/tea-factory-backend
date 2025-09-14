@@ -91,4 +91,17 @@ public class TripBagController {
         SupplierInfoDTO supplierInfo = tripBagService.getSupplierInfoBySupplyRequestId(supplyRequestId);
         return ResponseEntity.ok(supplierInfo);
     }
+
+    @GetMapping("/trip/{tripId}/weighed")
+    public ResponseEntity<Page<com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagDetailsResponse>> getWeighedBagsByTripIdPaged(
+            @PathVariable Long tripId,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "bag.bagNumber,asc") String[] sort) {
+        Sort.Direction direction = sort.length > 1 && sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
+        Page<com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagDetailsResponse> result = tripBagService.getWeighedBagsByTripIdPaged(tripId, search, pageable);
+        return ResponseEntity.ok(result);
+    }
 }

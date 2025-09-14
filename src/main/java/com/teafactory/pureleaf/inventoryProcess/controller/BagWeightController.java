@@ -55,7 +55,7 @@ public class BagWeightController {
     public ResponseEntity<Page<WeighedBagWeightDetailsDTO>> getBagWeightDetailsBySessionIdPaged(
             @PathVariable Long sessionId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "1") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,desc") String[] sort,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status) {

@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
+import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.inventoryProcess.dto.*;
 import com.teafactory.pureleaf.inventoryProcess.entity.Bag;
 import com.teafactory.pureleaf.inventoryProcess.entity.TeaSupplyRequest;
@@ -9,6 +10,7 @@ import com.teafactory.pureleaf.inventoryProcess.repository.BagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripSupplierRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
 import com.teafactory.pureleaf.inventoryProcess.spec.TripBagSpecs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ public class TripBagService {
     @Autowired
     private TeaSupplyRequestRepository teaSupplyRequestRepository;
 
+    @Autowired
+    private TripRepository tripRepository;
     public List<TripBagDTO> getAllTripBags() {
         return tripBagRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
@@ -190,5 +194,23 @@ public class TripBagService {
         Long supplierId = teaSupplyRequest.getSupplier().getSupplierId();
         String supplierName = teaSupplyRequest.getSupplier().getUser().getName();
         return new SupplierInfoDTO(supplierId, supplierName);
+    }
+
+    public Page<WeighedBagDetailsResponse> getWeighedBagsByTripIdPaged(Long tripId, String search, Pageable pageable) {
+        if (!tripRepository.existsById(tripId)) {
+            throw new ResourceNotFoundException("Trip not found for id: " + tripId);
+        }
+        Specification<TripBag> spec = TripBagSpecs.belongsToTrip(tripId)
+            .and(TripBagSpecs.hasStatus("weighed"))
+            .and(TripBagSpecs.searchByBagNumber(search));
+        Page<TripBag> page = tripBagRepository.findAll(spec, pageable);
+        return page.map(tripBag -> {
+            String bagNumber = tripBag.getBag() != null ? tripBag.getBag().getBagNumber() : null;
+            Long supplyRequestId = null;
+            if (tripBag.getTripSupplier() != null && tripBag.getTripSupplier().getTeaSupplyRequest() != null) {
+                supplyRequestId = tripBag.getTripSupplier().getTeaSupplyRequest().getRequestId();
+            }
+            return new WeighedBagDetailsResponse(bagNumber, supplyRequestId);
+        });
     }
 }

@@ -55,7 +55,6 @@ public class BagWeightService {
                 .orElseThrow(() -> new RuntimeException("SupplyRequest not found"));
         WeighingSession weighingSession = weighingSessionRepository.findById(dto.getSessionId())
                 .orElseThrow(() -> new RuntimeException("WeighingSession not found"));
-        System.out.println( "weighingSession id: " + weighingSession.getSessionId());
 
         BagWeight bagWeight = new BagWeight();
 
@@ -151,6 +150,26 @@ public class BagWeightService {
         BagWeight saved = bagWeightRepository.save(bagWeight);
         updateTripBagStatusToWeighed(dto.getSupplyRequestId(), dto.getBagNumbers());
         updateSupplyRequestStatusIfAllBagsWeighed(dto.getSupplyRequestId());
+
+        // NEW LOGIC: Check if all bags for the trip are weighed, then update session and trip status
+        WeighingSession weighingSession = bagWeight.getWeighingSession();
+        if (weighingSession != null && weighingSession.getTrip() != null) {
+            Long tripId = weighingSession.getTrip().getTripId();
+            List<TripBag> tripBagsForTrip = tripBagRepository.findByTripSupplier_Trip_TripId(tripId);
+            boolean allWeighedForTrip = tripBagsForTrip.stream().allMatch(bag -> "weighed".equalsIgnoreCase(bag.getStatus()));
+            if (allWeighedForTrip) {
+                // Update WeighingSession status
+                List<WeighingSession> sessions = weighingSessionRepository.findByTrip_TripId(tripId);
+                for (WeighingSession session : sessions) {
+                    session.setStatus("weighed");
+                }
+                weighingSessionRepository.saveAll(sessions);
+                // Update Trip status
+                Trip trip = weighingSession.getTrip();
+                trip.setStatus("weighed");
+                tripRepository.save(trip);
+            }
+        }
         return saved;
     }
 
@@ -169,8 +188,7 @@ public class BagWeightService {
     }
 
     public Page<WeighedBagWeightDetailsDTO> getBagWeightDetailsBySessionIdPaged(Long sessionId, String search, String status, Pageable pageable) {
-        Specification<com.teafactory.pureleaf.inventoryProcess.entity.BagWeight> spec = Specification
-            .where(BagWeightSpecs.hasSessionId(sessionId))
+        Specification<com.teafactory.pureleaf.inventoryProcess.entity.BagWeight> spec = BagWeightSpecs.hasSessionId(sessionId)
             .and(BagWeightSpecs.searchSupplier(search))
             .and(BagWeightSpecs.hasStatus(status));
         Page<com.teafactory.pureleaf.inventoryProcess.entity.BagWeight> page = bagWeightRepository.findAll(spec, pageable);
@@ -191,6 +209,8 @@ public class BagWeightService {
                 bagWeight.getId(),
                 bagWeight.getBagTotal(),
                 (int) bagWeight.getCoarse(),
+                (int) bagWeight.getWater(),
+                (int) bagWeight.getOtherWeight(),
                 bagWeight.getGrossWeight(),
                 bagWeight.getTareWeight(),
                 supplierId,
