@@ -1,8 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
-import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDTO;
-import com.teafactory.pureleaf.inventoryProcess.dto.SupplierRequestBagSummaryDTO;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripSupplierId;
+import com.teafactory.pureleaf.exception.ResourceNotFoundException;
+import com.teafactory.pureleaf.inventoryProcess.dto.*;
 import com.teafactory.pureleaf.inventoryProcess.entity.Bag;
 import com.teafactory.pureleaf.inventoryProcess.entity.TeaSupplyRequest;
 import com.teafactory.pureleaf.inventoryProcess.entity.TripBag;
@@ -11,13 +10,19 @@ import com.teafactory.pureleaf.inventoryProcess.repository.BagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.TripSupplierRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
+import com.teafactory.pureleaf.inventoryProcess.spec.TripBagSpecs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 @Service
 public class TripBagService {
@@ -30,6 +35,8 @@ public class TripBagService {
     @Autowired
     private TeaSupplyRequestRepository teaSupplyRequestRepository;
 
+    @Autowired
+    private TripRepository tripRepository;
     public List<TripBagDTO> getAllTripBags() {
         return tripBagRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
@@ -91,6 +98,26 @@ public class TripBagService {
                 .collect(Collectors.toList());
     }
 
+
+
+    public List<TripBagDetailsDTO> getTripBagDetailsBySupplyRequestIdAndStatus(Long supplyRequestId, String status) {
+        if (status == null || status.isEmpty()) {
+            throw new IllegalArgumentException("Status parameter is required");
+        }
+        List<TripBag> tripBags = tripBagRepository.findByTripSupplier_TeaSupplyRequest_RequestId(supplyRequestId)
+            .stream()
+            .filter(bag -> status.equalsIgnoreCase(bag.getStatus()))
+            .collect(Collectors.toList());
+        return tripBags.stream()
+                .map(bag -> new TripBagDetailsDTO(
+                        bag.getBag() != null ? bag.getBag().getBagNumber() : null,
+                        bag.getDriverWeight(),
+                        bag.getWet(),
+                        bag.getCoarse()
+                ))
+                .collect(Collectors.toList());
+    }
+
     public List<SupplierRequestBagSummaryDTO> getSupplierRequestBagSummaryByTripId(Long tripId) {
         List<TripBag> tripBags = tripBagRepository.findAll();
         Map<Long, SupplierRequestBagSummaryDTO> summaryMap = new HashMap<>();
@@ -119,6 +146,33 @@ public class TripBagService {
         return new SupplierRequestBagSummaryDTO(supplyRequestId, totalBags, totalWeight);
     }
 
+    public Page<TripBagBriefDTO> getTodayTripBagsBrief(Long tripId, String search, Pageable pageable) {
+        Specification<TripBag> spec = Specification.allOf(
+                TripBagSpecs.belongsToTrip(tripId),
+                TripBagSpecs.forDate(LocalDate.now()),
+                TripBagSpecs.hasStatus("pending"),
+                TripBagSpecs.searchByBagNumber(search)
+        );
+
+        Page<TripBag> page = tripBagRepository.findAll(spec, pageable);
+        return page.map(this::toBriefDTO);
+    }
+
+    private TripBagBriefDTO toBriefDTO(TripBag bag) {
+        String bagNo = bag.getBag() != null ? bag.getBag().getBagNumber() : null;
+        Double weight = bag.getDriverWeight();
+        Boolean wet = bag.getWet();
+        Boolean coarse = bag.getCoarse();
+        Long supplyRequestId = bag.getTripSupplier().getTeaSupplyRequest().getRequestId();
+        return TripBagBriefDTO.builder()
+                .bagNo(bagNo)
+                .weight(weight)
+                .wet(wet)
+                .coarse(coarse)
+                .supplyRequestId(supplyRequestId)
+                .build();
+    }
+
     private TripBagDTO convertToDTO(TripBag tripBag) {
         return new TripBagDTO(
                 tripBag.getId(),
@@ -132,5 +186,31 @@ public class TripBagService {
                 tripBag.getType(),
                 tripBag.getStatus()
         );
+    }
+
+    public SupplierInfoDTO getSupplierInfoBySupplyRequestId(Long supplyRequestId) {
+        TeaSupplyRequest teaSupplyRequest = teaSupplyRequestRepository.findById(supplyRequestId)
+            .orElseThrow(() -> new RuntimeException("TeaSupplyRequest not found"));
+        Long supplierId = teaSupplyRequest.getSupplier().getSupplierId();
+        String supplierName = teaSupplyRequest.getSupplier().getUser().getName();
+        return new SupplierInfoDTO(supplierId, supplierName);
+    }
+
+    public Page<WeighedBagDetailsResponse> getWeighedBagsByTripIdPaged(Long tripId, String search, Pageable pageable) {
+        if (!tripRepository.existsById(tripId)) {
+            throw new ResourceNotFoundException("Trip not found for id: " + tripId);
+        }
+        Specification<TripBag> spec = TripBagSpecs.belongsToTrip(tripId)
+            .and(TripBagSpecs.hasStatus("weighed"))
+            .and(TripBagSpecs.searchByBagNumber(search));
+        Page<TripBag> page = tripBagRepository.findAll(spec, pageable);
+        return page.map(tripBag -> {
+            String bagNumber = tripBag.getBag() != null ? tripBag.getBag().getBagNumber() : null;
+            Long supplyRequestId = null;
+            if (tripBag.getTripSupplier() != null && tripBag.getTripSupplier().getTeaSupplyRequest() != null) {
+                supplyRequestId = tripBag.getTripSupplier().getTeaSupplyRequest().getRequestId();
+            }
+            return new WeighedBagDetailsResponse(bagNumber, supplyRequestId);
+        });
     }
 }

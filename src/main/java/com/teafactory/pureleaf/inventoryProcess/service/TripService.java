@@ -12,7 +12,6 @@ import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
 import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.BagWeightRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,16 +24,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class TripService {
-    @Autowired
-    private TripRepository tripRepository;
-    @Autowired
-    private DriverRepository driverRepository;
-    @Autowired
-    private RouteRepository routeRepository;
-    @Autowired
-    private FactoryRepository factoryRepository;
-    @Autowired
-    private BagWeightRepository bagWeightRepository;
+
+    private final TripRepository tripRepository;
+    private final DriverRepository driverRepository;
+    private final RouteRepository routeRepository;
+    private final FactoryRepository factoryRepository;
+    private final BagWeightRepository bagWeightRepository;
+
+    public TripService(TripRepository tripRepository, DriverRepository driverRepository, RouteRepository routeRepository, FactoryRepository factoryRepository, BagWeightRepository bagWeightRepository) {
+        this.tripRepository = tripRepository;
+        this.driverRepository = driverRepository;
+        this.routeRepository = routeRepository;
+        this.factoryRepository = factoryRepository;
+        this.bagWeightRepository = bagWeightRepository;
+    }
 
     public List<TripDTO> getAllTrips() {
         return tripRepository.findAll().stream()
@@ -80,6 +83,7 @@ public class TripService {
         return Optional.empty();
     }
 
+    // Get counts of trips by status for today for a given factory
     public TripStatusCountsDTO getTodayTripStatusCounts(Long factoryId) {
         // Ensure factory exists
         factoryRepository.findById(factoryId).orElseThrow(() -> new ResourceNotFoundException("Factory not found with id: " + factoryId));
@@ -94,6 +98,7 @@ public class TripService {
         return new TripStatusCountsDTO(factoryId, today, pendingCount, arrivedCount, weighedCount, completedCount);
     }
 
+    // Get paginated trip summaries for today filtered by status and optional search term
     public Page<TripSummaryResponseDTO> getTodayTripSummaries(Long factoryId,
                                                               String status,
                                                               String search,

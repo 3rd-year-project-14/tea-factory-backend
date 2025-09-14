@@ -17,8 +17,6 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificationExecutor<Trip> {
     Optional<Trip> findByDriver_DriverIdAndTripDate(Long driverId, LocalDate tripDate);
 
-    List<Trip> findByRoute_Factory_FactoryIdAndTripDate(Long factoryId, LocalDate tripDate);
-
 
     // Projection for aggregated counts
     interface TripStatusAggregation {
@@ -45,22 +43,6 @@ public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificat
             "COALESCE(SUM(CASE WHEN LOWER(t.status) IN ('completed','complete') THEN 1 ELSE 0 END),0) AS completedCount " +
             "FROM Trip t WHERE t.route.factory.factoryId = :factoryId AND t.tripDate = :tripDate")
     TripStatusAggregation aggregateStatusCounts(@Param("factoryId") Long factoryId, @Param("tripDate") LocalDate tripDate);
-
-    // Existing (non-paginated) summaries
-    @Query("SELECT t.tripId AS tripId, r.routeId AS routeId, r.name AS routeName, u.name AS driverName, COUNT(tb.id) AS bagCount " +
-            "FROM Trip t " +
-            "LEFT JOIN t.route r " +
-            "LEFT JOIN t.driver d " +
-            "LEFT JOIN d.user u " +
-            "LEFT JOIN TripSupplier ts ON ts.trip = t " +
-            "LEFT JOIN TripBag tb ON tb.tripSupplier = ts " +
-            "WHERE r.factory.factoryId = :factoryId " +
-            "AND t.tripDate = :tripDate " +
-            "AND ((LOWER(:status) = 'pending' AND LOWER(t.status) IN ('pending','collected')) OR (LOWER(:status) <> 'pending' AND LOWER(t.status) = LOWER(:status))) " +
-            "GROUP BY t.tripId, r.routeId, r.name, u.name")
-    List<TripSummaryProjection> findTripSummaries(@Param("factoryId") Long factoryId,
-                                                  @Param("status") String status,
-                                                  @Param("tripDate") LocalDate tripDate);
 
     // New paginated + searchable summaries
     @Query(value = "SELECT t.tripId AS tripId, r.routeId AS routeId, r.name AS routeName, u.name AS driverName, COUNT(tb.id) AS bagCount " +

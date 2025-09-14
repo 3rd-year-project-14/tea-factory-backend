@@ -2,12 +2,17 @@ package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.TareWeightRequest;
 import com.teafactory.pureleaf.inventoryProcess.service.InventoryProcessService;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagDetailsResponse;
 
 @CrossOrigin (origins = "*")
 @RestController
@@ -17,15 +22,14 @@ public class InventoryProcessController {
     @Autowired
     private InventoryProcessService inventoryProcessService;
 
-    @GetMapping("/factory/{factoryId}")
-    public ResponseEntity<?> getByFactoryId(@PathVariable Long factoryId){
-        List<TripsResponse> trips = inventoryProcessService.getTodayTripsByFactory(factoryId);
-        return ResponseEntity.ok(trips);
-    }
-
     @GetMapping("/trip/{tripId}/bags")
     public ResponseEntity<?> getBagsByTripId(@PathVariable Long tripId) {
         return ResponseEntity.ok(inventoryProcessService.getBagsByTripId(tripId));
+    }
+
+    @GetMapping("/trip/{tripId}/summary")
+    public ResponseEntity<TripBagSummaryResponse> getTripBagSummary(@PathVariable Long tripId) {
+        return ResponseEntity.ok(inventoryProcessService.getTodayTripBagSummary(tripId));
     }
 
     @GetMapping("/trip/{tripId}/bags/pending")
@@ -39,9 +43,9 @@ public class InventoryProcessController {
     }
 
     @GetMapping("/supply-request/{supplyRequestId}/bagweight-id")
-    public ResponseEntity<List<Long>> getBagWeightIdsBySupplyRequestAndDate(@PathVariable Long supplyRequestId) {
-        List<Long> bagWeightIds = inventoryProcessService.getBagWeightIdsBySupplyRequestAndDate(supplyRequestId);
-        return ResponseEntity.ok(bagWeightIds);
+    public ResponseEntity<Long> getBagWeightIdBySupplyRequestAndDate(@PathVariable Long supplyRequestId) {
+        Long bagWeightId = inventoryProcessService.getBagWeightIdBySupplyRequestAndDate(supplyRequestId);
+        return ResponseEntity.ok(bagWeightId);
     }
 
     @PutMapping("/empty-bag/{bagWeightId}")
@@ -50,5 +54,13 @@ public class InventoryProcessController {
             @RequestBody TareWeightRequest tareWeightRequest) {
         inventoryProcessService.updateTareWeightAndCompleteProcess(bagWeightId, tareWeightRequest.getTareWeight());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/trip/{tripId}/weighing-summary")
+    public ResponseEntity<WeighingSummaryResponse> getWeighingSummary(
+            @PathVariable Long tripId,
+            @RequestParam String status) {
+        WeighingSummaryResponse resp = inventoryProcessService.getTodayWeighingSummaryByTripAndStatus(tripId, status);
+        return ResponseEntity.ok(resp);
     }
 }
