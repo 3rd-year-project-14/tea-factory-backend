@@ -79,6 +79,13 @@ public class TeaRateService {
             .toList();
     }
 
+    public List<TeaRateResponseDTO> getPendingTeaRateDTOs() {
+        return teaRateRepository.findAll().stream()
+            .filter(rate -> rate.getStatus() == TeaRate.Status.PENDING)
+            .map(this::toResponseDTO)
+            .toList();
+    }
+
     private TeaRateResponseDTO toResponseDTO(TeaRate rate) {
         String createdAt = rate.getCalculatedDate() != null ? rate.getCalculatedDate().toString() : null;
         return new TeaRateResponseDTO(
