@@ -26,6 +26,12 @@ public class TeaRateController {
         return ResponseEntity.ok("Tea rate created successfully");
     }
 
+    @GetMapping("/pending")
+    public List<TeaRateResponseDTO> getPendingTeaRates() {
+        return teaRateService.getPendingTeaRateDTOs();
+    }
+
+
     @GetMapping
     public List<TeaRateResponseDTO> getAllTeaRates() {
         return teaRateService.getAllTeaRateDTOs();
