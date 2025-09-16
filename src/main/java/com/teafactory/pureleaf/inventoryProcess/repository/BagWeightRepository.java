@@ -54,4 +54,14 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
     TodayWeighingSummaryProjection getTodayWeighingSummaryByTripAndStatus(@Param("tripId") Long tripId,
                                                                           @Param("status") String status,
                                                                           @Param("today") LocalDate today);
+
+    // Dashboard projection for total bags and gross weight for a factory on a given date
+    interface FactoryBagWeightSummaryProjection {
+        Long getTotalBags();
+        Double getTotalGrossWeight();
+    }
+
+    @Query("SELECT COALESCE(SUM(b.bagTotal), 0) AS totalBags, COALESCE(SUM(b.grossWeight), 0) AS totalGrossWeight " +
+            "FROM BagWeight b WHERE b.weighingSession.trip.route.factory.factoryId = :factoryId AND b.date = :today")
+    FactoryBagWeightSummaryProjection getFactoryBagWeightSummary(@Param("factoryId") Long factoryId, @Param("today") java.time.LocalDate today);
 }

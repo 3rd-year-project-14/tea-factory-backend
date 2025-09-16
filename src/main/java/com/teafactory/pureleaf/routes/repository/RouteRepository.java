@@ -15,4 +15,6 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @Query("SELECT new com.teafactory.pureleaf.routes.dto.RouteDetailsDTO(r.routeId, r.name, r.routeCode) FROM Route r WHERE r.factory.factoryId = :factoryId AND r.status = true")
     List<RouteDetailsDTO> findRouteDetailsByFactoryId(@Param("factoryId") Long factoryId);
+
+    long countByFactory_FactoryIdAndStatusTrue(Long factoryId);
 }
