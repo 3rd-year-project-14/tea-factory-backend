@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.teafactory.pureleaf.repository.UserRepository;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.auth.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;

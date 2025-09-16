@@ -4,7 +4,7 @@ package com.teafactory.pureleaf.payment.service;
 import com.teafactory.pureleaf.payment.dto.TeaRateRequestDTO;
 import com.teafactory.pureleaf.payment.dto.TeaRateResponseDTO;
 import com.teafactory.pureleaf.payment.entity.TeaRate;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.auth.entity.User;
 import com.teafactory.pureleaf.payment.repository.TeaRateRepository;
 import com.teafactory.pureleaf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

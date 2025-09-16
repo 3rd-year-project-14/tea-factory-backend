@@ -5,7 +5,7 @@ import com.teafactory.pureleaf.driverProcess.entity.Driver;
 import com.teafactory.pureleaf.entity.Factory;
 import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.routes.entity.Route;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.auth.entity.User;
 import com.teafactory.pureleaf.driverProcess.repository.DriverRepository;
 import com.teafactory.pureleaf.repository.FactoryRepository;
 import com.teafactory.pureleaf.routes.repository.RouteRepository;

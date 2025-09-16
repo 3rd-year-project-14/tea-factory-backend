@@ -1,8 +1,7 @@
 package com.teafactory.pureleaf.controller;
 
-import com.teafactory.pureleaf.dto.FactoryDTO;
+import com.teafactory.pureleaf.dto.InventoryManagerDto;
 import com.teafactory.pureleaf.dto.UserDTO;
-import com.teafactory.pureleaf.entity.User;
 import com.teafactory.pureleaf.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +44,11 @@ public class UserController {
     public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/inventory-managers/{factoryId}")
+    public ResponseEntity<List<InventoryManagerDto>> getInventoryManagersByFactoryId(@PathVariable Long factoryId) {
+        return ResponseEntity.ok(userService.getInventoryManagersByFactoryId(factoryId));
     }
 
 }

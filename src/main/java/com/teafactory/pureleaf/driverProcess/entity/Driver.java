@@ -1,7 +1,7 @@
 package com.teafactory.pureleaf.driverProcess.entity;
 
 import com.teafactory.pureleaf.entity.Factory;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

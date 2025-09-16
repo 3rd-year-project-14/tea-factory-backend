@@ -4,6 +4,7 @@ package com.teafactory.pureleaf.supplier.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teafactory.pureleaf.auth.entity.Role;
+import com.teafactory.pureleaf.auth.entity.User;
 import com.teafactory.pureleaf.entity.*;
 import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.repository.*;
@@ -26,7 +27,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class SupplierService {

@@ -25,4 +25,5 @@ public class AuthController {
     public AuthResponse login(@RequestBody LoginRequest request) throws Exception {
         return authService.login(request);
     }
+
 }

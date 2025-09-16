@@ -2,7 +2,7 @@ package com.teafactory.pureleaf.inventoryProcess.service;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSessionDTO;
 import com.teafactory.pureleaf.inventoryProcess.entity.WeighingSession;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.auth.entity.User;
 import com.teafactory.pureleaf.inventoryProcess.entity.Trip;
 import com.teafactory.pureleaf.inventoryProcess.repository.WeighingSessionRepository;
 import com.teafactory.pureleaf.repository.UserRepository;
