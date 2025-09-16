@@ -12,8 +12,12 @@ import com.teafactory.pureleaf.inventoryProcess.repository.WeighingSessionReposi
 import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.BagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.teafactory.pureleaf.inventoryProcess.spec.BagWeightSpecs;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDetailsResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -182,4 +186,49 @@ public class InventoryProcessService {
         double totalGrossWeight = p != null && p.getTotalGrossWeight() != null ? p.getTotalGrossWeight() : 0.0;
         return new WeighingSummaryResponse(totalSuppliers, totalBags, totalGrossWeight);
     }
+
+    public Page<BagWeightDetailsResponse> getBagWeights(
+            Long factoryId,
+            Long routeId,
+            Long userId,
+            String date,
+            String search,
+            int page,
+            int size
+    ) {
+        LocalDate parsedDate = null;
+        if (date != null && !date.isEmpty()) {
+            try {
+                parsedDate = LocalDate.parse(date);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid date format. Use yyyy-MM-dd.");
+            }
+        }
+        var spec = BagWeightSpecs.filterAll(factoryId, routeId, userId, parsedDate, search);
+        Page<BagWeight> bagWeightPage;
+        if (parsedDate != null) {
+            // If filtering by date, do not explicitly sort by date
+            bagWeightPage = bagWeightRepository.findAll(spec, PageRequest.of(page, size));
+        } else {
+            // If filtering by routeId or userId (or neither), sort by date descending
+            org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "date");
+            bagWeightPage = bagWeightRepository.findAll(spec, PageRequest.of(page, size, sort));
+        }
+        return bagWeightPage.map(bw -> {
+            BagWeightDetailsResponse dto = new BagWeightDetailsResponse();
+            dto.setBagWeightId(bw.getId());
+            dto.setGrossWeight(bw.getGrossWeight());
+            double deduction = (bw.getWater() + bw.getCoarse() + bw.getOtherWeight() + bw.getTareWeight());
+            dto.setDeduction(deduction);
+            dto.setNetWeight(bw.getNetWeight());
+            if (bw.getSupplyRequest() != null && bw.getSupplyRequest().getSupplier() != null) {
+                dto.setSupplierId(bw.getSupplyRequest().getSupplier().getSupplierId());
+                if (bw.getSupplyRequest().getSupplier().getUser() != null) {
+                    dto.setSupplierName(bw.getSupplyRequest().getSupplier().getUser().getName());
+                }
+            }
+            return dto;
+        });
+    }
+
 }

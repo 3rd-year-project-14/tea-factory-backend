@@ -38,4 +38,39 @@ public class BagWeightSpecs {
             return cb.equal(cb.lower(root.get("supplyRequest").get("status")), status.trim().toLowerCase());
         };
     }
+
+    public static Specification<BagWeight> filterAll(
+            Long factoryId,
+            Long routeId,
+            Long userId,
+            java.time.LocalDate date,
+            String search
+    ) {
+        Specification<BagWeight> spec = Specification.where(null);
+        if (factoryId != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("supplyRequest").get("supplier").get("user").get("factory").get("factoryId"), factoryId)
+            );
+        }
+        if (routeId != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("weighingSession").get("trip").get("route").get("routeId"), routeId)
+            );
+        }
+        if (userId != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("weighingSession").get("user").get("id"), userId)
+            );
+        }
+        if (date != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("date"), date)
+            );
+        }
+        Specification<BagWeight> searchSpec = searchSupplier(search);
+        if (searchSpec != null) {
+            spec = spec.and(searchSpec);
+        }
+        return spec;
+    }
 }
