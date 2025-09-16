@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagDetailsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDetailsResponse;
 
 @CrossOrigin (origins = "*")
 @RestController
@@ -62,5 +63,21 @@ public class InventoryProcessController {
             @RequestParam String status) {
         WeighingSummaryResponse resp = inventoryProcessService.getTodayWeighingSummaryByTripAndStatus(tripId, status);
         return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/{factoryId}/bagweights")
+    public ResponseEntity<Page<BagWeightDetailsResponse>> getBagWeights(
+            @PathVariable Long factoryId,
+            @RequestParam(required = false) Long routeId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<BagWeightDetailsResponse> result = inventoryProcessService.getBagWeights(
+            factoryId, routeId, userId, date, search, page, size
+        );
+        return ResponseEntity.ok(result);
     }
 }

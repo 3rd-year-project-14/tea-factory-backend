@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import com.teafactory.pureleaf.entity.Factory;
 import com.teafactory.pureleaf.routes.entity.Route;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
 

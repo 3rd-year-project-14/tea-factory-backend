@@ -1,7 +1,9 @@
 package com.teafactory.pureleaf.service;
 
 import com.teafactory.pureleaf.dto.UserDTO;
-import com.teafactory.pureleaf.entity.User;
+import com.teafactory.pureleaf.dto.InventoryManagerDto;
+import com.teafactory.pureleaf.auth.entity.User;
+import com.teafactory.pureleaf.auth.entity.Role;
 import com.teafactory.pureleaf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,5 +67,13 @@ public class UserService {
     // ✅ DELETE
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    // ✅ READ INVENTORY MANAGERS BY FACTORY
+    public List<InventoryManagerDto> getInventoryManagersByFactoryId(Long factoryId) {
+        List<User> users = userRepository.findByFactory_FactoryIdAndRole(factoryId, Role.INVENTORY_MANAGER);
+        return users.stream()
+                .map(user -> new InventoryManagerDto(user.getId(), user.getName()))
+                .collect(Collectors.toList());
     }
 }
