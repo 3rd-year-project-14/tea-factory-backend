@@ -21,10 +21,12 @@ import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDetailsResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.FactoryDashboardSummaryResponse;
 import com.teafactory.pureleaf.routes.repository.RouteRepository;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
+import com.teafactory.pureleaf.inventoryProcess.dto.TodayTripDetailsResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class InventoryProcessService {
@@ -261,6 +263,24 @@ public class InventoryProcessService {
                 .completedRoutes(completedRoutes)
                 .completedSuppliers(completedSuppliers)
                 .build();
+    }
+
+    public Page<TodayTripDetailsResponse> getTodayTripDetails(Long factoryId, String search, Pageable pageable) {
+        LocalDate today = LocalDate.now();
+        return tripRepository.findTodayTripDetailsByFactoryIdAndTripDate(factoryId, today, search, pageable)
+                .map(p -> TodayTripDetailsResponse.builder()
+                        .tripId(p.getTripId())
+                        .routeName(p.getRouteName())
+                        .routeCode(p.getRouteCode())
+                        .driverName(p.getDriverName())
+                        .totalBags(p.getTotalBags() != null ? p.getTotalBags() : 0)
+                        .totalWeight(p.getTotalWeight() != null ? p.getTotalWeight() : 0.0)
+                        .totalSuppliers(p.getTotalSuppliers() != null ? p.getTotalSuppliers() : 0)
+                        .completedSuppliers(p.getCompletedSuppliers() != null ? p.getCompletedSuppliers() : 0)
+                        .tripStatus(p.getTripStatus())
+                        .lastUpdate(p.getLastUpdate())
+                        .build()
+                );
     }
 
 }

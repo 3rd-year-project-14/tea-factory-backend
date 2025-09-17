@@ -82,4 +82,13 @@ public class InventoryProcessController {
         FactoryDashboardSummaryResponse summary = inventoryProcessService.getFactoryDashboardSummary(factoryId);
         return ResponseEntity.ok(summary);
     }
+
+    @GetMapping("/factories/{factoryId}/trips/today")
+    public ResponseEntity<Page<TodayTripDetailsResponse>> getTodayTripDetails(
+            @PathVariable Long factoryId,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        Page<TodayTripDetailsResponse> result = inventoryProcessService.getTodayTripDetails(factoryId, search, pageable);
+        return ResponseEntity.ok(result);
+    }
 }
