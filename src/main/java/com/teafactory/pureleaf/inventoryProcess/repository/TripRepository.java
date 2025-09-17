@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,20 @@ public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificat
         String getRouteName();
         String getDriverName();
         long getBagCount();
+    }
+
+    // Projection for TodayTripDetailsResponse
+    interface TodayTripDetailsProjection {
+        Long getTripId();
+        String getRouteName();
+        String getRouteCode();
+        String getDriverName();
+        Integer getTotalBags();
+        Double getTotalWeight();
+        Integer getTotalSuppliers();
+        Integer getCompletedSuppliers();
+        String getTripStatus();
+        LocalTime getLastUpdate();
     }
 
     // Single aggregated query to reduce data transfer and Java-side processing
@@ -74,4 +89,28 @@ public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificat
                                                   @Param("tripDate") LocalDate tripDate,
                                                   @Param("search") String search,
                                                   Pageable pageable);
+
+    // Custom query for today's trip details with pagination
+    @Query(value = "SELECT t.tripId AS tripId, " +
+            "r.name AS routeName, " +
+            "r.routeCode AS routeCode, " +
+            "u.name AS driverName, " +
+            "COUNT(DISTINCT tb.id) AS totalBags, " +
+            "COALESCE(SUM(tb.driverWeight), 0) AS totalWeight, " +
+            "(SELECT COUNT(tsr.requestId) FROM TeaSupplyRequest tsr WHERE tsr.supplier.route.routeId = t.route.routeId AND tsr.supplyDate = :tripDate) AS totalSuppliers, " +
+            "(SELECT COUNT(ts2.id.requestId) FROM TripSupplier ts2 WHERE ts2.trip.tripId = t.tripId AND ts2.status = 'completed') AS completedSuppliers, " +
+            "t.status AS tripStatus, " +
+            "(SELECT MAX(ts2.completionTime) FROM TripSupplier ts2 WHERE ts2.trip.tripId = t.tripId AND ts2.status = 'completed') AS lastUpdate " +
+            "FROM Trip t " +
+            "JOIN t.route r " +
+            "JOIN t.driver d " +
+            "JOIN d.user u " +
+            "LEFT JOIN TripSupplier tsp ON tsp.trip = t " +
+            "LEFT JOIN TripBag tb ON tb.tripSupplier = tsp " +
+            "WHERE r.factory.factoryId = :factoryId AND t.tripDate = :tripDate " +
+            "AND (:search IS NULL OR :search = '' OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "GROUP BY t.tripId, r.name, r.routeCode, u.name, t.status " +
+            "ORDER BY lastUpdate DESC, t.tripId DESC",
+            countQuery = "SELECT COUNT(DISTINCT t.tripId) FROM Trip t WHERE t.route.factory.factoryId = :factoryId AND t.tripDate = :tripDate AND (:search IS NULL OR :search = '' OR LOWER(t.route.name) LIKE LOWER(CONCAT('%', :search, '%')))" )
+    Page<TodayTripDetailsProjection> findTodayTripDetailsByFactoryIdAndTripDate(@Param("factoryId") Long factoryId, @Param("tripDate") java.time.LocalDate tripDate, @Param("search") String search, Pageable pageable);
 }

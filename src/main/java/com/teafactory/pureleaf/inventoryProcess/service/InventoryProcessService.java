@@ -18,10 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDetailsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.FactoryDashboardSummaryResponse;
+import com.teafactory.pureleaf.routes.repository.RouteRepository;
+import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
+import com.teafactory.pureleaf.inventoryProcess.dto.TodayTripDetailsResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class InventoryProcessService {
@@ -42,6 +47,11 @@ public class InventoryProcessService {
 
     @Autowired
     private BagRepository bagRepository;
+
+    @Autowired
+    private RouteRepository routeRepository;
+    @Autowired
+    private SupplierRepository supplierRepository;
 
     public List<TripBagDetailsResponse> getBagsByTripId(Long tripId) {
         List<TripBag> tripBags = tripBagRepository.findByTripSupplier_Trip_TripId(tripId);
@@ -229,6 +239,48 @@ public class InventoryProcessService {
             }
             return dto;
         });
+    }
+
+    public FactoryDashboardSummaryResponse getFactoryDashboardSummary(Long factoryId) {
+        LocalDate today = LocalDate.now();
+        long totalActiveRoutes = routeRepository.countByFactory_FactoryIdAndStatusTrue(factoryId);
+        BagWeightRepository.FactoryBagWeightSummaryProjection bagWeightSummary = bagWeightRepository.getFactoryBagWeightSummary(factoryId, today);
+        long totalBags = bagWeightSummary != null && bagWeightSummary.getTotalBags() != null ? bagWeightSummary.getTotalBags() : 0L;
+        double totalGrossWeight = bagWeightSummary != null && bagWeightSummary.getTotalGrossWeight() != null ? bagWeightSummary.getTotalGrossWeight() : 0.0;
+        long totalSuppliers = supplierRepository.countByIsActiveIsTrueAndFactory_factoryId(factoryId);
+        long todaySuppliers = teaSupplyRequestRepository.countTodaySuppliers(today, factoryId);
+        long estimatedTotalBags = teaSupplyRequestRepository.sumEstimatedTotalBags(today, factoryId);
+        TripRepository.TripStatusAggregation tripStatus = tripRepository.aggregateStatusCounts(factoryId, today);
+        long completedRoutes = tripStatus != null ? tripStatus.getCompletedCount() : 0L;
+        long completedSuppliers = teaSupplyRequestRepository.countCompletedSuppliers(today, factoryId);
+        return FactoryDashboardSummaryResponse.builder()
+                .totalActiveRoutes(totalActiveRoutes)
+                .totalBags(totalBags)
+                .totalGrossWeight(totalGrossWeight)
+                .totalSuppliers(totalSuppliers)
+                .todaySuppliers(todaySuppliers)
+                .estimatedTotalBags(estimatedTotalBags)
+                .completedRoutes(completedRoutes)
+                .completedSuppliers(completedSuppliers)
+                .build();
+    }
+
+    public Page<TodayTripDetailsResponse> getTodayTripDetails(Long factoryId, String search, Pageable pageable) {
+        LocalDate today = LocalDate.now();
+        return tripRepository.findTodayTripDetailsByFactoryIdAndTripDate(factoryId, today, search, pageable)
+                .map(p -> TodayTripDetailsResponse.builder()
+                        .tripId(p.getTripId())
+                        .routeName(p.getRouteName())
+                        .routeCode(p.getRouteCode())
+                        .driverName(p.getDriverName())
+                        .totalBags(p.getTotalBags() != null ? p.getTotalBags() : 0)
+                        .totalWeight(p.getTotalWeight() != null ? p.getTotalWeight() : 0.0)
+                        .totalSuppliers(p.getTotalSuppliers() != null ? p.getTotalSuppliers() : 0)
+                        .completedSuppliers(p.getCompletedSuppliers() != null ? p.getCompletedSuppliers() : 0)
+                        .tripStatus(p.getTripStatus())
+                        .lastUpdate(p.getLastUpdate())
+                        .build()
+                );
     }
 
 }

@@ -1,9 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.controller;
 
-import com.teafactory.pureleaf.inventoryProcess.dto.TareWeightRequest;
+import com.teafactory.pureleaf.inventoryProcess.dto.*;
 import com.teafactory.pureleaf.inventoryProcess.service.InventoryProcessService;
-import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
-import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +10,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagDetailsResponse;
-import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDetailsResponse;
 
 @CrossOrigin (origins = "*")
 @RestController
@@ -76,8 +72,23 @@ public class InventoryProcessController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Page<BagWeightDetailsResponse> result = inventoryProcessService.getBagWeights(
-            factoryId, routeId, userId, date, search, page, size
+                factoryId, routeId, userId, date, search, page, size
         );
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{factoryId}/dashboard-summary")
+    public ResponseEntity<FactoryDashboardSummaryResponse> getFactoryDashboardSummary(@PathVariable Long factoryId) {
+        FactoryDashboardSummaryResponse summary = inventoryProcessService.getFactoryDashboardSummary(factoryId);
+        return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/factories/{factoryId}/trips/today")
+    public ResponseEntity<Page<TodayTripDetailsResponse>> getTodayTripDetails(
+            @PathVariable Long factoryId,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        Page<TodayTripDetailsResponse> result = inventoryProcessService.getTodayTripDetails(factoryId, search, pageable);
         return ResponseEntity.ok(result);
     }
 }
