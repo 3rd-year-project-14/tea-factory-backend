@@ -1,5 +1,6 @@
 package com.teafactory.pureleaf.inventoryProcess.repository;
 
+import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto;
 import com.teafactory.pureleaf.inventoryProcess.entity.BagWeight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -64,4 +65,17 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
     @Query("SELECT COALESCE(SUM(b.bagTotal), 0) AS totalBags, COALESCE(SUM(b.grossWeight), 0) AS totalGrossWeight " +
             "FROM BagWeight b WHERE b.weighingSession.trip.route.factory.factoryId = :factoryId AND b.date = :today")
     FactoryBagWeightSummaryProjection getFactoryBagWeightSummary(@Param("factoryId") Long factoryId, @Param("today") java.time.LocalDate today);
+
+    // Inventory summary for daily view using DTO projection
+    @Query("SELECT new com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto(" +
+           "COALESCE(SUM(b.grossWeight),0), COALESCE(SUM(b.netWeight),0), COALESCE(SUM(b.bagTotal),0)) " +
+           "FROM BagWeight b WHERE b.weighingSession.trip.route.factory.factoryId = :factoryId AND b.date = :date")
+    InventorySummaryDto getInventorySummaryByFactoryAndDate(@Param("factoryId") Long factoryId, @Param("date") LocalDate date);
+
+    // Inventory summary for monthly view using DTO projection (PostgreSQL compatible)
+    @Query("SELECT new com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto(" +
+           "COALESCE(SUM(b.grossWeight),0), COALESCE(SUM(b.netWeight),0), COALESCE(SUM(b.bagTotal),0)) " +
+           "FROM BagWeight b WHERE b.weighingSession.trip.route.factory.factoryId = :factoryId " +
+           "AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year")
+    InventorySummaryDto getInventorySummaryByFactoryAndMonth(@Param("factoryId") Long factoryId, @Param("month") int month, @Param("year") int year);
 }
