@@ -42,13 +42,13 @@ public class TeaRateController {
         return teaRateService.getApprovedTeaRateDTOs();
     }
 
-    @PatchMapping("/{id}/approve")
+    @PutMapping("/{id}/approve")
     public ResponseEntity<TeaRateResponseDTO> approveTeaRate(@PathVariable Long id) {
         TeaRateResponseDTO updatedTeaRate = teaRateService.approveTeaRate(id);
         return ResponseEntity.ok(updatedTeaRate);
     }
 
-    @PatchMapping("/{id}/adjust")
+    @PutMapping("/{id}/adjust")
     public ResponseEntity<TeaRateResponseDTO> adjustTeaRate(
             @PathVariable Long id,
             @RequestBody TeaRateRequestDTO dto) {

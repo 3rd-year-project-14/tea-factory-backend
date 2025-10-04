@@ -11,6 +11,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -29,6 +30,11 @@ public class SecurityConfig {
                 .addFilterBefore(firebaseAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        // allow public GET access for fertilizer dropdown endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-companies/dropdown").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-companies/*/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-companies").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-categories/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.disable()); // Disable session management for stateless JWT
