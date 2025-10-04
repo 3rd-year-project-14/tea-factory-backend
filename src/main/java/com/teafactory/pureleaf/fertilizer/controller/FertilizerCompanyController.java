@@ -1,6 +1,8 @@
 package com.teafactory.pureleaf.fertilizer.controller;
 
 import com.teafactory.pureleaf.fertilizer.dto.FertilizerCompanyDTO;
+import com.teafactory.pureleaf.fertilizer.dto.FertilizerCategoryDTO;
+import com.teafactory.pureleaf.fertilizer.dto.SimpleFertilizerCompanyDTO;
 import com.teafactory.pureleaf.fertilizer.service.FertilizerCompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +35,16 @@ public class FertilizerCompanyController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         companyService.deleteCompany(id);
+    }
+
+    // --- Dropdown Endpoints ---
+    @GetMapping("/dropdown")
+    public List<SimpleFertilizerCompanyDTO> companyDropdown() {
+        return companyService.getCompanyDropdown();
+    }
+
+    @GetMapping("/{id}/categories")
+    public List<FertilizerCategoryDTO> categoriesByCompany(@PathVariable Long id) {
+        return companyService.getCategoriesByCompany(id);
     }
 }

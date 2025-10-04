@@ -1,6 +1,10 @@
 package com.teafactory.pureleaf.fertilizer.service;
 
 import com.teafactory.pureleaf.fertilizer.dto.FertilizerCompanyDTO;
+//
+import com.teafactory.pureleaf.fertilizer.dto.FertilizerCategoryDTO;
+import com.teafactory.pureleaf.fertilizer.dto.SimpleFertilizerCompanyDTO;
+//
 import com.teafactory.pureleaf.fertilizer.entity.FertilizerCategory;
 import com.teafactory.pureleaf.fertilizer.entity.FertilizerCompany;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerCategoryRepository;
@@ -83,6 +87,30 @@ public class FertilizerCompanyService {
         companyRepo.deleteById(id);
     }
 
+    // --- Dropdown Support Methods ---
+    public List<SimpleFertilizerCompanyDTO> getCompanyDropdown() {
+        return companyRepo.findAll().stream()
+                .map(c -> SimpleFertilizerCompanyDTO.builder().id(c.getId()).name(c.getName()).build())
+                .collect(Collectors.toList());
+    }
+
+    public List<FertilizerCategoryDTO> getCategoriesByCompany(Long companyId) {
+        FertilizerCompany company = companyRepo.findWithCategoriesById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+        Set<FertilizerCategory> assigned = company.getCategories();
+        // Fallback: if no categories assigned to this company, return all categories instead of empty
+        if (assigned == null || assigned.isEmpty()) {
+            return categoryRepo.findAll().stream()
+                    .map(cat -> FertilizerCategoryDTO.builder().id(cat.getId()).name(cat.getName()).build())
+                    .sorted(Comparator.comparing(FertilizerCategoryDTO::getName, String.CASE_INSENSITIVE_ORDER))
+                    .collect(Collectors.toList());
+        }
+        return assigned.stream()
+                .map(cat -> FertilizerCategoryDTO.builder().id(cat.getId()).name(cat.getName()).build())
+                .sorted(Comparator.comparing(FertilizerCategoryDTO::getName, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+    }
+//dropdown support methods end
     private FertilizerCompanyDTO mapToDTO(FertilizerCompany company) {
         return FertilizerCompanyDTO.builder()
                 .id(company.getId())
