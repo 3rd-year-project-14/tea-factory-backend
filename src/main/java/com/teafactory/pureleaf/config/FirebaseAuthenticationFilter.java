@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.teafactory.pureleaf.repository.UserRepository;
 import com.teafactory.pureleaf.auth.entity.User;
+import com.teafactory.pureleaf.auth.entity.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -35,15 +36,24 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             try {
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
                 String email = decodedToken.getEmail();
-                List<SimpleGrantedAuthority> authorities = Collections.emptyList();
-                if (email != null) {
-                    User user = userRepository.findByEmail(email).orElse(null);
-                    if (user != null && user.getRole() != null) {
-                        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-                    }
-                }
+                String uid = decodedToken.getUid();
+
+                User user = userRepository.findByFirebaseUid(uid).orElseGet(() -> {
+                    User u = new User();
+                    u.setFirebaseUid(uid);
+                    u.setEmail(email != null ? email : (uid + "@firebase.local"));
+                    u.setRole(Role.PENDING_USER);
+                    u.setIsActive(true);
+                    return userRepository.save(u);
+                });
+
+                List<SimpleGrantedAuthority> authorities = user.getRole() != null ?
+                        List.of(new SimpleGrantedAuthority(user.getRole().getAuthority())) : Collections.emptyList();
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        decodedToken.getUid(), null, authorities);
+                        user,
+                        null,
+                        authorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
