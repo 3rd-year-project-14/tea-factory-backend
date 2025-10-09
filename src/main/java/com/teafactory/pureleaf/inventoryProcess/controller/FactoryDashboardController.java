@@ -1,8 +1,10 @@
 package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto;
+import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.RouteInventorySummaryDTO;
 import com.teafactory.pureleaf.inventoryProcess.service.FactoryDashboardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,5 +34,19 @@ public class FactoryDashboardController {
             throw new IllegalArgumentException("Invalid viewMode: " + viewMode);
         }
     }
-}
 
+    @GetMapping("/route/{factoryId}")
+    public Page<RouteInventorySummaryDTO> getRouteInventorySummary(
+            @PathVariable Long factoryId,
+            @RequestParam String viewMode,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        return factoryDashboardService.getRouteInventorySummary(factoryId, viewMode, date, month, year, search, page, size, sortDir);
+    }
+}
