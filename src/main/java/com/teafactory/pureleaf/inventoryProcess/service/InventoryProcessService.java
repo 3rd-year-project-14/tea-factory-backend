@@ -1,0 +1,286 @@
+package com.teafactory.pureleaf.inventoryProcess.service;
+
+import com.teafactory.pureleaf.exception.ResourceNotFoundException;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagSummaryResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse;
+import com.teafactory.pureleaf.inventoryProcess.entity.*;
+import com.teafactory.pureleaf.inventoryProcess.repository.TripBagRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.TripRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.BagWeightRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.WeighingSessionRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.TeaSupplyRequestRepository;
+import com.teafactory.pureleaf.inventoryProcess.repository.BagRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.teafactory.pureleaf.inventoryProcess.spec.BagWeightSpecs;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDetailsResponse;
+import com.teafactory.pureleaf.inventoryProcess.dto.FactoryDashboardSummaryResponse;
+import com.teafactory.pureleaf.routes.repository.RouteRepository;
+import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
+import com.teafactory.pureleaf.inventoryProcess.dto.TodayTripDetailsResponse;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
+
+@Service
+public class InventoryProcessService {
+    @Autowired
+    private TripRepository tripRepository;
+
+    @Autowired
+    private TripBagRepository tripBagRepository;
+
+    @Autowired
+    private BagWeightRepository bagWeightRepository;
+
+    @Autowired
+    private WeighingSessionRepository weighingSessionRepository;
+
+    @Autowired
+    private TeaSupplyRequestRepository teaSupplyRequestRepository;
+
+    @Autowired
+    private BagRepository bagRepository;
+
+    @Autowired
+    private RouteRepository routeRepository;
+    @Autowired
+    private SupplierRepository supplierRepository;
+
+    public List<TripBagDetailsResponse> getBagsByTripId(Long tripId) {
+        List<TripBag> tripBags = tripBagRepository.findByTripSupplier_Trip_TripId(tripId);
+        return tripBags.stream().map(tripBag -> {
+            Long supplierId = null;
+            String supplierName = null;
+            Long supplyRequestId = null;
+            if (tripBag.getTripSupplier() != null && tripBag.getTripSupplier().getTeaSupplyRequest() != null) {
+                if (tripBag.getTripSupplier().getTeaSupplyRequest().getSupplier() != null) {
+                    supplierId = tripBag.getTripSupplier().getTeaSupplyRequest().getSupplier().getSupplierId();
+                    // Get supplier name from related User entity
+                    supplierName = tripBag.getTripSupplier().getTeaSupplyRequest().getSupplier().getUser() != null ?
+                        tripBag.getTripSupplier().getTeaSupplyRequest().getSupplier().getUser().getName() : null;
+                }
+                supplyRequestId = tripBag.getTripSupplier().getTeaSupplyRequest().getRequestId();
+            }
+            return new TripBagDetailsResponse(
+                tripBag.getBag() != null ? tripBag.getBag().getBagNumber() : null,
+                supplierId,
+                supplierName,
+                tripBag.getDriverWeight(),
+                supplyRequestId,
+                tripBag.getWet(),
+                tripBag.getCoarse(),
+                tripBag.getId(), // set bagId
+                tripBag.getStatus() // set status
+            );
+        }).collect(Collectors.toList());
+    }
+
+    public Long getBagWeightIdBySupplyRequestAndDate(Long supplyRequestId) {
+        List<BagWeight> bagWeights = bagWeightRepository.findBySupplyRequest_RequestIdAndDate(supplyRequestId, java.time.LocalDate.now());
+        if (bagWeights.isEmpty()) {
+            throw new ResourceNotFoundException("No BagWeight found for supplyRequestId: " + supplyRequestId + " and today's date");
+        }
+        return bagWeights.get(0).getId();
+    }
+
+    public List<TripBagDetailsResponse> getPendingBagsByTripId(Long tripId) {
+        return getBagsByTripId(tripId).stream()
+                .filter(bag -> "pending".equalsIgnoreCase(bag.getStatus()))
+                .collect(Collectors.toList());
+    }
+
+    public List<TripBagDetailsResponse> getWeighedBagsByTripId(Long tripId) {
+        return getBagsByTripId(tripId).stream()
+                .filter(bag -> "weighed".equalsIgnoreCase(bag.getStatus()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateTareWeightAndCompleteProcess(Long bagWeightId, Double tareWeight) {
+        try {
+            BagWeight bagWeight = bagWeightRepository.findById(bagWeightId)
+                    .orElseThrow(() -> new RuntimeException("BagWeight not found"));
+            bagWeight.setTareWeight(tareWeight);
+            double netWeight = bagWeight.getGrossWeight() - bagWeight.getWater() - bagWeight.getCoarse() - bagWeight.getOtherWeight() - tareWeight;
+            bagWeight.setNetWeight(netWeight);
+            bagWeightRepository.save(bagWeight);
+
+            Long supplyRequestId = bagWeight.getSupplyRequest().getRequestId();
+            List<TripBag> tripBags = tripBagRepository.findByTripSupplier_TeaSupplyRequest_RequestId(supplyRequestId);
+            for (TripBag tripBag : tripBags) {
+                tripBag.setStatus("completed");
+                tripBagRepository.save(tripBag);
+                // Update Bag status to "not-assigned" using bagNumber and routeId
+                String bagNumber = tripBag.getBag() != null ? tripBag.getBag().getBagNumber() : null;
+                Long routeId = tripBag.getTripSupplier() != null && tripBag.getTripSupplier().getTrip() != null && tripBag.getTripSupplier().getTrip().getRoute() != null ? tripBag.getTripSupplier().getTrip().getRoute().getRouteId() : null;
+                if (bagNumber != null && routeId != null) {
+                    Bag.BagId bagId = new Bag.BagId(bagNumber, routeId);
+                    Bag bag = bagRepository.findById(bagId).orElse(null);
+                    if (bag != null) {
+                        bag.setStatus("not-assigned");
+                        bagRepository.save(bag);
+                    }
+                }
+            }
+
+            TeaSupplyRequest teaSupplyRequest = teaSupplyRequestRepository.findById(supplyRequestId)
+                    .orElseThrow(() -> new RuntimeException("TeaSupplyRequest not found"));
+            teaSupplyRequest.setStatus("completed");
+            teaSupplyRequestRepository.save(teaSupplyRequest);
+
+            // Retrieve sessionId from BagWeight
+            Long sessionId = bagWeight.getWeighingSession() != null ? bagWeight.getWeighingSession().getSessionId() : null;
+            if (sessionId == null) {
+                throw new RuntimeException("SessionId not found in BagWeight");
+            }
+            // Check if all BagWeight records for this sessionId have non-null netWeight
+            List<BagWeight> sessionBagWeights = bagWeightRepository.findByWeighingSession_SessionId(sessionId);
+            boolean allNetWeightsPresent = sessionBagWeights.stream().allMatch(bw -> bw.getNetWeight() != 0);
+            if (allNetWeightsPresent) {
+                // Update WeighingSession status to completed and set end time
+                WeighingSession session = weighingSessionRepository.findById(sessionId)
+                        .orElseThrow(() -> new RuntimeException("WeighingSession not found"));
+                session.setStatus("completed");
+                session.setEndTime(java.time.LocalTime.now());
+                weighingSessionRepository.save(session);
+
+                // Update Trip status to completed if session is completed
+                Trip trip = session.getTrip();
+                if (trip != null) {
+                    trip.setStatus("completed");
+                    tripRepository.save(trip);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to complete process: " + e.getMessage(), e);
+        }
+    }
+
+    public TripBagSummaryResponse getTodayTripBagSummary(Long tripId) {
+        LocalDate today = LocalDate.now();
+        String status = "pending";
+        long totalBags = tripBagRepository
+                .countByTripSupplier_Trip_TripIdAndTripSupplier_Trip_TripDateAndStatus(tripId, today, status);
+        long supplierRequestCount = tripBagRepository
+                .countDistinctSupplyRequestsByTripIdAndDateAndStatus(tripId, today, status);
+        Double totalWeight = tripBagRepository
+                .sumDriverWeightByTripIdAndDateAndStatus(tripId, today, status);
+
+        WeighingSession session = weighingSessionRepository
+                .findFirstByTrip_TripIdAndSessionDateOrderByStartTimeDesc(tripId, today);
+        Long sessionId = session != null ? session.getSessionId() : null;
+        Long userId = (session != null && session.getUser() != null) ? session.getUser().getId() : null;
+
+        return TripBagSummaryResponse.builder()
+                .tripId(tripId)
+                .sessionId(sessionId)
+                .userId(userId)
+                .supplierRequestCount(supplierRequestCount)
+                .totalBags(totalBags)
+                .totalWeight(totalWeight != null ? totalWeight : 0.0)
+                .build();
+    }
+
+    public com.teafactory.pureleaf.inventoryProcess.dto.WeighingSummaryResponse getTodayWeighingSummaryByTripAndStatus(Long tripId, String status) {
+        LocalDate today = LocalDate.now();
+        BagWeightRepository.TodayWeighingSummaryProjection p = bagWeightRepository.getTodayWeighingSummaryByTripAndStatus(tripId, status, today);
+        long totalSuppliers = p != null && p.getTotalSuppliers() != null ? p.getTotalSuppliers() : 0L;
+        long totalBags = p != null && p.getTotalBags() != null ? p.getTotalBags() : 0L;
+        double totalGrossWeight = p != null && p.getTotalGrossWeight() != null ? p.getTotalGrossWeight() : 0.0;
+        return new WeighingSummaryResponse(totalSuppliers, totalBags, totalGrossWeight);
+    }
+
+    public Page<BagWeightDetailsResponse> getBagWeights(
+            Long factoryId,
+            Long routeId,
+            Long userId,
+            String date,
+            String search,
+            int page,
+            int size
+    ) {
+        LocalDate parsedDate = null;
+        if (date != null && !date.isEmpty()) {
+            try {
+                parsedDate = LocalDate.parse(date);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid date format. Use yyyy-MM-dd.");
+            }
+        }
+        var spec = BagWeightSpecs.filterAll(factoryId, routeId, userId, parsedDate, search);
+        Page<BagWeight> bagWeightPage;
+        if (parsedDate != null) {
+            // If filtering by date, do not explicitly sort by date
+            bagWeightPage = bagWeightRepository.findAll(spec, PageRequest.of(page, size));
+        } else {
+            // If filtering by routeId or userId (or neither), sort by date descending
+            org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "date");
+            bagWeightPage = bagWeightRepository.findAll(spec, PageRequest.of(page, size, sort));
+        }
+        return bagWeightPage.map(bw -> {
+            BagWeightDetailsResponse dto = new BagWeightDetailsResponse();
+            dto.setBagWeightId(bw.getId());
+            dto.setGrossWeight(bw.getGrossWeight());
+            double deduction = (bw.getWater() + bw.getCoarse() + bw.getOtherWeight() + bw.getTareWeight());
+            dto.setDeduction(deduction);
+            dto.setNetWeight(bw.getNetWeight());
+            if (bw.getSupplyRequest() != null && bw.getSupplyRequest().getSupplier() != null) {
+                dto.setSupplierId(bw.getSupplyRequest().getSupplier().getSupplierId());
+                if (bw.getSupplyRequest().getSupplier().getUser() != null) {
+                    dto.setSupplierName(bw.getSupplyRequest().getSupplier().getUser().getName());
+                }
+            }
+            return dto;
+        });
+    }
+
+    public FactoryDashboardSummaryResponse getFactoryDashboardSummary(Long factoryId) {
+        LocalDate today = LocalDate.now();
+        long totalActiveRoutes = routeRepository.countByFactory_FactoryIdAndStatusTrue(factoryId);
+        BagWeightRepository.FactoryBagWeightSummaryProjection bagWeightSummary = bagWeightRepository.getFactoryBagWeightSummary(factoryId, today);
+        long totalBags = bagWeightSummary != null && bagWeightSummary.getTotalBags() != null ? bagWeightSummary.getTotalBags() : 0L;
+        double totalGrossWeight = bagWeightSummary != null && bagWeightSummary.getTotalGrossWeight() != null ? bagWeightSummary.getTotalGrossWeight() : 0.0;
+        long totalSuppliers = supplierRepository.countByIsActiveIsTrueAndFactory_factoryId(factoryId);
+        long todaySuppliers = teaSupplyRequestRepository.countTodaySuppliers(today, factoryId);
+        long estimatedTotalBags = teaSupplyRequestRepository.sumEstimatedTotalBags(today, factoryId);
+        TripRepository.TripStatusAggregation tripStatus = tripRepository.aggregateStatusCounts(factoryId, today);
+        long completedRoutes = tripStatus != null ? tripStatus.getCompletedCount() : 0L;
+        long completedSuppliers = teaSupplyRequestRepository.countCompletedSuppliers(today, factoryId);
+        return FactoryDashboardSummaryResponse.builder()
+                .totalActiveRoutes(totalActiveRoutes)
+                .totalBags(totalBags)
+                .totalGrossWeight(totalGrossWeight)
+                .totalSuppliers(totalSuppliers)
+                .todaySuppliers(todaySuppliers)
+                .estimatedTotalBags(estimatedTotalBags)
+                .completedRoutes(completedRoutes)
+                .completedSuppliers(completedSuppliers)
+                .build();
+    }
+
+    public Page<TodayTripDetailsResponse> getTodayTripDetails(Long factoryId, String search, Pageable pageable) {
+        LocalDate today = LocalDate.now();
+        return tripRepository.findTodayTripDetailsByFactoryIdAndTripDate(factoryId, today, search, pageable)
+                .map(p -> TodayTripDetailsResponse.builder()
+                        .tripId(p.getTripId())
+                        .routeName(p.getRouteName())
+                        .routeCode(p.getRouteCode())
+                        .driverName(p.getDriverName())
+                        .totalBags(p.getTotalBags() != null ? p.getTotalBags() : 0)
+                        .totalWeight(p.getTotalWeight() != null ? p.getTotalWeight() : 0.0)
+                        .totalSuppliers(p.getTotalSuppliers() != null ? p.getTotalSuppliers() : 0)
+                        .completedSuppliers(p.getCompletedSuppliers() != null ? p.getCompletedSuppliers() : 0)
+                        .tripStatus(p.getTripStatus())
+                        .lastUpdate(p.getLastUpdate())
+                        .build()
+                );
+    }
+
+}
