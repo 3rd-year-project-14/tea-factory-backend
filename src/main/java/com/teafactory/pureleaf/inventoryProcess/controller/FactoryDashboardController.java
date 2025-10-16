@@ -1,7 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto;
-import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.RouteInventorySummaryDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventoryRouteSummaryDTO;
 import com.teafactory.pureleaf.inventoryProcess.service.FactoryDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/inventory/summary")
+@RequestMapping("/api/factory-dashboard")
 @RequiredArgsConstructor
 public class FactoryDashboardController {
     private final FactoryDashboardService factoryDashboardService;
 
-    @GetMapping("/{factoryId}")
+    @GetMapping("/inventory/{factoryId}")
     public InventorySummaryDto getInventorySummary(
             @PathVariable Long factoryId,
             @RequestParam String viewMode,
@@ -35,8 +35,8 @@ public class FactoryDashboardController {
         }
     }
 
-    @GetMapping("/route/{factoryId}")
-    public Page<RouteInventorySummaryDTO> getRouteInventorySummary(
+    @GetMapping("/inventory/route/{factoryId}")
+    public Page<InventoryRouteSummaryDTO> getRouteInventorySummary(
             @PathVariable Long factoryId,
             @RequestParam String viewMode,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
@@ -49,4 +49,6 @@ public class FactoryDashboardController {
     ) {
         return factoryDashboardService.getRouteInventorySummary(factoryId, viewMode, date, month, year, search, page, size, sortDir);
     }
+
+
 }

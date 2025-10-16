@@ -1,7 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.repository;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto;
-import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.RouteInventorySummaryDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventoryRouteSummaryDTO;
 import com.teafactory.pureleaf.inventoryProcess.entity.BagWeight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -100,7 +100,7 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
             "WHERE r.factory.factoryId = :factoryId AND b.date = :date " +
             "AND (:search IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "GROUP BY r.routeId, r.name, r.routeCode")
-    Page<RouteInventorySummaryDTO> getRouteInventorySummaryByFactoryAndDate(
+    Page<InventoryRouteSummaryDTO> getRouteInventorySummaryByFactoryAndDate(
             @Param("factoryId") Long factoryId,
             @Param("date") LocalDate date,
             @Param("search") String search,
@@ -120,7 +120,7 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
             "AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year " +
             "AND (:search IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "GROUP BY r.routeId, r.name, r.routeCode")
-    Page<RouteInventorySummaryDTO> getRouteInventorySummaryByFactoryAndMonth(
+    Page<InventoryRouteSummaryDTO> getRouteInventorySummaryByFactoryAndMonth(
             @Param("factoryId") Long factoryId,
             @Param("month") int month,
             @Param("year") int year,

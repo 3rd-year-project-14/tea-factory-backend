@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RouteInventorySummaryDTO {
+public class InventoryRouteSummaryDTO {
     private Long routeId;
     private String routeName;
     private String routeCode;

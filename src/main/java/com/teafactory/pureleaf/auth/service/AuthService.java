@@ -68,7 +68,8 @@ public class AuthService {
             user.getRole().name(),
             factoryId,
             factoryName,
-            user.getId()
+            user.getId(),
+            user.getNic() // Pass NIC to AuthResponse
         );
     }
 }

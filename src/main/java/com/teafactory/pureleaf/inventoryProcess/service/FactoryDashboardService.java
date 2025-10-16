@@ -1,7 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.service;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventorySummaryDto;
-import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.RouteInventorySummaryDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventoryRouteSummaryDTO;
 import com.teafactory.pureleaf.inventoryProcess.repository.BagWeightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ public class FactoryDashboardService {
         }
     }
 
-    public Page<RouteInventorySummaryDTO> getRouteInventorySummary(
+    public Page<InventoryRouteSummaryDTO> getRouteInventorySummary(
             Long factoryId,
             String viewMode,
             LocalDate date,
