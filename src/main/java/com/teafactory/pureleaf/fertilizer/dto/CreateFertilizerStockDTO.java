@@ -39,5 +39,8 @@ public class CreateFertilizerStockDTO {
 
     @NotBlank(message = "Warehouse is required")
     private String warehouse;
-}
 
+    @NotNull(message = "Quantity is required")
+    @PositiveOrZero(message = "Quantity must be zero or positive")
+    private Integer quantity;
+}

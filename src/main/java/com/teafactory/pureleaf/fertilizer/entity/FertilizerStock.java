@@ -40,6 +40,9 @@ public class FertilizerStock {
     @Temporal(TemporalType.TIMESTAMP)
     private java.util.Date createdAt;
 
+    @Column(nullable = false)
+    private Integer quantity;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
