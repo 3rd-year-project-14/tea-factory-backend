@@ -28,7 +28,6 @@ public class FertilizerRequestService {
     private final UserRepository userRepository;
 
     @Transactional
-    @PreAuthorize("hasAnyRole('SUPPLIER','PENDING_USER','PENDING_SUPPLIER','FACTORY_MANAGER','ESTATE_MANAGER','OWNER')")
     public FertilizerRequestDTO createRequest(CreateFertilizerRequestDTO dto) {
         log.info("Creating fertilizer request for user: {}, category: {}, company: {}",
                  dto.getUserId(), dto.getCategoryId(), dto.getCompanyId());
@@ -59,7 +58,6 @@ public class FertilizerRequestService {
                 .user(user)
                 .quantity(dto.getQuantity())
                 .note(dto.getNote())
-                .description(dto.getDescription())
                 .status(FertilizerRequestStatus.PENDING)
                 .build();
 
@@ -70,7 +68,6 @@ public class FertilizerRequestService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('SUPPLIER','PENDING_USER','PENDING_SUPPLIER','FACTORY_MANAGER','ESTATE_MANAGER','OWNER')")
     public List<FertilizerRequestDTO> createBatchRequests(BatchFertilizerRequestDTO batchDto) {
         log.info("Creating batch of {} fertilizer requests", batchDto.getRequests().size());
 
@@ -185,7 +182,6 @@ public class FertilizerRequestService {
                 .note(request.getNote())
                 .status(request.getStatus())
                 .rejectReason(request.getRejectReason())
-                .description(request.getDescription())
                 .createdAt(request.getCreatedAt())
                 .updatedAt(request.getUpdatedAt())
                 .build();
