@@ -35,4 +35,14 @@ public class LoanRequestController {
         List<LoanRequestResponseDTO> list = loanRequestService.getAllLoanRequests();
         return ResponseEntity.ok(list);
     }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<?> approveLoanRequest(@PathVariable("id") Long id) {
+        try {
+            loanRequestService.approveLoanRequest(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

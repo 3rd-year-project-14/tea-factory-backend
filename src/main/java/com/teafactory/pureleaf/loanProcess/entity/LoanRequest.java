@@ -40,6 +40,7 @@ public class LoanRequest {
 
     public enum Status {
         PENDING,
+        APPROVED,
         REJECTED
     }
 }
