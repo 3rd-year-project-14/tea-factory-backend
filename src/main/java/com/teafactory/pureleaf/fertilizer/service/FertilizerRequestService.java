@@ -7,6 +7,7 @@ import com.teafactory.pureleaf.fertilizer.entity.*;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerCategoryRepository;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerCompanyRepository;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerRequestRepository;
+import com.teafactory.pureleaf.fertilizer.repository.FertilizerStockRepository;
 import com.teafactory.pureleaf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,30 +27,20 @@ public class FertilizerRequestService {
     private final FertilizerCategoryRepository categoryRepository;
     private final FertilizerCompanyRepository companyRepository;
     private final UserRepository userRepository;
+    private final FertilizerStockRepository fertilizerStockRepository;
 
     @Transactional
     public FertilizerRequestDTO createRequest(CreateFertilizerRequestDTO dto) {
-        log.info("Creating fertilizer request for user: {}, category: {}, company: {}",
-                 dto.getUserId(), dto.getCategoryId(), dto.getCompanyId());
+        log.info("Creating fertilizer request for fertilizerStockId: {}", dto.getFertilizerStockId());
 
-        // Validate and fetch entities
-        FertilizerCategory category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + dto.getCategoryId()));
+        // Fetch FertilizerStock entity
+        FertilizerStock fertilizerStock = fertilizerStockRepository.findById(dto.getFertilizerStockId())
+                .orElseThrow(() -> new ResourceNotFoundException("Fertilizer stock not found: " + dto.getFertilizerStockId()));
 
-        FertilizerCompany company = companyRepository.findById(dto.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found: " + dto.getCompanyId()));
-
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserId()));
-
-        // Validate company-category relationship (if company has specific categories)
-        if (company.getCategories() != null && !company.getCategories().isEmpty()) {
-            boolean categoryFound = company.getCategories().stream()
-                    .anyMatch(c -> c.getId().equals(category.getId()));
-            if (!categoryFound) {
-                throw new IllegalArgumentException("Selected company is not associated with the chosen category");
-            }
-        }
+        // Use related entities from FertilizerStock
+        FertilizerCategory category = fertilizerStock.getCategory();
+        FertilizerCompany company = fertilizerStock.getCompany();
+        User user = fertilizerStock.getUser();
 
         // Create and save the request
         FertilizerRequest request = FertilizerRequest.builder()
@@ -57,14 +48,13 @@ public class FertilizerRequestService {
                 .company(company)
                 .user(user)
                 .quantity(dto.getQuantity())
-                .note(dto.getNote())
                 .status(FertilizerRequestStatus.PENDING)
                 .build();
+        request = requestRepository.save(request);
 
-        FertilizerRequest savedRequest = requestRepository.save(request);
-        log.info("Successfully created fertilizer request with ID: {}", savedRequest.getId());
+        log.info("Successfully created fertilizer request with ID: {}", request.getId());
 
-        return toDTO(savedRequest);
+        return toDTO(request);
     }
 
     @Transactional

@@ -26,7 +26,7 @@ public class FertilizerRequestController {
      */
     @PostMapping
     public ResponseEntity<FertilizerRequestDTO> createRequest(@Valid @RequestBody CreateFertilizerRequestDTO dto) {
-        log.info("Received request to create fertilizer request for user: {}", dto.getUserId());
+        log.info("Received request to create fertilizer request for fertilizerStockId: {}", dto.getFertilizerStockId());
         FertilizerRequestDTO created = fertilizerRequestService.createRequest(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }

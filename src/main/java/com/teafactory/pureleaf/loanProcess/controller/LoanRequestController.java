@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/loan-requests")
 public class LoanRequestController {
@@ -23,9 +25,14 @@ public class LoanRequestController {
             created.getAmount(),
             created.getMonths(),
             created.getDate(),
-            created.getType(),
             created.getStatus()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LoanRequestResponseDTO>> getAllLoanRequests() {
+        List<LoanRequestResponseDTO> list = loanRequestService.getAllLoanRequests();
+        return ResponseEntity.ok(list);
     }
 }
