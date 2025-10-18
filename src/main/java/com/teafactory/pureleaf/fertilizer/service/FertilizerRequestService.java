@@ -142,7 +142,7 @@ public class FertilizerRequestService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('FERTILIZER_MANAGER','FACTORY_MANAGER','INVENTORY_MANAGER','OWNER')")
+    @PreAuthorize("isAuthenticated()")
     public FertilizerRequestDTO updateRequestStatus(Long id, UpdateFertilizerRequestStatusDTO dto) {
         log.info("Updating fertilizer request {} status to: {}", id, dto.getStatus());
 
