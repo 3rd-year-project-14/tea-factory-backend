@@ -1,7 +1,6 @@
 package com.teafactory.pureleaf.fertilizer.controller;
 
 import com.teafactory.pureleaf.fertilizer.dto.FertilizerCompanyDTO;
-import com.teafactory.pureleaf.fertilizer.dto.FertilizerCategoryDTO;
 import com.teafactory.pureleaf.fertilizer.dto.SimpleFertilizerCompanyDTO;
 import com.teafactory.pureleaf.fertilizer.service.FertilizerCompanyService;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,6 @@ public class FertilizerCompanyController {
         return companyService.createCompany(dto);
     }
 
-    @PutMapping("/{id}")
-    public FertilizerCompanyDTO update(@PathVariable Long id, @RequestBody FertilizerCompanyDTO dto) {
-        return companyService.updateCompany(id, dto);
-    }
-
     @GetMapping
     public List<FertilizerCompanyDTO> getAll() {
         return companyService.getAllCompanies();
@@ -43,8 +37,8 @@ public class FertilizerCompanyController {
         return companyService.getCompanyDropdown();
     }
 
-    @GetMapping("/{id}/categories")
-    public List<FertilizerCategoryDTO> categoriesByCompany(@PathVariable Long id) {
-        return companyService.getCategoriesByCompany(id);
+    @GetMapping("/by-category/{categoryId}")
+    public List<SimpleFertilizerCompanyDTO> companiesByCategory(@PathVariable Long categoryId) {
+        return companyService.getCompaniesByCategory(categoryId);
     }
 }

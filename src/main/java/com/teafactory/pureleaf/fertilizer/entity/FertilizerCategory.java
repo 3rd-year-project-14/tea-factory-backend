@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.fertilizer.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +23,7 @@ public class FertilizerCategory {
     @Column(unique = true)
     private String name;
 
+    @JsonIgnore // Prevent infinite recursion during JSON serialization
     @ManyToMany(mappedBy = "categories")
     private Set<FertilizerCompany> companies = new HashSet<>();
 }
