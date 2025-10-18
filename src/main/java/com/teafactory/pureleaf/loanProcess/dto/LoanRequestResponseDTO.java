@@ -16,7 +16,5 @@ public class LoanRequestResponseDTO {
     private BigDecimal amount;
     private Integer months;
     private LocalDate date;
-    private String type;
     private LoanRequest.Status status;
 }
-

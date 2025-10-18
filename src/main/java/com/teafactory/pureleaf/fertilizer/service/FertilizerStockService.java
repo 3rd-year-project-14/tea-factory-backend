@@ -3,6 +3,7 @@ package com.teafactory.pureleaf.fertilizer.service;
 import com.teafactory.pureleaf.auth.entity.User;
 import com.teafactory.pureleaf.exception.ResourceNotFoundException;
 import com.teafactory.pureleaf.fertilizer.dto.CreateFertilizerStockDTO;
+import com.teafactory.pureleaf.fertilizer.dto.FertilizerStockDisplayDTO;
 import com.teafactory.pureleaf.fertilizer.entity.FertilizerCategory;
 import com.teafactory.pureleaf.fertilizer.entity.FertilizerCompany;
 import com.teafactory.pureleaf.fertilizer.entity.FertilizerStock;
@@ -13,6 +14,9 @@ import com.teafactory.pureleaf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,5 +94,35 @@ public class FertilizerStockService {
         FertilizerStock stock = stockRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Fertilizer stock not found: " + id));
         stockRepository.delete(stock);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FertilizerStockDisplayDTO> getStocksForSupplier(Long supplierId) {
+        List<FertilizerStock> stocks = stockRepository.findByUserId(supplierId);
+        return stocks.stream().map(stock -> {
+            String productName = stock.getCompany().getName() + " " + stock.getCategory().getName();
+            return new FertilizerStockDisplayDTO(
+                stock.getId(),
+                productName,
+                stock.getWeightPerQuantity(),
+                stock.getSellPrice()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<FertilizerStockDisplayDTO> getStocksDisplay(Long supplierId) {
+        List<FertilizerStock> stocks = (supplierId == null)
+            ? stockRepository.findAll()
+            : stockRepository.findByUserId(supplierId);
+        return stocks.stream().map(stock -> {
+            String productName = stock.getCompany().getName() + " " + stock.getCategory().getName();
+            return new FertilizerStockDisplayDTO(
+                stock.getId(),
+                productName,
+                stock.getWeightPerQuantity(),
+                stock.getSellPrice()
+            );
+        }).collect(Collectors.toList());
     }
 }

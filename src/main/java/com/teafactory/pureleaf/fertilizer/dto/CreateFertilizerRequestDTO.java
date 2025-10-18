@@ -9,19 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CreateFertilizerRequestDTO {
-    @NotNull(message = "Category ID is required")
-    private Long categoryId;
-
-    @NotNull(message = "Company ID is required")
-    private Long companyId;
-
-    @NotNull(message = "User ID is required")
-    private Long userId;
+    @NotNull(message = "Fertilizer Stock ID is required")
+    private Long fertilizerStockId;
 
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be positive")
     private Integer quantity;
-
-    @Size(max = 500, message = "Note cannot exceed 500 characters")
-    private String note;
 }
