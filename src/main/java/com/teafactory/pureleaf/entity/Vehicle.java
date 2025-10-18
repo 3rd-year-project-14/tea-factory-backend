@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class Vehicle {
     @Id
     private String vehicleNo;
-
     private String model;
     private Integer capacity;
     private String status;
