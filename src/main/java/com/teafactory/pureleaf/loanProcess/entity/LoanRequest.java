@@ -35,7 +35,7 @@ public class LoanRequest {
     private String type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "varchar(20) default 'Pending'")
+    @Column(name = "status", nullable = false, columnDefinition = "varchar(20)")
     private Status status = Status.PENDING;
 
     public enum Status {
