@@ -11,15 +11,14 @@ import java.time.LocalDateTime;
 @Table(name = "vehicle")
 public class Vehicle {
     @Id
+    @Column(name = "vehicle_no", nullable = false, length = 100)
     private String vehicleNo;
-
     private String model;
     private Integer capacity;
     private String status;
     private LocalDateTime registeredDate;
     private String incomeCertificate;
     private String image;
-
     @ManyToOne
     @JoinColumn(name = "factory_id")
     private Factory factory;
