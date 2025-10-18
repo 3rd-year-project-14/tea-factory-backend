@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.fertilizer.service;
 
 import com.teafactory.pureleaf.fertilizer.dto.FertilizerCompanyDTO;
 //
+//
 import com.teafactory.pureleaf.fertilizer.dto.FertilizerCategoryDTO;
 import com.teafactory.pureleaf.fertilizer.dto.SimpleFertilizerCompanyDTO;
 //
@@ -108,6 +109,16 @@ public class FertilizerCompanyService {
         return assigned.stream()
                 .map(cat -> FertilizerCategoryDTO.builder().id(cat.getId()).name(cat.getName()).build())
                 .sorted(Comparator.comparing(FertilizerCategoryDTO::getName, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+    }
+
+    public List<SimpleFertilizerCompanyDTO> getCompaniesByCategory(Long categoryId) {
+        if (categoryId == null) throw new IllegalArgumentException("categoryId is required");
+        FertilizerCategory category = categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        return companyRepo.findAllByCategoryId(category.getId()).stream()
+                .sorted(Comparator.comparing(FertilizerCompany::getName, String.CASE_INSENSITIVE_ORDER))
+                .map(c -> SimpleFertilizerCompanyDTO.builder().id(c.getId()).name(c.getName()).build())
                 .collect(Collectors.toList());
     }
 //dropdown support methods end
