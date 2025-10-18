@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -89,7 +90,7 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
     InventorySummaryDto getInventorySummaryByFactoryAndMonth(@Param("factoryId") Long factoryId, @Param("month") int month, @Param("year") int year);
 
     // Daily view
-    @Query("SELECT new com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.RouteInventorySummaryDTO(" +
+    @Query("SELECT new com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventoryRouteSummaryDTO(" +
             "r.routeId, r.name, r.routeCode, COUNT(DISTINCT b.supplyRequest.supplier.supplierId) as supplierCount, " +
             "COALESCE(SUM(b.grossWeight),0) as totalGrossWeight, " +
             "COALESCE(SUM(b.netWeight),0) as netWeight) " +
@@ -108,7 +109,7 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
     );
 
     // Monthly view
-    @Query("SELECT new com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.RouteInventorySummaryDTO(" +
+    @Query("SELECT new com.teafactory.pureleaf.inventoryProcess.dto.factoryDashboard.InventoryRouteSummaryDTO(" +
             "r.routeId, r.name, r.routeCode, COUNT(DISTINCT b.supplyRequest.supplier.supplierId) as supplierCount, " +
             "COALESCE(SUM(b.grossWeight),0) as totalGrossWeight, " +
             "COALESCE(SUM(b.netWeight),0) as netWeight) " +
@@ -128,4 +129,6 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
             Pageable pageable
     );
 
+    @Query("SELECT COALESCE(SUM(b.netWeight), 0) FROM BagWeight b WHERE b.supplyRequest.supplier.supplierId = :supplierId AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year")
+    BigDecimal findTotalNetWeightBySupplierIdAndMonth(@Param("supplierId") Long supplierId, @Param("month") int month, @Param("year") int year);
 }
