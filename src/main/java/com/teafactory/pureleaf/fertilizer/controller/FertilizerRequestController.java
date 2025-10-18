@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.fertilizer.controller;
 
 import com.teafactory.pureleaf.fertilizer.dto.*;
 import com.teafactory.pureleaf.fertilizer.service.FertilizerRequestService;
+import com.teafactory.pureleaf.fertilizer.entity.FertilizerRequestStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class FertilizerRequestController {
      */
     @PostMapping
     public ResponseEntity<FertilizerRequestDTO> createRequest(@Valid @RequestBody CreateFertilizerRequestDTO dto) {
-        log.info("Received request to create fertilizer request for user: {}", dto.getUserId());
+        log.info("Received request to create fertilizer request for fertilizerStockId: {}", dto.getFertilizerStockId());
         FertilizerRequestDTO created = fertilizerRequestService.createRequest(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -91,6 +92,31 @@ public class FertilizerRequestController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateFertilizerRequestStatusDTO dto) {
         log.info("Updating status of fertilizer request {} to: {}", id, dto.getStatus());
+        FertilizerRequestDTO updated = fertilizerRequestService.updateRequestStatus(id, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Approve a fertilizer request (set status to APPROVED)
+     */
+    @PatchMapping("/{id}/approve")
+    public ResponseEntity<FertilizerRequestDTO> approveRequest(@PathVariable Long id) {
+        UpdateFertilizerRequestStatusDTO dto = UpdateFertilizerRequestStatusDTO.builder()
+                .status(FertilizerRequestStatus.APPROVED)
+                .build();
+        FertilizerRequestDTO updated = fertilizerRequestService.updateRequestStatus(id, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Reject a fertilizer request (set status to REJECTED with reason)
+     */
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<FertilizerRequestDTO> rejectRequest(@PathVariable Long id, @RequestBody RejectRequestDTO rejectDto) {
+        UpdateFertilizerRequestStatusDTO dto = UpdateFertilizerRequestStatusDTO.builder()
+                .status(FertilizerRequestStatus.REJECTED)
+                .rejectReason(rejectDto.getRejectReason())
+                .build();
         FertilizerRequestDTO updated = fertilizerRequestService.updateRequestStatus(id, dto);
         return ResponseEntity.ok(updated);
     }

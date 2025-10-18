@@ -16,4 +16,6 @@ public class AuthResponse {
     private Long factoryId;
     private String factoryName;
     private Long userId;
+    private String nic;
+
 }

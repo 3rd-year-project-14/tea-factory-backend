@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.fertilizer.controller;
 
 import com.teafactory.pureleaf.fertilizer.dto.CreateFertilizerStockDTO;
 import com.teafactory.pureleaf.fertilizer.dto.FertilizerStockDTO;
+import com.teafactory.pureleaf.fertilizer.dto.FertilizerStockDisplayDTO;
 import com.teafactory.pureleaf.fertilizer.entity.FertilizerStock;
 import com.teafactory.pureleaf.fertilizer.service.FertilizerStockService;
 import jakarta.validation.Valid;
@@ -32,6 +33,18 @@ public class FertilizerStockController {
     @GetMapping
     public ResponseEntity<List<FertilizerStockDTO>> getAllStocks() {
         return ResponseEntity.ok(fertilizerStockService.getAllStocks());
+    }
+
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<List<FertilizerStockDisplayDTO>> getStocksForSupplier(@PathVariable Long supplierId) {
+        List<FertilizerStockDisplayDTO> stocks = fertilizerStockService.getStocksForSupplier(supplierId);
+        return ResponseEntity.ok(stocks);
+    }
+
+    @GetMapping("/display")
+    public ResponseEntity<List<FertilizerStockDisplayDTO>> getStocksDisplay(@RequestParam(required = false) Long supplierId) {
+        List<FertilizerStockDisplayDTO> stocks = fertilizerStockService.getStocksDisplay(supplierId);
+        return ResponseEntity.ok(stocks);
     }
 
     @PutMapping("/{id}")
