@@ -3,6 +3,7 @@ package com.teafactory.pureleaf.fertilizer.entity;
 import com.teafactory.pureleaf.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,6 +35,9 @@ public class FertilizerRequest {
 
     @Column(length = 500)
     private String note;
+
+    @Column(name = "request_date")
+    private LocalDate requestDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
