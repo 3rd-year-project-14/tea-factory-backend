@@ -30,11 +30,7 @@ public class AuthService {
         String email = decodedToken.getEmail();
         String firebaseUid = decodedToken.getUid();
 
-        if (userRepository.existsByEmail(email)) {
-            throw new Exception("User already exists with email: " + email);
-        }
-
-        User user = new User();
+        User user = userRepository.findByEmail(email).orElse(new User());
         user.setFirebaseUid(firebaseUid);
         user.setEmail(email);
         user.setName(request.getName());
