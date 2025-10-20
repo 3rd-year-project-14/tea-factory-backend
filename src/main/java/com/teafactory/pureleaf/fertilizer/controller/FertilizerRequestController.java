@@ -140,4 +140,24 @@ public class FertilizerRequestController {
         FertilizerRequestDTO updated = fertilizerRequestService.updateRequestStatus(id, dto);
         return ResponseEntity.ok(updated);
     }
+
+    /**
+     * Create a new fertilizer stock request (custom endpoint)
+     */
+    @PostMapping("/fertilizer-stock-requests")
+    public ResponseEntity<FertilizerRequestDTO> createFertilizerStockRequest(@Valid @RequestBody NewFertilizerStockRequestDTO dto) {
+        log.info("Received new fertilizer stock request: categoryId={}, companyId={}, userId={}, quantity={}", dto.getCategoryId(), dto.getCompanyId(), dto.getUserId(), dto.getQuantity());
+        FertilizerRequestDTO created = fertilizerRequestService.createFertilizerStockRequest(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    /**
+     * Get all fertilizer stock requests (custom endpoint)
+     */
+    @GetMapping("/fertilizer-stock-requests")
+    public ResponseEntity<List<FertilizerRequestDTO>> getAllFertilizerStockRequests() {
+        log.info("Fetching all fertilizer stock requests");
+        List<FertilizerRequestDTO> requests = fertilizerRequestService.getAllFertilizerStockRequests();
+        return ResponseEntity.ok(requests);
+    }
 }
