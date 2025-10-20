@@ -13,3 +13,5 @@ public interface TeaRateRepository extends JpaRepository<TeaRate, Long> {
     BigDecimal findCurrentRateByDate(@Param("month") String month);
 
 }
+
+

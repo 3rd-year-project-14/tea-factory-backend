@@ -13,6 +13,10 @@ import com.teafactory.pureleaf.advanceProcess.spec.AdvanceSpecification;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.BagWeightRepository;
+import com.teafactory.pureleaf.paymentProcess.service.PaymentService;
+import com.teafactory.pureleaf.paymentProcess.dto.PaymentDTO;
+import com.teafactory.pureleaf.paymentProcess.enums.PaymentType;
+import com.teafactory.pureleaf.paymentProcess.enums.DisbursementMethod;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +40,7 @@ public class SupplierAdvanceService {
     private final SupplierRepository supplierRepository;
     private final EligibilityService eligibilityService;
     private final BagWeightRepository bagWeightRepository;
+    private final PaymentService paymentService; // Inject PaymentService
 
     public AdvanceResponseDto createAdvanceRequest(AdvanceRequestDto requestDto) {
         Supplier supplier = supplierRepository.findById(requestDto.getSupplierId())
@@ -158,6 +163,22 @@ public class SupplierAdvanceService {
             advance.setApprovedBy(approvedByUserId); // can be null if not tracked
             advance.setApprovedAt(LocalDateTime.now());
             advance.setStatus(Status.APPROVED);
+
+            // Create payment record
+            PaymentDTO paymentDTO = PaymentDTO.builder()
+                    .supplierId(String.valueOf(advance.getSupplier().getSupplierId()))
+                    .routeId(String.valueOf(advance.getSupplier().getRoute().getRouteId()))
+                    .paymentType(PaymentType.ADVANCE)
+                    .netAmount(approvalDto.getApprovedAmount())
+                    .disbursementMethod(DisbursementMethod.BANK)
+                    .notes("Advance payment for advance ID " + advance.getId())
+                    .teaRate(BigDecimal.ZERO)
+                    .periodMonth(LocalDate.now().getMonthValue())
+                    .periodYear(LocalDate.now().getYear())
+                    .build();
+            PaymentDTO created = paymentService.createAdhocPayment(paymentDTO);
+            paymentService.approveAdhocPayment(created.getId(), String.valueOf(approvedByUserId));
+
         } else if (approvalDto.getAction() == AdvanceApprovalDto.Action.REJECT) {
             if (approvalDto.getRejectionReason() == null || approvalDto.getRejectionReason().isEmpty()) {
                 throw new IllegalArgumentException("Rejection reason required");

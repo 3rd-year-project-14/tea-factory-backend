@@ -33,3 +33,4 @@ public interface SupplierAdvanceRepository extends JpaRepository<SupplierAdvance
            "GROUP BY sa.status")
     List<AdvanceStatusCountDto> countAdvancesByStatus(@Param("factoryId") Long factoryId, @Param("year") int year, @Param("month") int month);
 }
+

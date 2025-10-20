@@ -29,4 +29,5 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Query("SELECT p FROM Payment p WHERE p.id LIKE CONCAT(:prefix, '%') ORDER BY p.id DESC LIMIT 1")
     Payment findTopByIdStartingWithOrderByIdDesc(@Param("prefix") String prefix);
     List<Payment> findBySupplierId(String supplierId);
+    List<Payment> findBySupplierIdAndPeriodMonthAndPeriodYear(String supplierId, Integer periodMonth, Integer periodYear);
 }
