@@ -27,15 +27,9 @@ public class SecurityConfig {
         http
                 .cors(cors -> {})
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(firebaseAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // .addFilterBefore(firebaseAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Authentication filter disabled for development
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // allow public GET access for fertilizer dropdown endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-companies/dropdown").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-companies/*/categories").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-companies").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/fertilizer-categories/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // All endpoints are public during development
                 )
                 .sessionManagement(session -> session.disable()); // Disable session management for stateless JWT
         return http.build();
