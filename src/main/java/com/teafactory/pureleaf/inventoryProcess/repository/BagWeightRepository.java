@@ -307,4 +307,29 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
         @Param("month") int month,
         @Param("year") int year
     );
+
+    // Projection for supplier weight summary
+    interface SupplierWeightSummaryProjection {
+        Double getTotalNetWeight();
+        Double getTotalGrossWeight();
+        Double getTotalWet();
+        Double getTotalCoarse();
+        Double getTotalTareWeight();
+    }
+
+    // Aggregate totals for a supplier, month, and year (PostgreSQL compatible)
+    @Query("SELECT " +
+            "COALESCE(SUM(b.netWeight),0) AS totalNetWeight, " +
+            "COALESCE(SUM(b.grossWeight),0) AS totalGrossWeight, " +
+            "COALESCE(SUM(b.water),0) AS totalWet, " +
+            "COALESCE(SUM(b.coarse),0) AS totalCoarse, " +
+            "COALESCE(SUM(b.tareWeight),0) AS totalTareWeight " +
+            "FROM BagWeight b " +
+            "WHERE b.supplyRequest.supplier.supplierId = :supplierId " +
+            "AND EXTRACT(MONTH FROM b.date) = :month " +
+            "AND EXTRACT(YEAR FROM b.date) = :year")
+    SupplierWeightSummaryProjection getSupplierWeightSummary(@Param("supplierId") Long supplierId, @Param("month") int month, @Param("year") int year);
+
+    @Query("SELECT COALESCE(SUM(b.netWeight), 0) FROM BagWeight b WHERE b.supplyRequest.supplier.supplierId = :supplierId AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year")
+    BigDecimal sumWeightBySupplierAndPeriod(@Param("supplierId") Long supplierId, @Param("month") int month, @Param("year") int year);
 }

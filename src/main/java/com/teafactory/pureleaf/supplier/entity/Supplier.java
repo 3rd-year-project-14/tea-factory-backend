@@ -48,4 +48,9 @@ public class Supplier {
 
     @Column(name = "pickup_to_route_start_distance")
     private Double pickupToRouteStartDistance;
+
+    private String bankAccountNumber;
+    private String bankName;
+    private String bankBranch;
+    private String paymentMethodPreference;
 }
