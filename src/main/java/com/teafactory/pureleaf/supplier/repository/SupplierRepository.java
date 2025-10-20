@@ -22,4 +22,5 @@ public interface SupplierRepository extends JpaRepository<Supplier,Long>, JpaSpe
     @Query("SELECT new com.teafactory.pureleaf.supplier.dto.SupplierDetailsDTO(s.supplierId, s.user.name, s.user.nic, s.user.email, s.user.address, s.user.contactNo, s.landSize, s.nicImage, s.pickupLocation, s.landLocation, s.approvedDate, s.route.name, s.pickupToRouteStartDistance, s.initialBagCount) FROM Supplier s WHERE s.supplierId = :supplierId")
     SupplierDetailsDTO findSupplierDetails(@Param("supplierId") Long supplierId);
 
+    List<Supplier> findByFactory_FactoryIdAndIsActiveTrue(Long factoryId);
 }
