@@ -113,4 +113,8 @@ public interface TripRepository extends JpaRepository<Trip, Long>, JpaSpecificat
             "ORDER BY lastUpdate DESC, t.tripId DESC",
             countQuery = "SELECT COUNT(DISTINCT t.tripId) FROM Trip t WHERE t.route.factory.factoryId = :factoryId AND t.tripDate = :tripDate AND (:search IS NULL OR :search = '' OR LOWER(t.route.name) LIKE LOWER(CONCAT('%', :search, '%')))" )
     Page<TodayTripDetailsProjection> findTodayTripDetailsByFactoryIdAndTripDate(@Param("factoryId") Long factoryId, @Param("tripDate") java.time.LocalDate tripDate, @Param("search") String search, Pageable pageable);
+
+    // Custom query to find all trips for a driver in a given month and year
+    @Query("SELECT t FROM Trip t WHERE t.driver.driverId = :driverId AND MONTH(t.tripDate) = :month AND YEAR(t.tripDate) = :year")
+    List<Trip> findByDriverAndMonthAndYear(@Param("driverId") Long driverId, @Param("month") int month, @Param("year") int year);
 }
