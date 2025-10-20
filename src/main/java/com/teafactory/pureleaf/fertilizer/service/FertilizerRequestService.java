@@ -288,6 +288,39 @@ public class FertilizerRequestService {
             .collect(java.util.stream.Collectors.toList());
     }
 
+    @Transactional
+    public FertilizerRequestDTO createFertilizerStockRequest(NewFertilizerStockRequestDTO dto) {
+        log.info("Creating new fertilizer stock request: categoryId={}, companyId={}, userId={}, quantity={}", dto.getCategoryId(), dto.getCompanyId(), dto.getUserId(), dto.getQuantity());
+
+        FertilizerCategory category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Fertilizer category not found: " + dto.getCategoryId()));
+        FertilizerCompany company = companyRepository.findById(dto.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Fertilizer company not found: " + dto.getCompanyId()));
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserId()));
+
+        FertilizerRequest request = FertilizerRequest.builder()
+                .category(category)
+                .company(company)
+                .user(user)
+                .quantity(dto.getQuantity())
+                .note(dto.getNote())
+                .status(FertilizerRequestStatus.PENDING)
+                .build();
+        request = requestRepository.save(request);
+        log.info("Successfully created fertilizer stock request with ID: {}", request.getId());
+        return toDTO(request);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FertilizerRequestDTO> getAllFertilizerStockRequests() {
+        log.info("Fetching all fertilizer stock requests");
+        return requestRepository.findAllWithDetails()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     private FertilizerRequestDTO toDTO(FertilizerRequest request) {
         return FertilizerRequestDTO.builder()
                 .id(request.getId())
