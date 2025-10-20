@@ -2,6 +2,7 @@ package com.teafactory.pureleaf.fertilizer.controller;
 
 import com.teafactory.pureleaf.fertilizer.dto.SupplierFertilizerRequestCreateDTO;
 import com.teafactory.pureleaf.fertilizer.dto.SupplierFertilizerRequestResponseDTO;
+import com.teafactory.pureleaf.fertilizer.dto.SupplierFertilizerRequestUpdateDTO;
 import com.teafactory.pureleaf.fertilizer.service.SupplierFertilizerRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,22 @@ public class SupplierFertilizerRequestController {
         List<SupplierFertilizerRequestResponseDTO> list = requestService.getAllRequests();
         return ResponseEntity.ok(list);
     }
-}
 
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<List<SupplierFertilizerRequestResponseDTO>> getRequestsBySupplier(@PathVariable Long supplierId) {
+        List<SupplierFertilizerRequestResponseDTO> list = requestService.getRequestsBySupplierId(supplierId);
+        return ResponseEntity.ok(list);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SupplierFertilizerRequestResponseDTO> updateRequest(@PathVariable Long id, @RequestBody SupplierFertilizerRequestUpdateDTO dto) {
+        SupplierFertilizerRequestResponseDTO response = requestService.updateRequest(id, dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRequest(@PathVariable Long id) {
+        requestService.deleteRequest(id);
+        return ResponseEntity.noContent().build();
+    }
+}
