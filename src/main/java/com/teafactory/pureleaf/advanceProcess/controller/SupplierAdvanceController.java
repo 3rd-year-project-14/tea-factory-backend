@@ -98,4 +98,18 @@ public class SupplierAdvanceController {
         AdvanceResponseDto response = supplierAdvanceService.markAdvanceAsPaid(id);
         return ResponseEntity.ok(response);
     }
+
+    // Update advance request
+    @PutMapping("/{id}")
+    public ResponseEntity<AdvanceResponseDto> updateAdvance(@PathVariable Long id, @Valid @RequestBody AdvanceRequestDto requestDto) {
+        AdvanceResponseDto response = supplierAdvanceService.updateAdvance(id, requestDto);
+        return ResponseEntity.ok(response);
+    }
+
+    // Delete advance request
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteAdvance(@PathVariable Long id) {
+        supplierAdvanceService.deleteAdvance(id);
+        return ResponseEntity.ok().build();
+    }
 }

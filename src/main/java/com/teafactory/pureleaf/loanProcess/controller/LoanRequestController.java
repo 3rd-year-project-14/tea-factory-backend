@@ -36,6 +36,12 @@ public class LoanRequestController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<List<LoanRequestResponseDTO>> getLoanRequestsBySupplierId(@PathVariable Long supplierId) {
+        List<LoanRequestResponseDTO> list = loanRequestService.getLoanRequestsBySupplierId(supplierId);
+        return ResponseEntity.ok(list);
+    }
+
     @PutMapping("/{id}/approve")
     public ResponseEntity<?> approveLoanRequest(@PathVariable("id") Long id) {
         try {
@@ -44,5 +50,25 @@ public class LoanRequestController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LoanRequestResponseDTO> updateLoanRequest(@PathVariable Long id, @RequestBody LoanRequestCreateDTO dto) {
+        LoanRequest updated = loanRequestService.updateLoanRequest(id, dto);
+        LoanRequestResponseDTO response = new LoanRequestResponseDTO(
+            updated.getReqId(),
+            updated.getSupplier().getSupplierId(),
+            updated.getAmount(),
+            updated.getMonths(),
+            updated.getDate(),
+            updated.getStatus()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteLoanRequest(@PathVariable Long id) {
+        loanRequestService.deleteLoanRequest(id);
+        return ResponseEntity.ok().build();
     }
 }

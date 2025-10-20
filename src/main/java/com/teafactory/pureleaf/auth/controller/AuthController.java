@@ -5,6 +5,7 @@ import com.teafactory.pureleaf.auth.dto.LoginRequest;
 import com.teafactory.pureleaf.auth.dto.SignupRequest;
 import com.teafactory.pureleaf.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,14 +17,19 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/signup")
-    public String signup(@RequestBody SignupRequest request) throws Exception {
+    public ResponseEntity<String> signup(@RequestBody SignupRequest request) throws Exception {
         authService.signup(request);
-        return "Signup successful";
+        return ResponseEntity.ok("Signup successful");
     }
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) throws Exception {
         return authService.login(request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
 }

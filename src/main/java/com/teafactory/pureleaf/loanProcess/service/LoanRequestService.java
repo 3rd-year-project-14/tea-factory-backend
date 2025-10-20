@@ -54,6 +54,31 @@ public class LoanRequestService {
         )).toList();
     }
 
+    public List<LoanRequestResponseDTO> getLoanRequestsBySupplierId(Long supplierId) {
+        return loanRequestRepository.findBySupplier_SupplierId(supplierId).stream().map(lr -> new LoanRequestResponseDTO(
+                lr.getReqId(),
+                lr.getSupplier().getSupplierId(),
+                lr.getAmount(),
+                lr.getMonths(),
+                lr.getDate(),
+                lr.getStatus()
+        )).toList();
+    }
+
+    public LoanRequest updateLoanRequest(Long reqId, LoanRequestCreateDTO dto) {
+        LoanRequest loanRequest = loanRequestRepository.findById(reqId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loan request not found with id: " + reqId));
+        loanRequest.setAmount(dto.getAmount());
+        loanRequest.setMonths(dto.getMonths());
+        return loanRequestRepository.save(loanRequest);
+    }
+
+    public void deleteLoanRequest(Long reqId) {
+        LoanRequest loanRequest = loanRequestRepository.findById(reqId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loan request not found with id: " + reqId));
+        loanRequestRepository.delete(loanRequest);
+    }
+
     @Transactional
     public Loan approveLoanRequest(Long reqId) {
         LoanRequest loanRequest = loanRequestRepository.findById(reqId)

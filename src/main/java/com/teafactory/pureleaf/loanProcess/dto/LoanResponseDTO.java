@@ -16,9 +16,8 @@ public class LoanResponseDTO {
     private BigDecimal loanAmount;
     private LocalDate date;
     private Integer months;
-    private Long rateId;
+    private BigDecimal rate;
     private BigDecimal monthlyInstalment;
     private BigDecimal remainingAmount;
     private String status;
 }
-

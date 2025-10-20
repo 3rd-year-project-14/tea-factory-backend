@@ -192,4 +192,26 @@ public class SupplierAdvanceService {
         Page<com.teafactory.pureleaf.advanceProcess.entity.SupplierAdvance> page = advanceRepository.findAll(spec, pageable);
         return page.map(this::toResponseDto);
     }
+
+    public AdvanceResponseDto updateAdvance(Long id, AdvanceRequestDto requestDto) {
+        SupplierAdvance advance = advanceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Advance not found"));
+        if (advance.getStatus() != Status.REQUESTED) {
+            throw new IllegalStateException("Only REQUESTED advances can be updated");
+        }
+        advance.setRequestedAmount(requestDto.getRequestedAmount());
+        advance.setPurpose(requestDto.getPurpose());
+        advance.setPaymentMethod(SupplierAdvance.PaymentMethod.valueOf(requestDto.getPaymentMethod().name()));
+        advanceRepository.save(advance);
+        return toResponseDto(advance);
+    }
+
+    public void deleteAdvance(Long id) {
+        SupplierAdvance advance = advanceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Advance not found"));
+        if (advance.getStatus() != Status.REQUESTED) {
+            throw new IllegalStateException("Only REQUESTED advances can be deleted");
+        }
+        advanceRepository.delete(advance);
+    }
 }
