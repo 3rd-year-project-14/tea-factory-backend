@@ -237,6 +237,9 @@ public class PaymentService {
                 .status(PaymentStatus.PENDING_APPROVAL)
                 .isDeduction(false)
                 .notes(paymentDTO.getNotes())
+                .teaRate(paymentDTO.getTeaRate() != null ? paymentDTO.getTeaRate() : BigDecimal.ZERO)
+                .periodMonth(paymentDTO.getPeriodMonth())
+                .periodYear(paymentDTO.getPeriodYear())
                 .build();
         paymentRepository.save(payment);
         createAuditLog(paymentId, null, PaymentStatus.PENDING_APPROVAL.name(), "ADHOC_PAYMENT_CALCULATED", "system", null);

@@ -48,37 +48,37 @@ public class Payment {
     @Column(name = "period_year")
     private Integer periodYear;
 
-    @Column(name = "gross_amount", precision = 15, scale = 2, nullable = false)
+    @Column(name = "gross_amount", precision = 15, scale = 2)
     @ColumnDefault("0")
     private BigDecimal grossAmount = BigDecimal.ZERO;
 
-    @Column(name = "total_weight", precision = 15, scale = 2, nullable = false)
+    @Column(name = "total_weight", precision = 15, scale = 2)
     @ColumnDefault("0")
     private BigDecimal totalWeight = BigDecimal.ZERO;
 
-    @Column(name = "tea_rate", precision = 10, scale = 2, nullable = false)
+    @Column(name = "tea_rate", precision = 10, scale = 2)
     @ColumnDefault("0")
     private BigDecimal teaRate = BigDecimal.ZERO;
 
-    @Column(name = "deduction_amount", precision = 15, scale = 2, nullable = false)
+    @Column(name = "deduction_amount", precision = 15, scale = 2)
     @ColumnDefault("0")
     private BigDecimal deductionAmount = BigDecimal.ZERO;
 
-    @Column(name = "net_amount", precision = 15, scale = 2, nullable = false)
+    @Column(name = "net_amount", precision = 15, scale = 2)
     private BigDecimal netAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "disbursement_method", length = 10, nullable = false)
+    @Column(name = "disbursement_method", length = 10)
     private DisbursementMethod disbursementMethod;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 30, nullable = false)
+    @Column(name = "status", length = 30)
     private PaymentStatus status;
 
     @Column(name = "linked_monthly_payment_id", length = 20)
     private String linkedMonthlyPaymentId;
 
-    @Column(name = "is_deduction", nullable = false)
+    @Column(name = "is_deduction")
     @ColumnDefault("false")
     private Boolean isDeduction = false;
 
@@ -89,7 +89,7 @@ public class Payment {
     private String notes;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "approved_at")

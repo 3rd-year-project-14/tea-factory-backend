@@ -11,6 +11,10 @@ import com.teafactory.pureleaf.loanProcess.repository.LoanRateRepository;
 import com.teafactory.pureleaf.loanProcess.repository.LoanRequestRepository;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
+import com.teafactory.pureleaf.paymentProcess.service.PaymentService;
+import com.teafactory.pureleaf.paymentProcess.dto.PaymentDTO;
+import com.teafactory.pureleaf.paymentProcess.enums.PaymentType;
+import com.teafactory.pureleaf.paymentProcess.enums.DisbursementMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +33,8 @@ public class LoanRequestService {
     private LoanRepository loanRepository;
     @Autowired
     private LoanRateRepository loanRateRepository;
+    @Autowired
+    private PaymentService paymentService;
 
     public LoanRequest createLoanRequest(LoanRequestCreateDTO dto) {
         Supplier supplier = supplierRepository.findById(dto.getSupplierId())
@@ -112,6 +118,18 @@ public class LoanRequestService {
         loan.setRemainingAmount(total);
         // status is set by entity logic
         loanRepository.save(loan);
+
+        // Create initial payment record
+        PaymentDTO paymentDTO = PaymentDTO.builder()
+                .supplierId(String.valueOf(loanRequest.getSupplier().getSupplierId()))
+                .routeId(String.valueOf(loanRequest.getSupplier().getRoute().getRouteId()))
+                .paymentType(PaymentType.LOAN)
+                .netAmount(monthlyInstalment)
+                .disbursementMethod(DisbursementMethod.BANK)
+                .notes("Loan installment for loan ID " + loan.getLoanId())
+                .build();
+        paymentService.createAdhocPayment(paymentDTO);
+
         return loan;
     }
 }
