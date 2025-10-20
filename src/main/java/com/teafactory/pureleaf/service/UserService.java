@@ -21,13 +21,18 @@ public class UserService {
 
     // ✅ CREATE
     public UserDTO createUser(UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("Email is already in use: " + userDTO.getEmail());
+        // Find existing user by email or create new
+        User user = userRepository.findByEmail(userDTO.getEmail()).orElse(new User());
+
+        // Copy properties from DTO to entity but do not overwrite id and createdAt
+        BeanUtils.copyProperties(userDTO, user, "id", "createdAt");
+
+        // If createdAt is null (new user), set it
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
         }
-        User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
-        user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
+
         User savedUser = userRepository.save(user);
         UserDTO savedDTO = new UserDTO();
         BeanUtils.copyProperties(savedUser, savedDTO);
