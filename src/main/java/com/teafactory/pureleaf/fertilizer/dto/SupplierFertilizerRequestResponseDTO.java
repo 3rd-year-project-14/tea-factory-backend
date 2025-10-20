@@ -8,9 +8,9 @@ import java.util.List;
 public class SupplierFertilizerRequestResponseDTO {
     private Long id;
     private Long supplierId;
+    private String supplierName;
     private LocalDate requestDate;
     private String note;
     private String status;
     private List<SupplierFertilizerRequestItemResponseDTO> items;
 }
-

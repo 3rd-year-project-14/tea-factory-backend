@@ -11,4 +11,3 @@ public class SupplierFertilizerRequestCreateDTO {
     private String note;
     private List<SupplierFertilizerRequestItemCreateDTO> items;
 }
-
