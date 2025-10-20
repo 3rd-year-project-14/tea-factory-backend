@@ -62,11 +62,11 @@ public class DriverService {
     public DriverDTO registerDriver(DriverRegistrationDTO regDto) {
         // basic uniqueness checks
         if (regDto.getEmail() != null && userRepository.existsByEmail(regDto.getEmail())) {
-            throw new RuntimeException("Email is already in use: " + regDto.getEmail());
+           throw new RuntimeException("Email is already in use: " + regDto.getEmail());
         }
         if (regDto.getFirebaseUid() != null && userRepository.findByFirebaseUid(regDto.getFirebaseUid()).isPresent()) {
             throw new RuntimeException("User already exists with firebaseUid: " + regDto.getFirebaseUid());
-       }
+        }
          // create user
          User user = new User();
          user.setFirebaseUid(regDto.getFirebaseUid());
