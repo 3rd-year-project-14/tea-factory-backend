@@ -32,13 +32,13 @@ public class FertilizerRequestController {
     }
 
     /**
-     * Create multiple fertilizer requests in batch
+     * Create multiple fertilizer requests in batch (single parent request)
      */
     @PostMapping("/batch")
-    public ResponseEntity<List<FertilizerRequestDTO>> createBatchRequests(@Valid @RequestBody BatchFertilizerRequestDTO batchDto) {
-        log.info("Received batch request to create {} fertilizer requests", batchDto.getRequests().size());
-        List<FertilizerRequestDTO> created = fertilizerRequestService.createBatchRequests(batchDto);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    public ResponseEntity<BatchFertilizerRequestResponseDTO> createBatchRequests(@Valid @RequestBody BatchFertilizerRequestDTO batchDto) {
+        log.info("Received batch request to create {} fertilizer requests (single parent)", batchDto.getRequests().size());
+        BatchFertilizerRequestResponseDTO response = fertilizerRequestService.createBatchRequestSingleParent(batchDto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     /**
@@ -53,9 +53,29 @@ public class FertilizerRequestController {
     }
 
     /**
+     * Get all batch fertilizer requests (parent + items)
+     */
+    @GetMapping("/batch")
+    public ResponseEntity<List<BatchFertilizerRequestResponseDTO>> getAllBatchRequests() {
+        log.info("Fetching all batch fertilizer requests");
+        List<BatchFertilizerRequestResponseDTO> responses = fertilizerRequestService.getAllBatchRequests();
+        return ResponseEntity.ok(responses);
+    }
+
+    /**
+     * Get a batch fertilizer request (parent + items) by parent request ID
+     */
+    @GetMapping("/batch/{id}")
+    public ResponseEntity<BatchFertilizerRequestResponseDTO> getBatchRequestById(@PathVariable Long id) {
+        log.info("Fetching batch fertilizer request with parent ID: {}", id);
+        BatchFertilizerRequestResponseDTO response = fertilizerRequestService.getBatchRequestById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Get a specific fertilizer request by ID
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<FertilizerRequestDTO> getRequestById(@PathVariable Long id) {
         log.info("Fetching fertilizer request with ID: {}", id);
         FertilizerRequestDTO request = fertilizerRequestService.getRequestById(id);

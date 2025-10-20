@@ -7,6 +7,7 @@ import com.teafactory.pureleaf.fertilizer.entity.*;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerCategoryRepository;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerCompanyRepository;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerRequestRepository;
+import com.teafactory.pureleaf.fertilizer.repository.FertilizerRequestItemRepository;
 import com.teafactory.pureleaf.fertilizer.repository.FertilizerStockRepository;
 import com.teafactory.pureleaf.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class FertilizerRequestService {
     private final FertilizerCompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final FertilizerStockRepository fertilizerStockRepository;
+    private final FertilizerRequestItemRepository itemRepository;
 
     @Transactional
     public FertilizerRequestDTO createRequest(CreateFertilizerRequestDTO dto) {
@@ -157,6 +159,133 @@ public class FertilizerRequestService {
         log.info("Successfully updated fertilizer request {} status to: {}", id, dto.getStatus());
 
         return toDTO(updatedRequest);
+    }
+
+    @Transactional
+    public BatchFertilizerRequestResponseDTO createBatchRequestSingleParent(BatchFertilizerRequestDTO batchDto) {
+        if (batchDto.getRequests().isEmpty()) {
+            throw new IllegalArgumentException("Batch request must contain at least one item.");
+        }
+
+        // Use the first item's fertilizerStockId to get category, company, user
+        CreateFertilizerRequestDTO first = batchDto.getRequests().get(0);
+        FertilizerStock fertilizerStock = fertilizerStockRepository.findById(first.getFertilizerStockId())
+                .orElseThrow(() -> new ResourceNotFoundException("Fertilizer stock not found: " + first.getFertilizerStockId()));
+        FertilizerCategory category = fertilizerStock.getCategory();
+        FertilizerCompany company = fertilizerStock.getCompany();
+        User user = fertilizerStock.getUser();
+
+        // Calculate total quantity for parent request
+        int totalQuantity = batchDto.getRequests().stream()
+            .mapToInt(CreateFertilizerRequestDTO::getQuantity)
+            .sum();
+        // Create parent request
+        FertilizerRequest parentRequest = FertilizerRequest.builder()
+                .category(category)
+                .company(company)
+                .user(user)
+                .quantity(totalQuantity)
+                .status(FertilizerRequestStatus.PENDING)
+                .requestDate(batchDto.getRequestDate())
+                .build();
+        parentRequest = requestRepository.save(parentRequest);
+
+        final FertilizerRequest finalParentRequest = parentRequest;
+        // Create items
+        List<FertilizerRequestItemDTO> itemDTOs = batchDto.getRequests().stream().map(itemDto -> {
+            FertilizerRequestItem item = new FertilizerRequestItem();
+            item.setFertilizerRequest(finalParentRequest);
+            item.setFertilizerStockId(itemDto.getFertilizerStockId());
+            item.setQuantity(itemDto.getQuantity());
+            item = itemRepository.save(item);
+            // Fetch FertilizerStock for product name and weight
+            FertilizerStock stock = fertilizerStockRepository.findById(itemDto.getFertilizerStockId())
+                .orElse(null);
+            String productName = (stock != null && stock.getCompany() != null && stock.getCategory() != null)
+                ? stock.getCompany().getName() + " " + stock.getCategory().getName()
+                : null;
+            Double weightPerQuantity = (stock != null) ? stock.getWeightPerQuantity() : null;
+            Long supplierId = (stock != null && stock.getUser() != null) ? stock.getUser().getId() : null;
+            String supplierName = (stock != null && stock.getUser() != null) ? stock.getUser().getName() : null;
+            return FertilizerRequestItemDTO.builder()
+                    .id(item.getId())
+                    .fertilizerStockId(item.getFertilizerStockId())
+                    .quantity(item.getQuantity())
+                    .productName(productName)
+                    .weightPerQuantity(weightPerQuantity)
+                    .supplierId(supplierId)
+                    .supplierName(supplierName)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+
+        return BatchFertilizerRequestResponseDTO.builder()
+                .requestId(parentRequest.getId())
+                .items(itemDTOs)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public BatchFertilizerRequestResponseDTO getBatchRequestById(Long parentRequestId) {
+        FertilizerRequest parentRequest = requestRepository.findById(parentRequestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Fertilizer request not found: " + parentRequestId));
+        List<FertilizerRequestItem> items = itemRepository.findByFertilizerRequest_Id(parentRequestId);
+        List<FertilizerRequestItemDTO> itemDTOs = items.stream().map(item -> {
+            FertilizerStock stock = fertilizerStockRepository.findById(item.getFertilizerStockId()).orElse(null);
+            String productName = (stock != null && stock.getCompany() != null && stock.getCategory() != null)
+                    ? stock.getCompany().getName() + " " + stock.getCategory().getName() : null;
+            Double weightPerQuantity = (stock != null) ? stock.getWeightPerQuantity() : null;
+            Long supplierId = (stock != null && stock.getUser() != null) ? stock.getUser().getId() : null;
+            String supplierName = (stock != null && stock.getUser() != null) ? stock.getUser().getName() : null;
+            return FertilizerRequestItemDTO.builder()
+                    .id(item.getId())
+                    .fertilizerStockId(item.getFertilizerStockId())
+                    .quantity(item.getQuantity())
+                    .productName(productName)
+                    .weightPerQuantity(weightPerQuantity)
+                    .supplierId(supplierId)
+                    .supplierName(supplierName)
+                    .status(item.getStatus())
+                    .rejectReason(item.getRejectReason())
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+        return BatchFertilizerRequestResponseDTO.builder()
+                .requestId(parentRequest.getId())
+                .items(itemDTOs)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BatchFertilizerRequestResponseDTO> getAllBatchRequests() {
+        List<FertilizerRequest> parentRequests = requestRepository.findAll();
+        return parentRequests.stream()
+            .map(parentRequest -> {
+                List<FertilizerRequestItem> items = itemRepository.findByFertilizerRequest_Id(parentRequest.getId());
+                List<FertilizerRequestItemDTO> itemDTOs = items.stream().map(item -> {
+                    FertilizerStock stock = fertilizerStockRepository.findById(item.getFertilizerStockId()).orElse(null);
+                    String productName = (stock != null && stock.getCompany() != null && stock.getCategory() != null)
+                            ? stock.getCompany().getName() + " " + stock.getCategory().getName() : null;
+                    Double weightPerQuantity = (stock != null) ? stock.getWeightPerQuantity() : null;
+                    Long supplierId = (stock != null && stock.getUser() != null) ? stock.getUser().getId() : null;
+                    String supplierName = (stock != null && stock.getUser() != null) ? stock.getUser().getName() : null;
+                    return FertilizerRequestItemDTO.builder()
+                            .id(item.getId())
+                            .fertilizerStockId(item.getFertilizerStockId())
+                            .quantity(item.getQuantity())
+                            .productName(productName)
+                            .weightPerQuantity(weightPerQuantity)
+                            .supplierId(supplierId)
+                            .supplierName(supplierName)
+                            .status(item.getStatus())
+                            .rejectReason(item.getRejectReason())
+                            .build();
+                }).collect(java.util.stream.Collectors.toList());
+                return BatchFertilizerRequestResponseDTO.builder()
+                        .requestId(parentRequest.getId())
+                        .items(itemDTOs)
+                        .build();
+            })
+            .filter(batch -> batch.getItems() != null && !batch.getItems().isEmpty())
+            .collect(java.util.stream.Collectors.toList());
     }
 
     private FertilizerRequestDTO toDTO(FertilizerRequest request) {
