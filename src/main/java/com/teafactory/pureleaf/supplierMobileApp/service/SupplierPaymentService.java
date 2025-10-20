@@ -6,6 +6,7 @@ import com.teafactory.pureleaf.supplierMobileApp.dto.SupplierPaymentDTO;
 import com.teafactory.pureleaf.inventoryProcess.repository.BagWeightRepository;
 import com.teafactory.pureleaf.payment.repository.TeaRateRepository;
 import com.teafactory.pureleaf.supplierMobileApp.dto.SupplierPaymentSummaryDTO;
+import com.teafactory.pureleaf.supplierMobileApp.dto.SupplierDashboardSummaryDTO;
 import com.teafactory.pureleaf.paymentProcess.enums.PaymentType;
 import com.teafactory.pureleaf.paymentProcess.enums.DisbursementMethod;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class SupplierPaymentService {
     public SupplierPaymentSummaryDTO getSupplierPaymentSummary(String supplierId, int month, int year) {
         SupplierPaymentSummaryDTO summary = new SupplierPaymentSummaryDTO();
         // 1. Total Net Weight
-        Double totalNetWeight = bagWeightRepository.sumNetWeightBySupplierIdAndMonth(supplierId, month, year);
+        Double totalNetWeight = bagWeightRepository.sumNetWeightBySupplierIdAndMonthPostgres(supplierId, month, year);
         summary.setTotalNetWeight(totalNetWeight != null ? totalNetWeight : 0.0);
 
         // 2. Tea Rate Average (last 6 months)
@@ -74,5 +75,46 @@ public class SupplierPaymentService {
         summary.setTotalAdvancePayments(totalAdvance);
         summary.setTotalLoanPayments(totalLoan);
         return summary;
+    }
+
+    public SupplierDashboardSummaryDTO getSupplierDashboardSummary(String supplierId, int month, int year) {
+        SupplierDashboardSummaryDTO dto = new SupplierDashboardSummaryDTO();
+        // 1. Total Net Weight
+        Double totalNetWeight = bagWeightRepository.sumNetWeightBySupplierIdAndMonthPostgres(supplierId, month, year);
+        dto.setTotalNetWeight(totalNetWeight != null ? totalNetWeight : 0.0);
+
+        // 2. Tea Rate Average (last 6 months)
+        java.math.BigDecimal teaRateSum = java.math.BigDecimal.ZERO;
+        int count = 0;
+        java.time.YearMonth current = java.time.YearMonth.of(year, month);
+        for (int i = 0; i < 6; i++) {
+            java.time.YearMonth ym = current.minusMonths(i);
+            java.math.BigDecimal rate = teaRateRepository.findCurrentRateByDate(ym.toString());
+            if (rate != null) {
+                teaRateSum = teaRateSum.add(rate);
+                count++;
+            }
+        }
+        dto.setAverageTeaRate(count > 0 ? teaRateSum.divide(java.math.BigDecimal.valueOf(count), 2, java.math.RoundingMode.HALF_UP).doubleValue() : 0.0);
+
+        // 3. Approved Advance and Loan Payments (CASH)
+        java.util.List<com.teafactory.pureleaf.paymentProcess.entity.Payment> payments = paymentRepository.findBySupplierIdAndPeriodMonthAndPeriodYear(supplierId, month, year);
+        double totalAdvance = 0.0;
+        double totalLoan = 0.0;
+        for (com.teafactory.pureleaf.paymentProcess.entity.Payment p : payments) {
+            if (p.getPaymentType() == com.teafactory.pureleaf.paymentProcess.enums.PaymentType.ADVANCE &&
+                p.getDisbursementMethod() == com.teafactory.pureleaf.paymentProcess.enums.DisbursementMethod.CASH &&
+                p.getStatus().name().equals("APPROVED")) {
+                totalAdvance += p.getNetAmount().doubleValue();
+            }
+            if (p.getPaymentType() == com.teafactory.pureleaf.paymentProcess.enums.PaymentType.LOAN &&
+                p.getDisbursementMethod() == com.teafactory.pureleaf.paymentProcess.enums.DisbursementMethod.CASH &&
+                p.getStatus().name().equals("APPROVED")) {
+                totalLoan += p.getNetAmount().doubleValue();
+            }
+        }
+        dto.setApprovedCashAdvancePayments(totalAdvance);
+        dto.setApprovedLoanPayments(totalLoan);
+        return dto;
     }
 }

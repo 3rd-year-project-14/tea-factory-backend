@@ -333,6 +333,6 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
     @Query("SELECT COALESCE(SUM(b.netWeight), 0) FROM BagWeight b WHERE b.supplyRequest.supplier.supplierId = :supplierId AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year")
     BigDecimal sumWeightBySupplierAndPeriod(@Param("supplierId") Long supplierId, @Param("month") int month, @Param("year") int year);
 
-    @Query("SELECT COALESCE(SUM(b.netWeight), 0) FROM BagWeight b WHERE b.supplyRequest.supplier.supplierId = :supplierId AND FUNCTION('MONTH', b.date) = :month AND FUNCTION('YEAR', b.date) = :year")
-    Double sumNetWeightBySupplierIdAndMonth(@Param("supplierId") String supplierId, @Param("month") int month, @Param("year") int year);
+    @Query("SELECT COALESCE(SUM(b.netWeight), 0) FROM BagWeight b WHERE b.supplyRequest.supplier.supplierId = :supplierId AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year")
+    Double sumNetWeightBySupplierIdAndMonthPostgres(@Param("supplierId") String supplierId, @Param("month") int month, @Param("year") int year);
 }

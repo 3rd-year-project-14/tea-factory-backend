@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.teafactory.pureleaf.supplierMobileApp.dto.SupplierDashboardSummaryDTO;
 
 @RestController
 @RequestMapping("/api/supplier/payments")
@@ -20,4 +21,12 @@ public class SupplierPaymentController {
             @RequestParam int month,
             @RequestParam int year) {
         return supplierPaymentService.getSupplierPaymentHistory(supplierId, month, year);
+    }
+
+    @GetMapping("/dashboard-summary")
+    public SupplierDashboardSummaryDTO getSupplierDashboardSummary(
+            @RequestParam String supplierId,
+            @RequestParam int month,
+            @RequestParam int year) {
+        return supplierPaymentService.getSupplierDashboardSummary(supplierId, month, year);
     }}
