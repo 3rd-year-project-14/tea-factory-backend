@@ -22,8 +22,10 @@ public class SupplierFertilizerRequestService {
 
     @Transactional
     public SupplierFertilizerRequestResponseDTO createRequest(SupplierFertilizerRequestCreateDTO dto) {
+        System.out.println("DEBUG: Creating request for supplierId: " + dto.getSupplierId());
         User supplier = userRepository.findById(dto.getSupplierId())
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
+        System.out.println("DEBUG: Found supplier with ID: " + supplier.getId());
         SupplierFertilizerRequest request = SupplierFertilizerRequest.builder()
                 .supplier(supplier)
                 .requestDate(dto.getRequestDate())
@@ -50,6 +52,41 @@ public class SupplierFertilizerRequestService {
     public List<SupplierFertilizerRequestResponseDTO> getAllRequests() {
         List<SupplierFertilizerRequest> requests = requestRepository.findAll();
         return requests.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SupplierFertilizerRequestResponseDTO> getRequestsBySupplierId(Long supplierId) {
+        List<SupplierFertilizerRequest> requests = requestRepository.findBySupplier_Id(supplierId);
+        return requests.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public SupplierFertilizerRequestResponseDTO updateRequest(Long id, SupplierFertilizerRequestUpdateDTO dto) {
+        SupplierFertilizerRequest request = requestRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Supplier fertilizer request not found"));
+        if (dto.getQuantity() != null && request.getItems() != null && !request.getItems().isEmpty()) {
+            // Update quantity for all items (or customize as needed)
+            request.getItems().forEach(item -> item.setQuantity(dto.getQuantity()));
+            itemRepository.saveAll(request.getItems());
+        }
+        if (dto.getNote() != null) {
+            request.setNote(dto.getNote());
+        }
+        if (dto.getStatus() != null) {
+            request.setStatus(dto.getStatus());
+        }
+        SupplierFertilizerRequest updated = requestRepository.save(request);
+        return toResponseDTO(updated);
+    }
+
+    @Transactional
+    public void deleteRequest(Long id) {
+        if (!requestRepository.existsById(id)) {
+            throw new RuntimeException("Supplier fertilizer request not found");
+        }
+        // Delete items first if necessary
+        itemRepository.deleteBySupplierFertilizerRequest_Id(id);
+        requestRepository.deleteById(id);
     }
 
     private SupplierFertilizerRequestResponseDTO toResponseDTO(SupplierFertilizerRequest request) {
