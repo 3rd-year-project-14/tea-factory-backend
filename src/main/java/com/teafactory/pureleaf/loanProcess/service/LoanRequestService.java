@@ -35,6 +35,8 @@ public class LoanRequestService {
     private LoanRateRepository loanRateRepository;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private com.teafactory.pureleaf.payment.repository.SupplierPaymentRepository supplierPaymentRepository;
 
     public LoanRequest createLoanRequest(LoanRequestCreateDTO dto) {
         Supplier supplier = supplierRepository.findById(dto.getSupplierId())
@@ -119,16 +121,16 @@ public class LoanRequestService {
         // status is set by entity logic
         loanRepository.save(loan);
 
-        // Create initial payment record
-        PaymentDTO paymentDTO = PaymentDTO.builder()
-                .supplierId(String.valueOf(loanRequest.getSupplier().getSupplierId()))
-                .routeId(String.valueOf(loanRequest.getSupplier().getRoute().getRouteId()))
-                .paymentType(PaymentType.LOAN)
-                .netAmount(monthlyInstalment)
-                .disbursementMethod(DisbursementMethod.BANK)
-                .notes("Loan installment for loan ID " + loan.getLoanId())
-                .build();
-        paymentService.createAdhocPayment(paymentDTO);
+        // Create SupplierPayment record for first installment
+        com.teafactory.pureleaf.payment.entity.SupplierPayment supplierPayment = new com.teafactory.pureleaf.payment.entity.SupplierPayment();
+        supplierPayment.setSupplier(loan.getSupplier());
+        supplierPayment.setPaymentType("LOAN");
+        supplierPayment.setAmount(monthlyInstalment);
+        supplierPayment.setPaymentDate(LocalDate.now());
+        supplierPayment.setCurrency("LKR");
+        supplierPayment.setStatus("Pending");
+        supplierPayment.setReference("Loan installment for loan ID " + loan.getLoanId());
+        supplierPaymentRepository.save(supplierPayment);
 
         return loan;
     }

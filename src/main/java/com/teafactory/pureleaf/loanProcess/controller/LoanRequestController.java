@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/loan-requests")
@@ -28,6 +29,24 @@ public class LoanRequestController {
             created.getStatus()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<LoanRequestResponseDTO>> createLoanRequests(@RequestBody List<LoanRequestCreateDTO> dtos) {
+        List<LoanRequestResponseDTO> responses = dtos.stream()
+            .map(dto -> {
+                LoanRequest created = loanRequestService.createLoanRequest(dto);
+                return new LoanRequestResponseDTO(
+                    created.getReqId(),
+                    created.getSupplier().getSupplierId(),
+                    created.getAmount(),
+                    created.getMonths(),
+                    created.getDate(),
+                    created.getStatus()
+                );
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping
