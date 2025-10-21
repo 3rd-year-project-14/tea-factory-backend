@@ -10,6 +10,7 @@ import com.teafactory.pureleaf.advanceProcess.entity.SupplierAdvance;
 import com.teafactory.pureleaf.advanceProcess.entity.SupplierAdvance.Status;
 import com.teafactory.pureleaf.advanceProcess.repository.SupplierAdvanceRepository;
 import com.teafactory.pureleaf.advanceProcess.spec.AdvanceSpecification;
+import com.teafactory.pureleaf.payment.repository.SupplierPaymentRepository;
 import com.teafactory.pureleaf.supplier.entity.Supplier;
 import com.teafactory.pureleaf.supplier.repository.SupplierRepository;
 import com.teafactory.pureleaf.inventoryProcess.repository.BagWeightRepository;
@@ -41,6 +42,7 @@ public class SupplierAdvanceService {
     private final EligibilityService eligibilityService;
     private final BagWeightRepository bagWeightRepository;
     private final PaymentService paymentService; // Inject PaymentService
+    private final SupplierPaymentRepository supplierPaymentRepository;
 
     public AdvanceResponseDto createAdvanceRequest(AdvanceRequestDto requestDto) {
         Supplier supplier = supplierRepository.findById(requestDto.getSupplierId())
@@ -164,21 +166,16 @@ public class SupplierAdvanceService {
             advance.setApprovedAt(LocalDateTime.now());
             advance.setStatus(Status.APPROVED);
 
-            // Create payment record
-            PaymentDTO paymentDTO = PaymentDTO.builder()
-                    .supplierId(String.valueOf(advance.getSupplier().getSupplierId()))
-                    .routeId(String.valueOf(advance.getSupplier().getRoute().getRouteId()))
-                    .paymentType(PaymentType.ADVANCE)
-                    .netAmount(approvalDto.getApprovedAmount())
-                    .disbursementMethod(DisbursementMethod.BANK)
-                    .notes("Advance payment for advance ID " + advance.getId())
-                    .teaRate(BigDecimal.ZERO)
-                    .periodMonth(LocalDate.now().getMonthValue())
-                    .periodYear(LocalDate.now().getYear())
-                    .build();
-            PaymentDTO created = paymentService.createAdhocPayment(paymentDTO);
-            paymentService.approveAdhocPayment(created.getId(), String.valueOf(approvedByUserId));
-
+            // Create SupplierPayment record
+            com.teafactory.pureleaf.payment.entity.SupplierPayment supplierPayment = new com.teafactory.pureleaf.payment.entity.SupplierPayment();
+            supplierPayment.setSupplier(advance.getSupplier());
+            supplierPayment.setPaymentType("ADVANCE");
+            supplierPayment.setAmount(approvalDto.getApprovedAmount());
+            supplierPayment.setPaymentDate(LocalDate.now());
+            supplierPayment.setCurrency("LKR");
+            supplierPayment.setStatus("Pending");
+            supplierPayment.setReference("Advance payment for advance ID " + advance.getId());
+            supplierPaymentRepository.save(supplierPayment);
         } else if (approvalDto.getAction() == AdvanceApprovalDto.Action.REJECT) {
             if (approvalDto.getRejectionReason() == null || approvalDto.getRejectionReason().isEmpty()) {
                 throw new IllegalArgumentException("Rejection reason required");
