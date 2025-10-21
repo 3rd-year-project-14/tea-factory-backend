@@ -31,4 +31,7 @@ public interface TripBagRepository extends JpaRepository<TripBag, Long>, JpaSpec
            "JOIN tb.tripSupplier ts " +
            "WHERE ts.trip.tripId = :tripId AND ts.trip.tripDate = :tripDate AND tb.status = :status")
     Double sumDriverWeightByTripIdAndDateAndStatus(@Param("tripId") Long tripId, @Param("tripDate") LocalDate tripDate, @Param("status") String status);
+
+    @Query("SELECT tb FROM TripBag tb WHERE tb.tripSupplier.teaSupplyRequest.requestId = :requestId AND tb.tripSupplier.teaSupplyRequest.supplier.supplierId = :supplierId")
+    List<TripBag> findBySupplyRequestIdAndSupplierId(@Param("requestId") Long requestId, @Param("supplierId") Long supplierId);
 }

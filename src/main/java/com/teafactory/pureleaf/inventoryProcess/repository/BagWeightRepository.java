@@ -335,4 +335,7 @@ public interface BagWeightRepository extends JpaRepository<BagWeight, Long>, Jpa
 
     @Query("SELECT COALESCE(SUM(b.netWeight), 0) FROM BagWeight b WHERE b.supplyRequest.supplier.supplierId = :supplierId AND EXTRACT(MONTH FROM b.date) = :month AND EXTRACT(YEAR FROM b.date) = :year")
     Double sumNetWeightBySupplierIdAndMonthPostgres(@Param("supplierId") String supplierId, @Param("month") int month, @Param("year") int year);
+
+    @Query("SELECT bw FROM BagWeight bw WHERE bw.supplyRequest.requestId = :requestId AND bw.supplyRequest.supplier.supplierId = :supplierId")
+    List<BagWeight> findByRequestIdAndSupplierId(@Param("requestId") Long requestId, @Param("supplierId") Long supplierId);
 }

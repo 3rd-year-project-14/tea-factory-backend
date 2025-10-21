@@ -213,4 +213,15 @@ public class TripBagService {
             return new WeighedBagDetailsResponse(bagNumber, supplyRequestId);
         });
     }
+
+    public List<TripBagDriverWeightResponse> getDriverWeightBySupplyRequestAndSupplier(Long requestId, Long supplierId) {
+        return tripBagRepository.findBySupplyRequestIdAndSupplierId(requestId, supplierId)
+                .stream()
+                .map(tb -> new TripBagDriverWeightResponse(
+                        tb.getDriverWeight(),
+                        tb.getCoarse() != null && tb.getCoarse() ? "true" : "false",
+                        tb.getWet() != null && tb.getWet() ? "true" : "false"
+                ))
+                .collect(Collectors.toList());
+    }
 }

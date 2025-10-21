@@ -5,6 +5,7 @@ import com.teafactory.pureleaf.inventoryProcess.dto.SupplierRequestBagSummaryDTO
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagBriefDTO;
 import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDetailsDTO;
 import com.teafactory.pureleaf.inventoryProcess.dto.SupplierInfoDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.TripBagDriverWeightResponse;
 import com.teafactory.pureleaf.inventoryProcess.service.TripBagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -102,6 +103,14 @@ public class TripBagController {
         Sort.Direction direction = sort.length > 1 && sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
         Page<com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagDetailsResponse> result = tripBagService.getWeighedBagsByTripIdPaged(tripId, search, pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/driver-weight")
+    public ResponseEntity<List<TripBagDriverWeightResponse>> getDriverWeightBySupplyRequestAndSupplier(
+            @RequestParam Long requestId,
+            @RequestParam Long supplierId) {
+        List<TripBagDriverWeightResponse> result = tripBagService.getDriverWeightBySupplyRequestAndSupplier(requestId, supplierId);
         return ResponseEntity.ok(result);
     }
 }

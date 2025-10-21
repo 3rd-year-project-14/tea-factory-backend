@@ -41,7 +41,6 @@ public class SupplierRequestService {
 
     // Create a new supplier request
     @Transactional
-    @PreAuthorize("hasRole('PENDING_USER')")
     public Long createSupplierRequest(@Valid CreateSupplierRequestDTO requestDTO) {
         // 1. Find and validate user
         User user = userRepository.findById(requestDTO.getUserId())
