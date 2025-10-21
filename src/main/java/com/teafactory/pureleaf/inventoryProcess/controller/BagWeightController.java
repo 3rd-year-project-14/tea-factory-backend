@@ -1,6 +1,7 @@
 package com.teafactory.pureleaf.inventoryProcess.controller;
 
 import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightDTO;
+import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponse;
 import com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponseDTO;
 import com.teafactory.pureleaf.inventoryProcess.dto.WeighedBagWeightDetailsDTO;
 import com.teafactory.pureleaf.inventoryProcess.entity.BagWeight;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin (origins = "*")
 @RestController
@@ -65,5 +67,12 @@ public class BagWeightController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/by-supply-request")
+    public ResponseEntity<List<BagWeightResponse>> getBagWeightsBySupplyRequestAndSupplier(
+            @RequestParam Long requestId,
+            @RequestParam Long supplierId) {
+        List<BagWeightResponse> result = bagWeightService.getBagWeightsBySupplyRequestAndSupplier(requestId, supplierId);
+        return ResponseEntity.ok(result);
+    }
 
 }

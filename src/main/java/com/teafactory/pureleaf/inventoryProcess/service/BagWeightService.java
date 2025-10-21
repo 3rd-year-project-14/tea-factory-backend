@@ -219,4 +219,16 @@ public class BagWeightService {
             );
         });
     }
+
+    public List<com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponse> getBagWeightsBySupplyRequestAndSupplier(Long requestId, Long supplierId) {
+        return bagWeightRepository.findByRequestIdAndSupplierId(requestId, supplierId)
+                .stream()
+                .map(bw -> new com.teafactory.pureleaf.inventoryProcess.dto.BagWeightResponse(
+                        bw.getGrossWeight(),
+                        bw.getNetWeight(),
+                        bw.getWater(),
+                        bw.getCoarse()
+                ))
+                .toList();
+    }
 }
