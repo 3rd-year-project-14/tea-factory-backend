@@ -4,21 +4,35 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 // OOP Concept: Class Declaration (Encapsulation, Abstraction)
 @Configuration
 public class FirebaseConfig {
 
+    @Value("${FIREBASE_CREDENTIALS:}")
+    private String firebaseCredentials;
+
     // OOP Concept: Method Declaration (Encapsulation)
     @PostConstruct
     public void initFirebase() {
         try {
-            // OOP Concept: Object Instantiation
-            FileInputStream serviceAccount =
-                    new FileInputStream("src/main/resources/firebase-service-account.json");
+            InputStream serviceAccount;
+            if (firebaseCredentials != null && !firebaseCredentials.isBlank()) {
+                // FIREBASE_CREDENTIALS holds the service account JSON, base64-encoded
+                byte[] decoded = Base64.getDecoder().decode(firebaseCredentials);
+                serviceAccount = new ByteArrayInputStream(decoded);
+            } else {
+                // Local dev fallback: raw JSON file on disk (not present in deployed containers)
+                serviceAccount = new FileInputStream("src/main/resources/firebase-service-account.json");
+            }
 
             // OOP Concept: Builder Pattern (Abstraction, Encapsulation)
             FirebaseOptions options = new FirebaseOptions.Builder()
