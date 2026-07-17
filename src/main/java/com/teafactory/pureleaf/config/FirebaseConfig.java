@@ -26,9 +26,16 @@ public class FirebaseConfig {
         try {
             InputStream serviceAccount;
             if (firebaseCredentials != null && !firebaseCredentials.isBlank()) {
-                // FIREBASE_CREDENTIALS holds the service account JSON, base64-encoded
-                byte[] decoded = Base64.getDecoder().decode(firebaseCredentials);
-                serviceAccount = new ByteArrayInputStream(decoded);
+                String trimmed = firebaseCredentials.trim();
+                byte[] jsonBytes;
+                if (trimmed.startsWith("{")) {
+                    // FIREBASE_CREDENTIALS holds the raw service account JSON
+                    jsonBytes = trimmed.getBytes(StandardCharsets.UTF_8);
+                } else {
+                    // FIREBASE_CREDENTIALS holds the service account JSON, base64-encoded
+                    jsonBytes = Base64.getDecoder().decode(trimmed);
+                }
+                serviceAccount = new ByteArrayInputStream(jsonBytes);
             } else {
                 // Local dev fallback: raw JSON file on disk (not present in deployed containers)
                 serviceAccount = new FileInputStream("src/main/resources/firebase-service-account.json");
