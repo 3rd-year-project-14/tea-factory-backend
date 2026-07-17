@@ -19,3 +19,4 @@ public class AuthResponse {
     private String nic;
 
 }
+//AuthResponse DTO sends authenticated user info, including role and factory details, back to the frontend.”

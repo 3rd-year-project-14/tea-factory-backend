@@ -30,7 +30,7 @@ public class AuthService {
         String email = decodedToken.getEmail();
         String firebaseUid = decodedToken.getUid();
 
-        User user = userRepository.findByEmail(email).orElse(new User());
+        User user = userRepository.findByEmail(email).orElse(new User());//checked if there is a user
         user.setFirebaseUid(firebaseUid);
         user.setEmail(email);
         user.setName(request.getName());
