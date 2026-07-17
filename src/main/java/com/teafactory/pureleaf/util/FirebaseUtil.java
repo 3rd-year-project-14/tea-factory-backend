@@ -11,3 +11,4 @@ public class FirebaseUtil {
         return FirebaseAuth.getInstance().verifyIdToken(token);
     }
 }
+//“We use FirebaseUtil to verify Firebase tokens.

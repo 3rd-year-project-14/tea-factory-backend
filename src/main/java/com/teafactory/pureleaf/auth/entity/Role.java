@@ -11,8 +11,10 @@ public enum Role {
     ESTATE_MANAGER,
     TRANSPORT_MANAGER,
     OWNER;
-
     public String getAuthority() {
         return "ROLE_" + this.name();
     }
 }
+//This enum defines all user roles in the system.
+//It helps identify different user types such as Supplier, Driver, and Managers.
+//The getAuthority() method adds the ROLE_ prefix so the role can be used by Spring Security for authorization.”

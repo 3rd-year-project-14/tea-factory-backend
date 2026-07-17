@@ -8,3 +8,4 @@ import lombok.Setter;
 public class LoginRequest {
     private String token;
 }
+//It contains a single field token sent from the frontend.
